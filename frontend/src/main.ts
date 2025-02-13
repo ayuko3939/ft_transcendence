@@ -16,6 +16,7 @@ class PongGame {
   private chatInput: HTMLInputElement;
   private chatMessages: HTMLDivElement;
   private sendButton: HTMLButtonElement;
+  private countdownElement: HTMLDivElement;
 
   constructor() {
     this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -72,6 +73,21 @@ class PongGame {
       }
     });
 
+    // カウントダウン要素の初期化
+    this.countdownElement = document.createElement('div');
+    this.countdownElement.style.position = 'absolute';
+    this.countdownElement.style.top = '50%';
+    this.countdownElement.style.left = '50%';
+    this.countdownElement.style.transform = 'translate(-50%, -50%)';
+    this.countdownElement.style.fontSize = '64px';
+    this.countdownElement.style.fontWeight = 'bold';
+    this.countdownElement.style.color = 'white';
+    this.countdownElement.style.display = 'none';
+    document.body.appendChild(this.countdownElement);
+
+    // ゲームキャンバスの上に表示するカウントダウン要素
+    document.body.appendChild(this.countdownElement);
+
     // ゲームループの開始
     this.gameLoop();
   }
@@ -85,6 +101,13 @@ class PongGame {
     } else if (Array.isArray(data)) {
       // チャットメッセージの配列
       this.updateChat(data);
+    } else if (data.type === 'countdown') {
+      this.countdownElement.style.display = 'block';
+      this.countdownElement.textContent = data.count.toString();
+    } else if (data.type === 'gameStart') {
+      this.countdownElement.style.display = 'none';
+      // ゲーム開始の処理
+      this.startGame(data.gameState);
     } else {
       this.updateGameState(data);
     }
@@ -217,6 +240,11 @@ class PongGame {
 
     // 最新のメッセージが見えるようにスクロール
     this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+  }
+
+  private startGame(gameState: any) {
+    // ゲーム開始の処理
+    this.updateGameState(gameState);
   }
 }
 
