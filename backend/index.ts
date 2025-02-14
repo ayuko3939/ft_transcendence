@@ -2,9 +2,16 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import websocket, { WebSocket } from '@fastify/websocket';
 import { GameEngine } from './game/GameState';
+import { mkdirSync } from 'fs';
+
+// ログファイルのディレクトリを作成
+mkdirSync('logs', { recursive: true });
 
 const fastify = Fastify({
-  logger: true,
+  logger: {
+    level: 'debug',
+    file: 'logs/server.log',
+  },
 });
 
 // 非同期処理を関数にまとめる
@@ -85,24 +92,24 @@ const startServer = async () => {
           // カウントダウンメッセージを送信
           const countdownMessage = JSON.stringify({
             type: 'countdown',
-            count: countdown
+            count: countdown,
           });
-          
+
           room.players.left.send(countdownMessage);
           room.players.right.send(countdownMessage);
-          
+
           countdown--;
-          
+
           if (countdown < 0) {
             clearInterval(countdownInterval);
             room.gameStarted = true;
-            
+
             // ゲーム開始メッセージを送信
             const gameStartMessage = JSON.stringify({
               type: 'gameStart',
-              gameState: room.gameState
+              gameState: room.gameState,
             });
-            
+
             room.players.left.send(gameStartMessage);
             room.players.right.send(gameStartMessage);
 
@@ -111,13 +118,13 @@ const startServer = async () => {
             const gameInterval = setInterval(() => {
               if (room.gameStarted && room.players.left && room.players.right) {
                 gameEngine.update();
-                
+
                 // 両プレイヤーに状態を送信
                 const stateMessage = JSON.stringify({
                   type: 'gameState',
-                  ...room.gameState
+                  ...room.gameState,
                 });
-                
+
                 room.players.left.send(stateMessage);
                 room.players.right.send(stateMessage);
               } else {
