@@ -1,9 +1,17 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import websocket, { WebSocket } from '@fastify/websocket';
+import { GameEngine } from './game/GameState';
+import { mkdirSync } from 'fs';
+
+// ログファイルのディレクトリを作成
+mkdirSync('logs', { recursive: true });
 
 const fastify = Fastify({
-  logger: true,
+  logger: {
+    level: 'debug',
+    file: 'logs/server.log',
+  },
 });
 
 // 非同期処理を関数にまとめる
@@ -41,6 +49,7 @@ const startServer = async () => {
       name: string;
       message: string;
     }[];
+    gameStarted: boolean;
   };
 
   const gameRooms = new Map<string, GameRoom>();
@@ -60,6 +69,7 @@ const startServer = async () => {
           score: { left: 0, right: 0 },
         },
         chats: [],
+        gameStarted: false,
       };
       gameRooms.set(roomId, room);
     }
@@ -74,6 +84,58 @@ const startServer = async () => {
       room.players.right = connection;
       playerSide = 'right';
       console.log('right player connected');
+
+      // 2人目のプレイヤーが参加したら、カウントダウンを開始
+      let countdown = 5;
+      const countdownInterval = setInterval(() => {
+        if (room && room.players.left && room.players.right) {
+          // カウントダウンメッセージを送信
+          const countdownMessage = JSON.stringify({
+            type: 'countdown',
+            count: countdown,
+          });
+
+          room.players.left.send(countdownMessage);
+          room.players.right.send(countdownMessage);
+
+          countdown--;
+
+          if (countdown < 0) {
+            clearInterval(countdownInterval);
+            room.gameStarted = true;
+
+            // ゲーム開始メッセージを送信
+            const gameStartMessage = JSON.stringify({
+              type: 'gameStart',
+              gameState: room.gameState,
+            });
+
+            room.players.left.send(gameStartMessage);
+            room.players.right.send(gameStartMessage);
+
+            // ゲームループの開始
+            const gameEngine = new GameEngine(room.gameState);
+            const gameInterval = setInterval(() => {
+              if (room.gameStarted && room.players.left && room.players.right) {
+                gameEngine.update();
+
+                // 両プレイヤーに状態を送信
+                const stateMessage = JSON.stringify({
+                  type: 'gameState',
+                  ...room.gameState,
+                });
+
+                room.players.left.send(stateMessage);
+                room.players.right.send(stateMessage);
+              } else {
+                clearInterval(gameInterval);
+              }
+            }, 1000 / 60); // 60FPS
+          }
+        } else {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
     } else {
       connection.close();
       return;
@@ -142,7 +204,7 @@ const startServer = async () => {
   });
 
   try {
-    await fastify.listen({ port: 3000 });
+    await fastify.listen({ port: 3000, host: '0.0.0.0' });
     console.log('Server running at http://localhost:3000');
   } catch (err) {
     fastify.log.error(err);
