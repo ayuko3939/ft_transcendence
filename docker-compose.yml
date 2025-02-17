@@ -15,4 +15,10 @@ services:
     entrypoint: ["pnpm", "start"]
     ports:
       - "3000:3000"
+    volumes:
+      - backend-logs:/app/logs
+
+volumes:
+  backend-logs:
+    driver: local
 
