@@ -16,9 +16,9 @@ if [ ! -f config/certs/certs.zip ]; then
     echo "Creating certs";
     echo -ne \
     "instances:\n"\
-    "  - name: es01\n"\
+    "  - name: elastic-search\n"\
     "    dns:\n"\
-    "      - es01\n"\
+    "      - elastic-search\n"\
     "      - localhost\n"\
     "    ip:\n"\
     "      - 127.0.0.1\n"\
@@ -37,7 +37,7 @@ chown -R root:root config/certs;
 find . -type d -exec chmod 750 \{\} \;;
 find . -type f -exec chmod 640 \{\} \;;
 echo "Waiting for Elasticsearch availability";
-until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
+until curl -s --cacert config/certs/ca/ca.crt https://elastic-search:9200 | grep -q "missing authentication credentials"; do sleep 30; done;
 echo "Setting kibana_system password";
-until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://elastic-search:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
 echo "All done!";

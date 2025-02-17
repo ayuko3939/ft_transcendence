@@ -31,14 +31,14 @@ services:
     user: "root"
     command: ["/bin/bash", "/elasticsearch_entrypoint.sh"]
     healthcheck:
-      test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
+      test: ["CMD-SHELL", "[ -f config/certs/elastic-search/elastic-search.crt ]"]
       interval: 1s
       timeout: 5s
       retries: 120
     env_file:
       - .env
 
-  es01:
+  elastic-search:
     depends_on:
       setup:
         condition: service_healthy
@@ -51,19 +51,19 @@ services:
     ports:
       - ${ES_PORT}:9200
     environment:
-      - node.name=es01
+      - node.name=elastic-search
       - cluster.name=${CLUSTER_NAME}
       - discovery.type=single-node
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - bootstrap.memory_lock=true
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.key=certs/es01/es01.key
-      - xpack.security.http.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.http.ssl.key=certs/elastic-search/elastic-search.key
+      - xpack.security.http.ssl.certificate=certs/elastic-search/elastic-search.crt
       - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
       - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.key=certs/es01/es01.key
-      - xpack.security.transport.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.transport.ssl.key=certs/elastic-search/elastic-search.key
+      - xpack.security.transport.ssl.certificate=certs/elastic-search/elastic-search.crt
       - xpack.security.transport.ssl.certificate_authorities=certs/ca/ca.crt
       - xpack.security.transport.ssl.verification_mode=certificate
       - xpack.license.self_generated.type=${LICENSE}
@@ -84,7 +84,7 @@ services:
 
   kibana:
     depends_on:
-      es01:
+      elastic-search:
         condition: service_healthy
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     labels:
@@ -96,7 +96,7 @@ services:
       - ${KIBANA_PORT}:5601
     environment:
       - SERVERNAME=kibana
-      - ELASTICSEARCH_HOSTS=https://es01:9200
+      - ELASTICSEARCH_HOSTS=https://elastic-search:9200
       - ELASTICSEARCH_USERNAME=kibana_system
       - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
@@ -116,7 +116,7 @@ services:
 
   logstash:
     depends_on:
-      es01:
+      elastic-search:
         condition: service_healthy
       kibana:
         condition: service_healthy
@@ -133,7 +133,7 @@ services:
       - xpack.monitoring.enabled=false
       - ELASTIC_USER=elastic
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - ELASTIC_HOSTS=https://es01:9200
+      - ELASTIC_HOSTS=https://elastic-search:9200
 
 volumes:
   logdir:

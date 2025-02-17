@@ -1,9 +1,8 @@
-PROJECT_NAME := ft_transcendence
 DOCKER_COMPOSE_FILE := docker-compose.yml
 
 COMMIT_HASH := $(shell git rev-parse --short HEAD)
 
-DOCKER_COMPOSE := COMMIT_HASH=$(COMMIT_HASH) docker compose -p $(PROJECT_NAME) -f $(DOCKER_COMPOSE_FILE)
+DOCKER_COMPOSE := COMMIT_HASH=$(COMMIT_HASH) docker compose -f $(DOCKER_COMPOSE_FILE)
 
 .PHONY: all
 all:
