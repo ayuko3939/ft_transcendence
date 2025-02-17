@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   frontend:
+    image: ft_transcendence_frontend:${COMMIT_HASH}
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -9,6 +10,7 @@ services:
     ports:
       - "4173:4173"
   backend:
+    image: ft_transcendence_backend:${COMMIT_HASH}
     build:
       context: ./backend
       dockerfile: Dockerfile
