@@ -7,7 +7,16 @@
 		3000,
 		4173
 	],
+	"workspaceFolder": "/workspace",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
 	"postCreateCommand": "echo \"source /usr/share/bash-completion/completions/git\" >> ~/.bashrc",
 	"postStartCommand": "git config --global alias.al 'config --get-regexp ^alias\\.' && git config --global alias.f 'fetch --all --prune' && git config --global alias.pf 'push --force-with-lease'",
+	"mounts": [
+		{
+			"source": "node_modules",
+			"target": "/workspace/node_modules",
+			"type": "volume"
+		}
+	],
 	"remoteUser": "root"
 }

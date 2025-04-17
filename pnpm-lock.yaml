@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  backend:
+  src/backend:
     dependencies:
       '@fastify/cors':
         specifier: ^10.0.2
@@ -33,7 +33,7 @@ importers:
         specifier: ^5.0.0
         version: 5.7.3
 
-  frontend:
+  src/frontend:
     devDependencies:
       autoprefixer:
         specifier: ^10.4.20
