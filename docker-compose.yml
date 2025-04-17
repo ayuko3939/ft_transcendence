@@ -1,20 +1,20 @@
-version: '3.8'
+version: "3.8"
 
 services:
   frontend:
     image: ft_transcendence_frontend:${COMMIT_HASH}
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./src/frontend/Dockerfile
     entrypoint: ["pnpm", "start"]
     ports:
       - "4173:4173"
   backend:
     image: ft_transcendence_backend:${COMMIT_HASH}
     build:
-      context: ./backend
-      dockerfile: Dockerfile
-    entrypoint: ["pnpm", "start"]
+      context: ./
+      dockerfile: ./src/backend/Dockerfile
+    command: [ "/app/dist/index.js"]
     ports:
       - "3000:3000"
     volumes:
@@ -27,11 +27,12 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
-      - ./devops/setup/elasticsearch_entrypoint.sh:/elasticsearch_entrypoint.sh
+      - ./internal/settings/elasticsearch_entrypoint.sh:/elasticsearch_entrypoint.sh
     user: "root"
     command: ["/bin/bash", "/elasticsearch_entrypoint.sh"]
     healthcheck:
-      test: ["CMD-SHELL", "[ -f config/certs/elastic-search/elastic-search.crt ]"]
+      test:
+        ["CMD-SHELL", "[ -f config/certs/elastic-search/elastic-search.crt ]"]
       interval: 1s
       timeout: 5s
       retries: 120
@@ -73,8 +74,7 @@ services:
         soft: -1
         hard: -1
     healthcheck:
-      test:
-        [
+      test: [
           "CMD-SHELL", # /bin/bash -c と同じ意味
           "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
         ]
@@ -105,8 +105,7 @@ services:
       - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
     mem_limit: ${KB_MEM_LIMIT}
     healthcheck:
-      test:
-        [
+      test: [
           "CMD-SHELL", # /bin/bash -c と同じ意味
           "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
         ]
@@ -128,7 +127,7 @@ services:
       - certs:/usr/share/logstash/certs
       - logstashdata:/usr/share/logstash/data
       - "logdir:/usr/share/logstash/ingest_data/"
-      - "./devops/logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
+      - "./internal/settings/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
     environment:
       - xpack.monitoring.enabled=false
       - ELASTIC_USER=elastic
