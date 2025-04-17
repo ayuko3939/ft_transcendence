@@ -16,6 +16,11 @@
 			"source": "node_modules",
 			"target": "/workspace/node_modules",
 			"type": "volume"
+		},
+		{
+			"source": "pnpm_store",
+			"target": "/workspace/.pnpm-store",
+			"type": "volume"
 		}
 	],
 	"remoteUser": "root"
