@@ -4,3 +4,4 @@ dist
 logs
 *.pdf
 .pnpm-store
+mise.local.toml
