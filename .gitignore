@@ -3,3 +3,5 @@ dist
 .env
 logs
 *.pdf
+.pnpm-store
+mise.local.toml
