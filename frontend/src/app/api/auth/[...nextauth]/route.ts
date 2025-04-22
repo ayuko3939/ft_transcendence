@@ -1,5 +1,5 @@
-import NextAuth from "next-auth/next";
 import type { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: NextAuthOptions = {
@@ -8,12 +8,15 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       credentials: {
         username: { label: "ユーザー名", type: "text" },
-        password: { label: "パスワード", type: "password" }
+        password: { label: "パスワード", type: "password" },
       },
       async authorize(credentials) {
         // ここでは実際の認証ロジックを実装します
         // TODO: バックエンドAPIとの連携を実装
-        if (credentials?.username === "user" && credentials?.password === "password") {
+        if (
+          credentials?.username === "user" &&
+          credentials?.password === "password"
+        ) {
           return {
             id: "1",
             name: "User",
@@ -21,11 +24,11 @@ export const authOptions: NextAuthOptions = {
           };
         }
         return null;
-      }
+      },
     }),
   ],
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
   session: {
     strategy: "jwt",

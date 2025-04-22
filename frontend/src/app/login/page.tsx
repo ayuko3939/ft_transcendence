@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+
 import "./login.css";
 
 export default function Login() {
@@ -14,24 +15,26 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username || !password) {
       setError("ユーザー名とパスワードを入力してください");
       return;
     }
-    
+
     setIsLoading(true);
     setError("");
-    
+
     try {
       const result = await signIn("credentials", {
         username,
         password,
         redirect: false,
       });
-      
+
       if (result?.error) {
-        setError("ログインに失敗しました。ユーザー名またはパスワードが間違っています。");
+        setError(
+          "ログインに失敗しました。ユーザー名またはパスワードが間違っています。",
+        );
       } else {
         router.push("/");
       }
@@ -47,12 +50,14 @@ export default function Login() {
       <div className="login-form-container">
         <div className="circuit-dot circuit-dot-1"></div>
         <div className="circuit-dot circuit-dot-2"></div>
-        
+
         <h1 className="login-title">PONG</h1>
-        
+
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username" className="form-label">ユーザー名</label>
+            <label htmlFor="username" className="form-label">
+              ユーザー名
+            </label>
             <input
               id="username"
               type="text"
@@ -62,9 +67,11 @@ export default function Login() {
               disabled={isLoading}
             />
           </div>
-          
+
           <div className="form-group">
-            <label htmlFor="password" className="form-label">パスワード</label>
+            <label htmlFor="password" className="form-label">
+              パスワード
+            </label>
             <input
               id="password"
               type="password"
@@ -74,21 +81,15 @@ export default function Login() {
               disabled={isLoading}
             />
           </div>
-          
+
           {error && <div className="error-message">{error}</div>}
-          
-          <button
-            type="submit"
-            className="login-button"
-            disabled={isLoading}
-          >
+
+          <button type="submit" className="login-button" disabled={isLoading}>
             {isLoading ? "ログイン中..." : "ログイン"}
           </button>
         </form>
-        
-        <div className="login-footer">
-          ©2025 PONG MASTERS
-        </div>
+
+        <div className="login-footer">©2025 PONG MASTERS</div>
       </div>
     </div>
   );

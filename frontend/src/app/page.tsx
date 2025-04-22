@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -18,20 +18,22 @@ export default function Home() {
   // ログインチェック中は何も表示しない
   if (status === "loading" || status === "unauthenticated") {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-black text-white">
+      <div className="flex min-h-screen items-center justify-center bg-black text-white">
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] bg-gray-900 text-cyan-400">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center">
+    <div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 bg-gray-900 p-8 pb-20 font-[family-name:var(--font-geist-sans)] text-cyan-400 sm:p-20">
+      <main className="row-start-2 flex flex-col items-center gap-[32px]">
         <h1 className="text-4xl font-bold text-cyan-400">PONG GAME</h1>
-        <p className="text-xl">ようこそ、{session?.user?.name || "プレイヤー"}さん</p>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+        <p className="text-xl">
+          ようこそ、{session?.user?.name || "プレイヤー"}さん
+        </p>
+        <div className="flex flex-col items-center gap-4 sm:flex-row">
           <button
-            className="rounded-md border-2 border-cyan-400 bg-transparent hover:bg-cyan-900 transition-colors text-cyan-400 font-bold py-3 px-6"
+            className="rounded-md border-2 border-cyan-400 bg-transparent px-6 py-3 font-bold text-cyan-400 transition-colors hover:bg-cyan-900"
             onClick={() => console.log("ゲーム開始")}
           >
             ゲームを始める
