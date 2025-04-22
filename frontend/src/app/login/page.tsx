@@ -44,17 +44,6 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      {/* サイバーなグリッド背景 */}
-      <div className="login-background"></div>
-      <div className="login-grid-lines"></div>
-      <div className="login-glow"></div>
-      
-      {/* 回路っぽい装飾 */}
-      <div className="circuit-decoration circuit-top-left"></div>
-      <div className="circuit-decoration circuit-bottom-right"></div>
-      <div className="circuit-lines circuit-line-1"></div>
-      <div className="circuit-lines circuit-line-2"></div>
-      
       <div className="login-form-container">
         <div className="circuit-dot circuit-dot-1"></div>
         <div className="circuit-dot circuit-dot-2"></div>

@@ -29,7 +29,6 @@ export default function Home() {
       <main className="flex flex-col gap-[32px] row-start-2 items-center">
         <h1 className="text-4xl font-bold text-cyan-400">PONG GAME</h1>
         <p className="text-xl">ようこそ、{session?.user?.name || "プレイヤー"}さん</p>
-        
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <button
             className="rounded-md border-2 border-cyan-400 bg-transparent hover:bg-cyan-900 transition-colors text-cyan-400 font-bold py-3 px-6"
