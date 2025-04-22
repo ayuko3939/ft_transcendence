@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  src/backend:
+  backend:
     dependencies:
       '@fastify/cors':
         specifier: ^10.0.2
@@ -33,7 +33,7 @@ importers:
         specifier: ^5.0.0
         version: 5.7.3
 
-  src/frontend:
+  frontend:
     dependencies:
       next:
         specifier: 15.3.1
@@ -71,7 +71,7 @@ importers:
         version: 15.3.1(eslint@9.25.0(jiti@2.4.2))(typescript@5.7.3)
       tailwindcss:
         specifier: ^4
-        version: 4.0.6
+        version: 4.1.4
       typescript:
         specifier: ^5
         version: 5.7.3
@@ -1927,9 +1927,6 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
-
-  tailwindcss@4.0.6:
-    resolution: {integrity: sha512-mysewHYJKaXgNOW6pp5xon/emCsfAMnO8WMaGKZZ35fomnR/T5gYnRg2/yRTTrtXiEl1tiVkeRt0eMO6HxEZqw==}
 
   tailwindcss@4.1.4:
     resolution: {integrity: sha512-1ZIUqtPITFbv/DxRmDr5/agPqJwF69d24m9qmM1939TJehgY539CtzeZRjbLt5G6fSy/7YqqYsfvoTEw9xUI2A==}
@@ -4105,8 +4102,6 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
-
-  tailwindcss@4.0.6: {}
 
   tailwindcss@4.1.4: {}
 
