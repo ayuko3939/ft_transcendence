@@ -33,8 +33,9 @@ export default function Home() {
         </p>
         <div className="flex flex-col items-center gap-4 sm:flex-row">
           <button
-            className="rounded-md border-2 border-cyan-400 bg-transparent px-6 py-3 font-bold text-cyan-400 transition-colors hover:bg-cyan-900"
-            onClick={() => console.log("ゲーム開始")}
+            type="button"
+            className="z-10 rounded-md border-2 border-cyan-400 bg-transparent px-6 py-3 font-bold text-cyan-400 transition-colors hover:bg-cyan-900"
+            onClick={() => router.push("/game")}
           >
             ゲームを始める
           </button>

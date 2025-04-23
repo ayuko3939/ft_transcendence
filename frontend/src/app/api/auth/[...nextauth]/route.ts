@@ -14,8 +14,8 @@ export const authOptions: NextAuthOptions = {
         // ここでは実際の認証ロジックを実装します
         // TODO: バックエンドAPIとの連携を実装
         if (
-          credentials?.username === "user" &&
-          credentials?.password === "password"
+          credentials?.username !== "" &&
+          credentials?.password !== ""
         ) {
           return {
             id: "1",

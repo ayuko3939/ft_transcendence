@@ -32,7 +32,6 @@ export default function RootLayout({
       >
         <div className="login-background"></div>
         <div className="login-grid-lines"></div>
-        <div className="login-glow"></div>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
