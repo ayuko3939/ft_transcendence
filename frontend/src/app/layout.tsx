@@ -33,10 +33,6 @@ export default function RootLayout({
         <div className="login-background"></div>
         <div className="login-grid-lines"></div>
         <div className="login-glow"></div>
-        <div className="circuit-decoration circuit-top-left"></div>
-        <div className="circuit-decoration circuit-bottom-right"></div>
-        <div className="circuit-lines circuit-line-1"></div>
-        <div className="circuit-lines circuit-line-2"></div>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

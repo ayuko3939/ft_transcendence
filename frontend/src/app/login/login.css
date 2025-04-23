@@ -149,48 +149,6 @@
   font-size: 0.9rem;
 }
 
-.circuit-decoration {
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  z-index: 0;
-}
-
-.circuit-top-left {
-  top: -100px;
-  left: -100px;
-  border-radius: 0 0 200px 0;
-}
-
-.circuit-bottom-right {
-  bottom: -100px;
-  right: -100px;
-  border-radius: 200px 0 0 0;
-}
-
-.circuit-lines {
-  position: absolute;
-  z-index: 0;
-}
-
-.circuit-line-1 {
-  width: 150px;
-  height: 1px;
-  background-color: rgba(0, 255, 255, 0.3);
-  top: 20px;
-  left: -120px;
-  transform: rotate(45deg);
-}
-
-.circuit-line-2 {
-  width: 100px;
-  height: 1px;
-  background-color: rgba(0, 255, 255, 0.3);
-  bottom: 50px;
-  right: -50px;
-}
-
 .circuit-dot {
   position: absolute;
   width: 6px;
