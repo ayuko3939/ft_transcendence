@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       },
       use: [
         {
-          loader: '@svgr/webpack',
+          loader: "@svgr/webpack",
           options: {
             svgo: false, // 圧縮を無効にする設定
           },
@@ -23,10 +23,10 @@ const nextConfig: NextConfig = {
     disableStaticImages: true,
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-        port: '',
-        pathname: '**',
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
+        pathname: "**",
       },
     ],
   },

@@ -14,10 +14,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         // ここでは実際の認証ロジックを実装します
         // TODO: バックエンドAPIとの連携を実装
-        if (
-          credentials?.username !== "" &&
-          credentials?.password !== ""
-        ) {
+        if (credentials?.username !== "" && credentials?.password !== "") {
           return {
             id: "1",
             name: "User",

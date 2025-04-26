@@ -1,6 +1,6 @@
-import { PongRenderer } from "./gameRenderer";
 import type { GameState, PlayerSide } from "./types";
 import type { PongSocketClient } from "./webSocketClient";
+import { PongRenderer } from "./gameRenderer";
 
 export class PongController {
   private renderer: PongRenderer;
