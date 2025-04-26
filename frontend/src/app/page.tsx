@@ -31,6 +31,12 @@ export default function Home() {
         <p className="text-xl">
           ようこそ、{session?.user?.name || "プレイヤー"}さん
         </p>
+        <Image
+          src={session?.user?.image || "プレイヤー"}
+          alt="User Avatar"
+          width={50}
+          height={50}
+          className="rounded-lg shadow-lg"/>
         <div className="flex flex-col items-center gap-4 sm:flex-row">
           <button
             type="button"

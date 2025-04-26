@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 import GoogleLoginButton from "./GoogleLoginButton.svg";
@@ -15,6 +15,22 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSSOLoading, setIsSSOLoading] = useState(false);
+
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  const handleGoogleLogin = async () => {
+    try {
+      setIsSSOLoading(true);
+      await signIn("google", { callbackUrl });
+    } catch (error) {
+      console.error("ログインエラー:", error);
+      setError("ログイン中にエラーが発生しました。もう一度お試しください。");
+    } finally {
+      setIsSSOLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +39,6 @@ export default function Login() {
       setError("ユーザー名とパスワードを入力してください");
       return;
     }
-
     setIsLoading(true);
     setError("");
 
@@ -93,20 +108,27 @@ export default function Login() {
         </form>
 
         <div className="google-button-container">
-          <button className="gsi-material-button">
+          <button
+            className="gsi-material-button"
+            onClick={handleGoogleLogin}
+            disabled={isSSOLoading}
+          >
             <div className="gsi-material-button-state"></div>
-            <div className="gsi-material-button-content-wrapper">
-              <div className="gsi-material-button-icon">
-                <GoogleLoginButton />
+            {isSSOLoading ? (
+              <span>読み込み中...</span>
+            ) : (
+              <div className="gsi-material-button-content-wrapper">
+                <div className="gsi-material-button-icon">
+                  <GoogleLoginButton />
+                </div>
+                <span className="gsi-material-button-contents">
+                  Sign in with Google
+                </span>
+                <span style={{ display: "none" }}>Sign in with Google</span>
               </div>
-              <span className="gsi-material-button-contents">
-                Sign in with Google
-              </span>
-              <span style={{ display: "none" }}>Sign in with Google</span>
-            </div>
+            )}
           </button>
         </div>
-
         <div className="login-footer">©2025 PONG MASTERS</div>
       </div>
     </div>
