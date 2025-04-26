@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
+import GoogleLoginButton from "./GoogleLoginButton.svg";
+
 import "./login.css";
+import "./googleButton.css";
 
 export default function Login() {
   const router = useRouter();
@@ -88,6 +91,21 @@ export default function Login() {
             {isLoading ? "ログイン中..." : "ログイン"}
           </button>
         </form>
+
+        <div className="google-button-container">
+          <button className="gsi-material-button">
+            <div className="gsi-material-button-state"></div>
+            <div className="gsi-material-button-content-wrapper">
+              <div className="gsi-material-button-icon">
+                <GoogleLoginButton />
+              </div>
+              <span className="gsi-material-button-contents">
+                Sign in with Google
+              </span>
+              <span style={{ display: "none" }}>Sign in with Google</span>
+            </div>
+          </button>
+        </div>
 
         <div className="login-footer">©2025 PONG MASTERS</div>
       </div>
