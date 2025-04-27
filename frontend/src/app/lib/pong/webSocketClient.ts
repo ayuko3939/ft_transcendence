@@ -71,16 +71,79 @@ export class PongSocketClient {
   }
 
   private handleMessage(data: any): void {
+    // デバッグ: 受信したデータの表示
+    console.log("WebSocketデータ受信:", data);
+
     if (data.type === "init") {
-      this.handlers.onInit(data.side, data.gameState);
+      // 初期化メッセージ
+      this.handlers.onInit(data.side, this.normalizeGameState(data.gameState));
     } else if (Array.isArray(data)) {
+      // チャットメッセージ
       this.handlers.onChatMessages(data);
     } else if (data.type === "countdown") {
+      // カウントダウン
       this.handlers.onCountdown(data.count);
     } else if (data.type === "gameStart") {
-      this.handlers.onGameStart(data.gameState);
+      // ゲーム開始
+      this.handlers.onGameStart(this.normalizeGameState(data.gameState));
+    } else if (data.type === "gameState" || data.ball) {
+      // ゲーム状態の更新
+      // data.typeがgameStateの場合と、直接ゲーム状態が送られてくる場合の両方に対応
+      const gameState = data.type === "gameState" ? data : data;
+      this.handlers.onGameState(this.normalizeGameState(gameState));
     } else {
-      this.handlers.onGameState(data);
+      // 不明なメッセージタイプ
+      console.warn("不明なWebSocketメッセージタイプ:", data);
     }
+  }
+
+  // バックエンドから受信したデータをフロントエンドの型に合わせて正規化
+  private normalizeGameState(data: any): GameState {
+    // データが既に期待する形式なら修正せずに返す
+    if (
+      data &&
+      data.ball &&
+      data.ball.radius !== undefined &&
+      data.paddleLeft &&
+      data.paddleLeft.width !== undefined &&
+      data.paddleRight &&
+      data.paddleRight.width !== undefined
+    ) {
+      return data as GameState;
+    }
+
+    const defaultPaddleWidth = 10;
+    const defaultPaddleHeight = 100;
+    const defaultBallRadius = 10;
+    const defaultLeftPaddleX = 50;
+    const defaultRightPaddleX = 740;
+
+    const normalized: GameState = {
+      ball: {
+        x: data.ball?.x ?? 400,
+        y: data.ball?.y ?? 300,
+        dx: data.ball?.dx ?? 5,
+        dy: data.ball?.dy ?? 5,
+        radius: data.ball?.radius ?? defaultBallRadius,
+      },
+      paddleLeft: {
+        x: data.paddleLeft?.x ?? defaultLeftPaddleX,
+        y: data.paddleLeft?.y ?? 250,
+        width: data.paddleLeft?.width ?? defaultPaddleWidth,
+        height: data.paddleLeft?.height ?? defaultPaddleHeight,
+      },
+      paddleRight: {
+        x: data.paddleRight?.x ?? defaultRightPaddleX,
+        y: data.paddleRight?.y ?? 250,
+        width: data.paddleRight?.width ?? defaultPaddleWidth,
+        height: data.paddleRight?.height ?? defaultPaddleHeight,
+      },
+      score: {
+        left: data.score?.left ?? 0,
+        right: data.score?.right ?? 0,
+      },
+    };
+
+    return normalized;
   }
 }

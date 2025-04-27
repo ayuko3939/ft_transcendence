@@ -10,14 +10,14 @@ export default function AvatorCard() {
 
   if (status === "loading" || status === "unauthenticated") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+      <div className="flex min-h-screen items-center justify-center text-white">
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="z-10">
+    <div className="flex min-h-screen items-center justify-center">
       <p className="text-xl">
         ようこそ、{session?.user?.name || "プレイヤー"}さん
       </p>

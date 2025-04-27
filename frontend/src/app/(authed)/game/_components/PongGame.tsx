@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import type { ChatMessage, GameState, PlayerSide } from "@/lib/pong/types";
+import { useEffect, useRef, useState } from "react";
 import { PongController } from "@/lib/pong/gameController";
 import { PongSocketClient } from "@/lib/pong/webSocketClient";
 
@@ -151,7 +151,7 @@ const PongGame = () => {
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && sendChat()}
+            onKeyDown={(e) => e.key === "Enter" && sendChat()}
             className={styles.chatInput}
             placeholder="メッセージを入力..."
           />

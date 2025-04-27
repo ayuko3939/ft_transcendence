@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 
-import GoogleLoginIcon from "./GoogleLoginButton.svg";
 import styles from "./GoogleButton.module.css";
+import GoogleLoginIcon from "./GoogleLoginButton.svg";
 
 interface GoogleButtonProps {
   callbackUrl?: string;
