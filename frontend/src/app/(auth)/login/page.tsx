@@ -4,10 +4,8 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
-import GoogleLoginButton from "./GoogleLoginButton.svg";
-
-import "./login.css";
-import "./googleButton.css";
+import GoogleButton from "./components/GoogleButton/GoogleButton";
+import styles from "./login.module.css";
 
 export default function Login() {
   const router = useRouter();
@@ -15,22 +13,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSSOLoading, setIsSSOLoading] = useState(false);
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
-
-  const handleGoogleLogin = async () => {
-    try {
-      setIsSSOLoading(true);
-      await signIn("google", { callbackUrl });
-    } catch (error) {
-      console.error("ログインエラー:", error);
-      setError("ログイン中にエラーが発生しました。もう一度お試しください。");
-    } finally {
-      setIsSSOLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,36 +49,36 @@ export default function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-form-container">
+    <div className={styles.container}>
+      <div className="cyber-container glow-animation">
         <div className="circuit-dot circuit-dot-1"></div>
         <div className="circuit-dot circuit-dot-2"></div>
 
-        <h1 className="login-title">PONG</h1>
+        <h1 className="cyber-title">PONG</h1>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username" className="form-label">
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <label htmlFor="username" className={styles.formLabel}>
               ユーザー名
             </label>
             <input
               id="username"
               type="text"
-              className="form-input"
+              className={styles.formInput}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={isLoading}
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
+          <div className={styles.formGroup}>
+            <label htmlFor="password" className={styles.formLabel}>
               パスワード
             </label>
             <input
               id="password"
               type="password"
-              className="form-input"
+              className={styles.formInput}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
@@ -102,34 +87,15 @@ export default function Login() {
 
           {error && <div className="error-message">{error}</div>}
 
-          <button type="submit" className="login-button" disabled={isLoading}>
+          <button type="submit" className="cyber-button" disabled={isLoading}>
             {isLoading ? "ログイン中..." : "ログイン"}
           </button>
         </form>
 
-        <div className="google-button-container">
-          <button
-            className="gsi-material-button"
-            onClick={handleGoogleLogin}
-            disabled={isSSOLoading}
-          >
-            <div className="gsi-material-button-state"></div>
-            {isSSOLoading ? (
-              <span>読み込み中...</span>
-            ) : (
-              <div className="gsi-material-button-content-wrapper">
-                <div className="gsi-material-button-icon">
-                  <GoogleLoginButton />
-                </div>
-                <span className="gsi-material-button-contents">
-                  Sign in with Google
-                </span>
-                <span style={{ display: "none" }}>Sign in with Google</span>
-              </div>
-            )}
-          </button>
+        <div className={styles.googleButtonContainer}>
+          <GoogleButton callbackUrl={callbackUrl} />
         </div>
-        <div className="login-footer">©2025 PONG MASTERS</div>
+        <div className={styles.footer}>©2025 PONG MASTERS</div>
       </div>
     </div>
   );
