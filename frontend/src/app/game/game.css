@@ -192,10 +192,3 @@
   margin-top: 5px;
   text-align: center;
 }
-
-/* Google ログインボタンのコンテナ */
-.google-button-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 16px;
-}

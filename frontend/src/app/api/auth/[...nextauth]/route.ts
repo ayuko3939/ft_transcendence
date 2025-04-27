@@ -1,6 +1,7 @@
-import NextAuth from "next-auth/next";
 import type { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -8,12 +9,12 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       credentials: {
         username: { label: "ユーザー名", type: "text" },
-        password: { label: "パスワード", type: "password" }
+        password: { label: "パスワード", type: "password" },
       },
       async authorize(credentials) {
         // ここでは実際の認証ロジックを実装します
         // TODO: バックエンドAPIとの連携を実装
-        if (credentials?.username === "user" && credentials?.password === "password") {
+        if (credentials?.username !== "" && credentials?.password !== "") {
           return {
             id: "1",
             name: "User",
@@ -21,11 +22,15 @@ export const authOptions: NextAuthOptions = {
           };
         }
         return null;
-      }
+      },
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
   ],
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
   session: {
     strategy: "jwt",
