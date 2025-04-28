@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 
@@ -91,14 +92,23 @@ export default function Login() {
               disabled={isLoading}
             />
           </div>
-
           {error && <div className="error-message">{error}</div>}
-
           <button type="submit" className="cyber-button" disabled={isLoading}>
-            {isLoading ? "ログイン中..." : "ログイン"}
+            {isLoading ? (
+              <div className="flex justify-center">
+                <div className="size-6 animate-spin rounded-full border-2 border-solid border-white" />
+              </div>
+            ) : (
+              "ログイン"
+            )}
           </button>
         </form>
-
+        <div className="flex justify-center py-5 text-sm">
+          アカウントが必要ですか？
+          <Link href="/signup">
+            <span className="text-cyan-400">登録</span>
+          </Link>
+        </div>
         <div className={styles.googleButtonContainer}>
           <GoogleButton callbackUrl={callbackUrl} />
         </div>
