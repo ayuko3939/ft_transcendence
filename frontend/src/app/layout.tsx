@@ -33,9 +33,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <div className="app-background"></div>
-          <div className="grid-lines"></div>
-          <div className="glow-effect"></div>
+          <div className="app-background" />
+          <div className="grid-lines" />
+          <div className="glow-effect" />
           <div>
             <Header />
             <main>

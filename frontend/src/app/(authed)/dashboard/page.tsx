@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import AvatorCard from "./components/AvatorContainer";
+import styles from "./dashboard.module.css";
 
 export default function DashboardPage() {
   const { status } = useSession();
@@ -13,25 +14,30 @@ export default function DashboardPage() {
     router.push("/login");
     return null;
   }
-
+  if (status === "loading") {
+    return (
+      <div className={styles.container}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
   return (
-    <div>
-      <main className="row-start-2 flex flex-col items-center gap-[32px]">
-        <h1 className="text-4xl font-bold text-cyan-400">PONG GAME</h1>
+    <div className={styles.container}>
+      <div className="cyber-container glow-animation">
+        <div className="circuit-dot circuit-dot-1" />
+        <div className="circuit-dot circuit-dot-2" />
+        <h1 className="cyber-title">PONG GAME</h1>
         <AvatorCard />
-        <div className="flex flex-col items-center gap-4 sm:flex-row">
+        <div className={styles.buttonContainer}>
           <button
             type="button"
-            className="z-10 rounded-md border-2 border-cyan-400 bg-transparent px-6 py-3 font-bold text-cyan-400 transition-colors hover:bg-cyan-900"
+            className="cyber-button"
             onClick={() => router.push("/game")}
           >
             ゲームを始める
           </button>
         </div>
-      </main>
-      <footer className="row-start-3 text-sm text-cyan-600">
-        ©2025 PONG MASTERS
-      </footer>
+      </div>
     </div>
   );
 }

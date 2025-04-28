@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -7,18 +8,17 @@ export default function Home() {
   const { status } = useSession();
   const router = useRouter();
 
-  if (status === "unauthenticated") {
-    router.push("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    } else if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
 
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-white">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-  router.push("/dashboard");
-  return null;
+  return (
+    <div className="flex min-h-screen items-center justify-center text-white">
+      <p>Loading...</p>
+    </div>
+  );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 import GoogleButton from "./components/GoogleButton/GoogleButton";
 import styles from "./login.module.css";
@@ -14,8 +14,17 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const { status } = useSession();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-white">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,11 +60,9 @@ export default function Login() {
   return (
     <div className={styles.container}>
       <div className="cyber-container glow-animation">
-        <div className="circuit-dot circuit-dot-1"></div>
-        <div className="circuit-dot circuit-dot-2"></div>
-
-        <h1 className="cyber-title">PONG</h1>
-
+        <div className="circuit-dot circuit-dot-1" />
+        <div className="circuit-dot circuit-dot-2" />
+        <h1 className="cyber-title">PONG GAME</h1>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <label htmlFor="username" className={styles.formLabel}>
@@ -95,7 +102,6 @@ export default function Login() {
         <div className={styles.googleButtonContainer}>
           <GoogleButton callbackUrl={callbackUrl} />
         </div>
-        <div className={styles.footer}>©2025 PONG MASTERS</div>
       </div>
     </div>
   );

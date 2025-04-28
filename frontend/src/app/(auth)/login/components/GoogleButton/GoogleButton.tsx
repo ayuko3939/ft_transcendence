@@ -26,11 +26,12 @@ export default function GoogleButton({ callbackUrl = "/" }: GoogleButtonProps) {
 
   return (
     <button
+      type="button"
       className={styles.materialButton}
       onClick={handleGoogleLogin}
       disabled={isLoading}
     >
-      <div className={styles.state}></div>
+      <div className={styles.state} />
       {isLoading ? (
         <span>読み込み中...</span>
       ) : (
