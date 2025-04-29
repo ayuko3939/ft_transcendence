@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { PongController } from "@/lib/pong/gameController";
 import { PongSocketClient } from "@/lib/pong/webSocketClient";
 
+import styles from "./game.module.css";
+
 const initialGameState: GameState = {
   ball: {
     x: 400,
@@ -118,27 +120,24 @@ const PongGame = () => {
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative">
+    <div className={styles.container}>
+      <div className={styles.canvasContainer}>
         <canvas
           ref={canvasRef}
           width={800}
           height={600}
-          className="border border-gray-400"
+          className={styles.canvas}
         />
 
         {countdown !== null && (
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform text-6xl font-bold text-white">
-            {countdown}
+          <div className={styles.countdownOverlay}>
+            <div className={styles.countdownText}>{countdown}</div>
           </div>
         )}
       </div>
 
-      <div className="mt-4 w-full max-w-2xl rounded border border-gray-300 p-4">
-        <div
-          className="mb-4 h-40 overflow-y-auto rounded bg-gray-100 p-2"
-          style={{ scrollBehavior: "smooth" }}
-        >
+      <div className={styles.chatContainer}>
+        <div className={styles.chatMessages}>
           {chatMessages.map((chat, index) => (
             <div key={index} className="mb-2">
               <span className="font-bold">{chat.name}:</span>
@@ -147,19 +146,19 @@ const PongGame = () => {
           ))}
         </div>
 
-        <div className="flex">
+        <div className={styles.chatInputContainer}>
           <input
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && sendChat()}
-            className="flex-1 rounded-l border border-gray-300 px-3 py-2"
+            onKeyDown={(e) => e.key === "Enter" && sendChat()}
+            className={styles.chatInput}
             placeholder="メッセージを入力..."
           />
           <button
             onClick={sendChat}
             type="button"
-            className="rounded-r bg-blue-500 px-4 py-2 text-white"
+            className={styles.sendButton}
           >
             送信
           </button>

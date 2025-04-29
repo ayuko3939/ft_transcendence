@@ -33,12 +33,19 @@ const startServer = async () => {
         y: number;
         dx: number;
         dy: number;
+        radius: number;
       };
       paddleLeft: {
+        x: number;
         y: number;
+        width: number;
+        height: number;
       };
       paddleRight: {
+        x: number;
         y: number;
+        width: number;
+        height: number;
       };
       score: {
         left: number;
@@ -63,9 +70,25 @@ const startServer = async () => {
       room = {
         players: {},
         gameState: {
-          ball: { x: 400, y: 300, dx: 5, dy: 5 },
-          paddleLeft: { y: 250 },
-          paddleRight: { y: 250 },
+          ball: { 
+            x: 400,
+            y: 300,
+            dx: 5,
+            dy: 5,
+            radius: 10
+          },
+          paddleLeft: { 
+            x: 50,
+            y: 250,
+            width: 10,
+            height: 100
+          },
+          paddleRight: { 
+            x: 740,
+            y: 250,
+            width: 10,
+            height: 100
+          },
           score: { left: 0, right: 0 },
         },
         chats: [],

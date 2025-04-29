@@ -4,12 +4,19 @@ export type GameState = {
     y: number;
     dx: number;
     dy: number;
+    radius: number;
   };
   paddleLeft: {
+    x: number;
     y: number;
+    width: number;
+    height: number;
   };
   paddleRight: {
+    x: number;
     y: number;
+    width: number;
+    height: number;
   };
   score: {
     left: number;
@@ -49,18 +56,18 @@ export class GameEngine {
   private checkPaddleCollision(): void {
     // 左パドルとの衝突
     if (
-      this.gameState.ball.x <= 50 + this.PADDLE_WIDTH &&
+      this.gameState.ball.x <= this.gameState.paddleLeft.x + this.gameState.paddleLeft.width &&
       this.gameState.ball.y >= this.gameState.paddleLeft.y &&
-      this.gameState.ball.y <= this.gameState.paddleLeft.y + this.PADDLE_HEIGHT
+      this.gameState.ball.y <= this.gameState.paddleLeft.y + this.gameState.paddleLeft.height
     ) {
       this.gameState.ball.dx *= -1;
     }
 
     // 右パドルとの衝突
     if (
-      this.gameState.ball.x >= this.CANVAS_WIDTH - 50 - this.PADDLE_WIDTH &&
+      this.gameState.ball.x >= this.gameState.paddleRight.x &&
       this.gameState.ball.y >= this.gameState.paddleRight.y &&
-      this.gameState.ball.y <= this.gameState.paddleRight.y + this.PADDLE_HEIGHT
+      this.gameState.ball.y <= this.gameState.paddleRight.y + this.gameState.paddleRight.height
     ) {
       this.gameState.ball.dx *= -1;
     }
@@ -84,7 +91,8 @@ export class GameEngine {
       x: this.CANVAS_WIDTH / 2,
       y: this.CANVAS_HEIGHT / 2,
       dx: this.BALL_SPEED * (Math.random() > 0.5 ? 1 : -1),
-      dy: this.BALL_SPEED * (Math.random() > 0.5 ? 1 : -1)
+      dy: this.BALL_SPEED * (Math.random() > 0.5 ? 1 : -1),
+      radius: this.BALL_RADIUS
     };
   }
-} 
+}
