@@ -41,15 +41,11 @@ export const authOptions: NextAuthOptions = {
     strategy: "database",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
+    async session({ session, user }) {
+      console.log("Session:", JSON.stringify(session));
+      console.log("User:", JSON.stringify(user));
+      if (session.user && user) {
+        session.user.id = user.id
       }
       return session;
     },
