@@ -1,9 +1,13 @@
 import type { NextAuthOptions } from "next-auth";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
+import { db } from "../../database/db";
+
 export const authOptions: NextAuthOptions = {
+  adapter: DrizzleAdapter(db as any),
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -34,7 +38,7 @@ export const authOptions: NextAuthOptions = {
     signOut: "/login",
   },
   session: {
-    strategy: "jwt",
+    strategy: "database",
   },
   callbacks: {
     async jwt({ token, user }) {

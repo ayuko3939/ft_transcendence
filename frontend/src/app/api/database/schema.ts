@@ -1,6 +1,11 @@
-import { integer, sqliteTable, text, primaryKey } from "drizzle-orm/sqlite-core"
-import type { AdapterAccount } from "next-auth/adapters"
- 
+import type { AdapterAccount } from "next-auth/adapters";
+import {
+  integer,
+  primaryKey,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
+
 export const users = sqliteTable("user", {
   id: text("id")
     .primaryKey()
@@ -9,8 +14,8 @@ export const users = sqliteTable("user", {
   email: text("email").unique(),
   emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
   image: text("image"),
-})
- 
+});
+
 export const accounts = sqliteTable(
   "account",
   {
@@ -32,17 +37,17 @@ export const accounts = sqliteTable(
     compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
-  })
-)
- 
+  }),
+);
+
 export const sessions = sqliteTable("session", {
   sessionToken: text("sessionToken").primaryKey(),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
-})
- 
+});
+
 export const verificationTokens = sqliteTable(
   "verificationToken",
   {
@@ -54,9 +59,9 @@ export const verificationTokens = sqliteTable(
     compositePk: primaryKey({
       columns: [verificationToken.identifier, verificationToken.token],
     }),
-  })
-)
- 
+  }),
+);
+
 export const authenticators = sqliteTable(
   "authenticator",
   {
@@ -77,5 +82,5 @@ export const authenticators = sqliteTable(
     compositePK: primaryKey({
       columns: [authenticator.userId, authenticator.credentialID],
     }),
-  })
-)
+  }),
+);

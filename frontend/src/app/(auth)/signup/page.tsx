@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import styles from "./signup.module.css";
 
 export default function Signup() {
@@ -46,8 +47,8 @@ export default function Signup() {
   return (
     <div className={styles.container}>
       <div className="cyber-container glow-animation">
-        <div className="circuit-dot circuit-dot-1"/>
-        <div className="circuit-dot circuit-dot-2"/>
+        <div className="circuit-dot circuit-dot-1" />
+        <div className="circuit-dot circuit-dot-2" />
         <h1 className="cyber-title">PONG GAME</h1>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>

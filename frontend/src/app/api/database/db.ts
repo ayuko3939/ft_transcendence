@@ -1,4 +1,5 @@
+import { drizzle } from "drizzle-orm/libsql";
 
-import { drizzle } from 'drizzle-orm/libsql';
-
-export const db = drizzle(process.env.DB_FILE_NAME ?? "file:../database/database.db");
+export const db = drizzle(
+  process.env.DB_FILE_NAME ?? "file:../database/database.db",
+);
