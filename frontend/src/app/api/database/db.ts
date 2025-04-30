@@ -1,5 +1,8 @@
+import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 
-export const db = drizzle(
-  process.env.DB_FILE_NAME ?? "file:../database/database.db ",
-);
+const client = createClient({
+  url: process.env.DB_FILE_NAME ?? "file:../database/database.db",
+});
+
+export const db = drizzle(client, { logger: true });

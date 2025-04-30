@@ -7,6 +7,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { db } from "../../database/db";
 
 export const authOptions: NextAuthOptions = {
+  debug: true,
   adapter: DrizzleAdapter(db as any),
   providers: [
     CredentialsProvider({
@@ -42,10 +43,8 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session, user }) {
-      console.log("Session:", JSON.stringify(session));
-      console.log("User:", JSON.stringify(user));
       if (session.user && user) {
-        session.user.id = user.id
+        session.user.id = user.id;
       }
       return session;
     },

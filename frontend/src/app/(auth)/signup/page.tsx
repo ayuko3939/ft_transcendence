@@ -1,12 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import styles from "./signup.module.css";
 
 export default function Signup() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center text-white">
+          <p>Loading...</p>
+        </div>
+      }
+    >
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -39,6 +53,7 @@ export default function Signup() {
       router.push("/login");
     } catch (error) {
       setError("アカウント登録に失敗しました。もう一度お試しください。");
+      console.error("Error during signup:", error);
     } finally {
       setIsLoading(false);
     }
