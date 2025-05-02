@@ -1,6 +1,12 @@
 version: "3.8"
 
 services:
+  database-init:
+    image: ft_transcendence_databaseinit:latest
+    build:
+      context: ./
+      dockerfile: ./database/Dockerfile
+
   frontend:
     image: ft_transcendence_frontend:${COMMIT_HASH}
     build:

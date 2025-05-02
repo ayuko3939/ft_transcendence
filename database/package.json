@@ -13,6 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "@auth/drizzle-adapter": "^1.9.0",
+    "@libsql/client": "^0.15.4",
     "@types/node": "^22.15.3",
     "dotenv": "^16.5.0",
     "drizzle-kit": "^0.31.0",

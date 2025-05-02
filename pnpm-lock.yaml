@@ -38,6 +38,9 @@ importers:
       '@auth/drizzle-adapter':
         specifier: ^1.9.0
         version: 1.9.0
+      '@libsql/client':
+        specifier: ^0.15.4
+        version: 0.15.4
       '@types/node':
         specifier: ^22.15.3
         version: 22.15.3
