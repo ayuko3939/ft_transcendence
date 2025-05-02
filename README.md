@@ -1,8 +1,13 @@
 # How to Use
-### Install
-The following commands are run in the workspace root directory.
+### インストール
+以下のコマンドをルートディレクトリで実行する。
 ```bash
 pnpm install
+```
+
+### データベースの初期化
+```bash
+pnpm db initialize
 ```
 
 ### Run

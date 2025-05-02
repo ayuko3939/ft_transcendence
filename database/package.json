@@ -1,0 +1,22 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "initialize": "pnpm push && pnpm generate",
+    "push": "drizzle-kit push",
+    "migrate": "drizzle-kit migrate",
+    "generate": "drizzle-kit generate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@auth/drizzle-adapter": "^1.9.0",
+    "@types/node": "^22.15.3",
+    "dotenv": "^16.5.0",
+    "drizzle-kit": "^0.31.0",
+    "drizzle-orm": "^0.43.1",
+    "next-auth": "^4.24.11"
+  }
+}
