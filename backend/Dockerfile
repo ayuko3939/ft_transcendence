@@ -1,15 +1,14 @@
-FROM node:22-alpine AS builder 
+FROM node:22-slim AS builder 
 
 RUN npm install -g pnpm
 
 WORKDIR /app
 
-COPY ./src/backend/package.json .
-COPY ./src/backend/pnpm-lock.yaml .
+COPY ./backend/package.json .
 
 RUN pnpm install
 
-COPY ./src/backend /app
+COPY ./backend /app
 
 RUN pnpm build
 
@@ -20,6 +19,6 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["/app/dist/index.js"]

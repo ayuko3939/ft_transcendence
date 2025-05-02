@@ -2,10 +2,17 @@ version: "3.8"
 
 services:
   database-init:
-    image: ft_transcendence_databaseinit:latest
+    image: ft_transcendence_databaseinit:${COMMIT_HASH}
     build:
       context: ./
       dockerfile: ./database/Dockerfile
+    environment:
+      - DB_FILE_DIR=/var/lib/db
+      - DB_FILE_NAME=${DB_FILE_NAME}
+    entrypoint: [ "/app/init.sh" ]
+    volumes:
+      - logdir:/app/logs
+      - dbdir:/var/lib/db
 
   frontend:
     image: ft_transcendence_frontend:${COMMIT_HASH}
@@ -29,7 +36,10 @@ services:
       - "3001:3001"
     volumes:
       - logdir:/app/logs
-      - dbdir:$(DB_DIR)
+      - dbdir:/var/lib/db
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
 
 volumes:
   logdir:

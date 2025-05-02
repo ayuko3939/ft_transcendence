@@ -7,8 +7,10 @@ WORKDIR /app
 COPY ./database/package.json .
 COPY ./database/*.ts .
 
-RUN pnpm install && \
-    pnpm run initialize
+RUN pnpm install
+
+COPY ./database/*.sh .
+RUN chmod +x *.sh
 
 ENTRYPOINT [ "node" ]
-CMD [ "-e", "console.log(\"All done!\")" ]
+CMD [ "-e", "setInterval(() => {}, 60000);" ]

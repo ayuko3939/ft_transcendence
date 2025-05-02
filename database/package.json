@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "initialize": "pnpm push && pnpm generate",
     "push": "drizzle-kit push",
     "migrate": "drizzle-kit migrate",
     "generate": "drizzle-kit generate"

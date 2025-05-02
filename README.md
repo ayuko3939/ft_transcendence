@@ -7,7 +7,7 @@ pnpm install
 
 ### データベースの初期化
 ```bash
-pnpm db initialize
+pnpm db push
 ```
 
 ### Run
