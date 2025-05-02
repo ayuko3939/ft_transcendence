@@ -1,14 +1,15 @@
 import type { NextAuthOptions } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { drizzle } from "drizzle-orm/libsql";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
-import { db } from "../../database/db";
+import { client } from "../../database/db";
 
 export const authOptions: NextAuthOptions = {
   debug: true,
-  adapter: DrizzleAdapter(db as any),
+  adapter: DrizzleAdapter(drizzle(client, { logger: true }) as any),
   providers: [
     CredentialsProvider({
       name: "Credentials",
