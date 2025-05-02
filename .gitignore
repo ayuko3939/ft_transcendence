@@ -7,3 +7,4 @@ logs
 mise.local.toml
 database/drizzle/
 *.db
+!*dummy.db

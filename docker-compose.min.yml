@@ -19,12 +19,21 @@ services:
     build:
       context: ./
       dockerfile: ./frontend/Dockerfile
-    entrypoint: ["pnpm", "start"]
+    environment:
+      - DB_FILE_DIR=/var/lib/db
+      - DB_FILE_NAME=${DB_FILE_NAME}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     ports:
       - "3000:3000"
     volumes:
       - logdir:/app/logs
-      - dbdir:$(DB_DIR)
+      - dbdir:/var/lib/db
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
 
   backend:
     image: ft_transcendence_backend:${COMMIT_HASH}
