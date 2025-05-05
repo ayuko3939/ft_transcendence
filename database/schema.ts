@@ -1,4 +1,5 @@
 import type { AdapterAccount } from "next-auth/adapters";
+import { sql } from "drizzle-orm";
 import {
   integer,
   primaryKey,
@@ -24,8 +25,8 @@ export const userPasswords = sqliteTable(
       .references(() => users.id, { onDelete: "cascade" }),
     passwordHash: text("password_hash").notNull(),
     passwordSalt: text("password_salt"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [primaryKey({ columns: [table.userId] })]
 );
