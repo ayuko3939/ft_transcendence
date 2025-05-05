@@ -1,11 +1,12 @@
 import type { NextAuthOptions } from "next-auth";
+import { client } from "@/api/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { drizzle } from "drizzle-orm/libsql";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
-import { client } from "../../database/db";
+// import { authenticateUser } from "../users";
 
 export const authOptions: NextAuthOptions = {
   debug: true,
@@ -18,16 +19,32 @@ export const authOptions: NextAuthOptions = {
         password: { label: "パスワード", type: "password" },
       },
       async authorize(credentials) {
-        // ここでは実際の認証ロジックを実装します
-        // TODO: バックエンドAPIとの連携を実装
-        if (credentials?.username !== "" && credentials?.password !== "") {
-          return {
-            id: "1",
-            name: "User",
-            email: "user@example.com",
-          };
+        if (!credentials?.username || !credentials?.password) {
+          return null;
         }
-        return null;
+        try {
+          // const user = await authenticateUser(
+          //   credentials.username,
+          //   credentials.password,
+          // );
+          // if (user) {
+          //   return {
+          //     id: user.id.toString(),
+          //     name: user.name,
+          //     email: user.email,
+          //     image: user.image || null,
+          //   };
+          // }
+          return {
+            id: "user.id.toString()",
+            name: "user.name",
+            email: "user.email",
+            image: "user.image || null",
+          };
+        } catch (error) {
+          console.error("認証エラー:", error);
+          return null;
+        }
       },
     }),
     GoogleProvider({

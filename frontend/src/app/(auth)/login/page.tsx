@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 
 import GoogleButton from "./components/GoogleButton/GoogleButton";
+import ToastRegisterSuccess from "./components/toast-register-success";
 import styles from "./login.module.css";
 
 export default function Login() {
@@ -41,6 +42,7 @@ function LoginContent() {
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const isRegistered = searchParams.get("registered") === "true";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,64 +70,67 @@ function LoginContent() {
       }
     } catch (error) {
       setError("ログインに失敗しました。もう一度お試しください。");
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
-    <div className={styles.container}>
-      <div className="cyber-container glow-animation">
-        <div className="circuit-dot circuit-dot-1" />
-        <div className="circuit-dot circuit-dot-2" />
-        <h1 className="cyber-title">PONG GAME</h1>
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label htmlFor="username" className={styles.formLabel}>
-              ユーザー名
-            </label>
-            <input
-              id="username"
-              type="text"
-              className={styles.formInput}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
+    <div>
+      <ToastRegisterSuccess isRegistered={isRegistered} />
+      <div className={styles.container}>
+        <div className="cyber-container glow-animation">
+          <div className="circuit-dot circuit-dot-1" />
+          <div className="circuit-dot circuit-dot-2" />
+          <h1 className="cyber-title">PONG GAME</h1>
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <div className={styles.formGroup}>
+              <label htmlFor="username" className={styles.formLabel}>
+                ユーザー名またはメール
+              </label>
+              <input
+                id="username"
+                type="text"
+                className={styles.formInput}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.formLabel}>
-              パスワード
-            </label>
-            <input
-              id="password"
-              type="password"
-              className={styles.formInput}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-            />
+            <div className={styles.formGroup}>
+              <label htmlFor="password" className={styles.formLabel}>
+                パスワード
+              </label>
+              <input
+                id="password"
+                type="password"
+                className={styles.formInput}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+            {error && <div className="error-message">{error}</div>}
+            <button type="submit" className="cyber-button" disabled={isLoading}>
+              {isLoading ? (
+                <div className="flex justify-center">
+                  <div className="size-6 animate-spin rounded-full border-2 border-solid border-white" />
+                </div>
+              ) : (
+                "ログイン"
+              )}
+            </button>
+          </form>
+          <div className="flex justify-center py-5 text-sm">
+            アカウントが必要ですか？
+            <Link href="/signup">
+              <span className="text-cyan-400">登録</span>
+            </Link>
           </div>
-          {error && <div className="error-message">{error}</div>}
-          <button type="submit" className="cyber-button" disabled={isLoading}>
-            {isLoading ? (
-              <div className="flex justify-center">
-                <div className="size-6 animate-spin rounded-full border-2 border-solid border-white" />
-              </div>
-            ) : (
-              "ログイン"
-            )}
-          </button>
-        </form>
-        <div className="flex justify-center py-5 text-sm">
-          アカウントが必要ですか？
-          <Link href="/signup">
-            <span className="text-cyan-400">登録</span>
-          </Link>
-        </div>
-        <div className={styles.googleButtonContainer}>
-          <GoogleButton callbackUrl={callbackUrl} />
+          <div className={styles.googleButtonContainer}>
+            <GoogleButton callbackUrl={callbackUrl} />
+          </div>
         </div>
       </div>
     </div>
