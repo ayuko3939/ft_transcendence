@@ -8,6 +8,7 @@ pnpm install
 ### データベースの初期化
 ```bash
 pnpm db push
+pnpm frontend introspect
 ```
 
 ### Run
