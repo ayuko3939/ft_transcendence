@@ -1,12 +1,11 @@
 import type { NextAuthOptions } from "next-auth";
+// import { getUserByEmail } from "@/api/auth/users";
 import { client } from "@/api/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { drizzle } from "drizzle-orm/libsql";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-
-// import { authenticateUser } from "../users";
 
 export const authOptions: NextAuthOptions = {
   debug: true,
@@ -50,6 +49,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   pages: {
@@ -60,6 +60,13 @@ export const authOptions: NextAuthOptions = {
     strategy: "database",
   },
   callbacks: {
+    // async signIn({ user, account, profile, email, credentials }) {
+    //   const existingUser = await getUserByEmail(user.email ?? undefined);
+    //   if (existingUser && existingUser.provider !== account.provider) {
+    //     return `/login?error=EmailInUse&email=${user.email}`;
+    //   }
+    //   return true;
+    // },
     async session({ session, user }) {
       if (session.user && user) {
         session.user.id = user.id;
