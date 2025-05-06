@@ -1,5 +1,5 @@
 import type { NextAuthOptions } from "next-auth";
-// import { getUserByEmail } from "@/api/auth/users";
+import { authenticateUser, getUserByEmail } from "@/api/auth/users";
 import { client } from "@/api/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { drizzle } from "drizzle-orm/libsql";
@@ -22,24 +22,10 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
         try {
-          // const user = await authenticateUser(
-          //   credentials.username,
-          //   credentials.password,
-          // );
-          // if (user) {
-          //   return {
-          //     id: user.id.toString(),
-          //     name: user.name,
-          //     email: user.email,
-          //     image: user.image || null,
-          //   };
-          // }
-          return {
-            id: "user.id.toString()",
-            name: "user.name",
-            email: "user.email",
-            image: "user.image || null",
-          };
+          return await authenticateUser(
+            credentials.username,
+            credentials.password,
+          );
         } catch (error) {
           console.error("認証エラー:", error);
           return null;
