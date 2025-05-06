@@ -1,5 +1,5 @@
 import type { NextAuthOptions } from "next-auth";
-import { authenticateUser, getUserByEmail } from "@/api/auth/users";
+import { authenticateUser } from "@/api/auth/users";
 import { client } from "@/api/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { drizzle } from "drizzle-orm/libsql";
@@ -43,21 +43,41 @@ export const authOptions: NextAuthOptions = {
     signOut: "/login",
   },
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   callbacks: {
     // async signIn({ user, account, profile, email, credentials }) {
-    //   const existingUser = await getUserByEmail(user.email ?? undefined);
-    //   if (existingUser && existingUser.provider !== account.provider) {
-    //     return `/login?error=EmailInUse&email=${user.email}`;
+    //   console.log("signIn", { user, account, profile, email, credentials });
+    //   if (account?.provider === "credentials") {
+    //     const session = await updateSession(user.id);
     //   }
     //   return true;
     // },
-    async session({ session, user }) {
-      if (session.user && user) {
-        session.user.id = user.id;
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return "/dashboard";
+      return baseUrl;
+    },
+    async session({ session, token }) {
+      if (token.sub && session.user) {
+        session.user.id = token.sub;
+        if (session.user) {
+          session.user.name = token.name;
+          session.user.email = token.email;
+          session.user.image = token.picture;
+        }
       }
       return session;
+    },
+    async jwt({ token, user }) {
+      if (!token.sub) return token;
+      if (user) {
+        token.sub = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
+      }
+      return token;
     },
   },
 };

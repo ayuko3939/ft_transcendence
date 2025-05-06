@@ -57,7 +57,7 @@ function LoginContent() {
     try {
       const result = await signIn("credentials", {
         username,
-        password
+        password,
       });
       if (result?.error) {
         setError("ユーザー名またはパスワードが間違っています。");

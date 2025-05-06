@@ -2,11 +2,12 @@ import type { InferSelectModel } from "drizzle-orm";
 import { client } from "@/api/db";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
-import { user, userPassword } from "drizzle/schema";
+import { session, user, userPassword } from "drizzle/schema";
 
 import { hashPassword, verifyPassword } from "./utils";
 
 type UserData = InferSelectModel<typeof user>;
+type SessionData = InferSelectModel<typeof session>;
 
 export async function getUserByEmail(email?: string): Promise<UserData | null> {
   if (!email) {
@@ -58,6 +59,32 @@ export async function createUser(
     image: image ?? null,
   };
 }
+
+// export async function updateSession(
+//   userID: string
+// ): Promise<SessionData> {
+//   const db = drizzle(client, { logger: true });
+//   const newSession = {
+//     sessionToken: crypto.randomUUID(),
+//     userId: userID,
+//     expires: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+//   };
+//   const getExistSessions = await db
+//     .select()
+//     .from(session)
+//     .where(eq(session.userId, userID))
+//     .limit(1);
+//   const existSession = getExistSessions[0];
+//   if (existSession) {
+//     await db
+//       .update(session)
+//       .set(newSession)
+//       .where(eq(session.userId, userID))
+//     return existSession;
+//   }
+//   await db.insert(session).values(newSession);
+//   return newSession;
+// }
 
 export async function authenticateUser(
   email: string,
