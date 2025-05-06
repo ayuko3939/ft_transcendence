@@ -24,7 +24,6 @@ export const userPasswords = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     passwordHash: text("password_hash").notNull(),
-    passwordSalt: text("password_salt"),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
   },

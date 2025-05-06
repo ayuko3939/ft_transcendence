@@ -42,7 +42,6 @@ export const session = sqliteTable("session", {
 export const userPassword = sqliteTable("user_password", {
 	userId: text("user_id").primaryKey().notNull().references(() => user.id, { onDelete: "cascade" } ),
 	passwordHash: text("password_hash").notNull(),
-	passwordSalt: text("password_salt"),
 	createdAt: integer("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
 	updatedAt: integer("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
 });

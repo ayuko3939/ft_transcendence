@@ -3,8 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-// import { registerUser } from "@/api/auth/api-client";
+import { registerUser } from "@/api/auth/api-client";
 
 import styles from "./signup.module.css";
 
@@ -57,16 +56,16 @@ function SignupContent() {
     setIsLoading(true);
     setError("");
     try {
-      // const response = await registerUser(
-      //   name,
-      //   email,
-      //   password,
-      //   confirmPassword,
-      // );
-      // if (response.error) {
-      //   setError(response.error);
-      //   return;
-      // }
+      const response = await registerUser(
+        name,
+        email,
+        password,
+        confirmPassword,
+      );
+      if (response.error) {
+        setError(response.error);
+        return;
+      }
       router.push("/login?registered=true");
     } catch (error) {
       console.error("Error during signup:", error);
