@@ -1,0 +1,13 @@
+backend/node_modules
+backend/dist
+backend/.env
+
+database/node_modules
+database/drizzle
+database/database.db
+database/.env
+
+frontend/node_modules
+frontend/.next
+frontend/.env
+frontend/.env.local

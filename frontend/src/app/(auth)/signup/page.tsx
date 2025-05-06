@@ -1,11 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import styles from "./signup.module.css";
 
 export default function Signup() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center text-white">
+          <p>Loading...</p>
+        </div>
+      }
+    >
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -38,6 +53,7 @@ export default function Signup() {
       router.push("/login");
     } catch (error) {
       setError("アカウント登録に失敗しました。もう一度お試しください。");
+      console.error("Error during signup:", error);
     } finally {
       setIsLoading(false);
     }
@@ -46,8 +62,8 @@ export default function Signup() {
   return (
     <div className={styles.container}>
       <div className="cyber-container glow-animation">
-        <div className="circuit-dot circuit-dot-1"/>
-        <div className="circuit-dot circuit-dot-2"/>
+        <div className="circuit-dot circuit-dot-1" />
+        <div className="circuit-dot circuit-dot-2" />
         <h1 className="cyber-title">PONG GAME</h1>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>

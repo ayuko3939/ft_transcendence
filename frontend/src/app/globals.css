@@ -44,7 +44,9 @@ body {
   height: 100%;
   z-index: -30;
   background-color: var(--cyber-bg-dark);
-  background-image: linear-gradient(rgba(0, 10, 18, 0.85), rgba(0, 10, 18, 0.85)), url('/bkgrnd.jpg');
+  background-image:
+    linear-gradient(rgba(0, 10, 18, 0.85), rgba(0, 10, 18, 0.85)),
+    url("/bkgrnd.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

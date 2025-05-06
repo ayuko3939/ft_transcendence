@@ -1,9 +1,15 @@
 import type { NextAuthOptions } from "next-auth";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { drizzle } from "drizzle-orm/libsql";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
+import { client } from "../../database/db";
+
 export const authOptions: NextAuthOptions = {
+  debug: true,
+  adapter: DrizzleAdapter(drizzle(client, { logger: true }) as any),
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -34,18 +40,12 @@ export const authOptions: NextAuthOptions = {
     signOut: "/login",
   },
   session: {
-    strategy: "jwt",
+    strategy: "database",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
+    async session({ session, user }) {
+      if (session.user && user) {
+        session.user.id = user.id;
       }
       return session;
     },

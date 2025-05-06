@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  database-init:
+    image: ft_transcendence_databaseinit:${COMMIT_HASH}
+    build:
+      context: ./
+      dockerfile: ./database/Dockerfile
+    environment:
+      - DB_FILE_DIR=/var/lib/db
+      - DB_FILE_NAME=${DB_FILE_NAME}
+    entrypoint: [ "/app/init.sh" ]
+    volumes:
+      - logdir:/app/logs
+      - dbdir:/var/lib/db
+
+  frontend:
+    image: ft_transcendence_frontend:${COMMIT_HASH}
+    build:
+      context: ./
+      dockerfile: ./frontend/Dockerfile
+    environment:
+      - DB_FILE_DIR=/var/lib/db
+      - DB_FILE_NAME=${DB_FILE_NAME}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+    ports:
+      - "3000:3000"
+    volumes:
+      - logdir:/app/logs
+      - dbdir:/var/lib/db
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
+
+  backend:
+    image: ft_transcendence_backend:${COMMIT_HASH}
+    build:
+      context: ./
+      dockerfile: ./backend/Dockerfile
+    command: [ "/app/dist/index.js"]
+    ports:
+      - "3001:3001"
+    volumes:
+      - logdir:/app/logs
+      - dbdir:/var/lib/db
+    depends_on:
+      database-init:
+        condition: service_completed_successfully
+
+volumes:
+  logdir:
+  dbdir:
