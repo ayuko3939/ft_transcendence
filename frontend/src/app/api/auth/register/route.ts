@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { createUser, getUserByEmail } from "@/api/auth/users";
 
 export async function POST(req: NextRequest) {
@@ -17,7 +18,6 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-    // メールアドレスの簡易検証
     const emailRegex =
       /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/i;
     if (!emailRegex.test(email)) {
@@ -26,8 +26,6 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-
-    // 既存ユーザーの確認
     const existingUser = await getUserByEmail(email);
     if (existingUser) {
       return NextResponse.json(
@@ -35,22 +33,14 @@ export async function POST(req: NextRequest) {
         { status: 409 },
       );
     }
-
-    // パスワードの強度検証（例：最低8文字）
     if (password.length < 8) {
       return NextResponse.json(
         { error: "パスワードは最低8文字必要です" },
         { status: 400 },
       );
     }
-
-    // ユーザーを作成
     const newUser = await createUser(name, email, password);
-
-    // パスワードを除いたユーザー情報を返す
-    const { password: _, ...userWithoutPassword } = newUser;
-
-    return NextResponse.json({ user: userWithoutPassword }, { status: 201 });
+    return NextResponse.json({ user: newUser }, { status: 201 });
   } catch (error) {
     console.error("ユーザー登録エラー:", error);
     return NextResponse.json(
