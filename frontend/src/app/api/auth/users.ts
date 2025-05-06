@@ -1,6 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { client } from "@/api/db";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 import { user, userPassword } from "drizzle/schema";
 
@@ -59,36 +59,38 @@ export async function createUser(
   };
 }
 
-// export async function getUserById(id: number) {
-//   const db = drizzle(client, { logger: true });
-//   const result = await db.select().from(user).where(eq(user.id, id)).limit(1);
-//   return result[0] || null;
-// }
+export async function authenticateUser(
+  email: string,
+  password: string,
+): Promise<UserData | null> {
+  const db = drizzle(client, { logger: true });
 
-// ユーザーをユーザー名（またはメール）とパスワードで認証
-// export async function authenticateUser(identifier: string, password: string) {
-//   const db = drizzle(client, { logger: true });
-//   // メールアドレスまたはユーザー名で検索
-//   const result = await db
-//     .select()
-//     .from(user)
-//     .where(eq(user.email, identifier))
-//     .limit(1);
+  const hitusers = await db
+    .select()
+    .from(user)
+    .where(eq(user.email, email))
+    .limit(1);
+  const hituser = hitusers[0];
+  if (!hituser) {
+    return null;
+  }
 
-//   const hituser = result[0];
+  const registeredPasswords = await db
+    .select()
+    .from(userPassword)
+    .where(eq(userPassword.userId, hituser.id))
+    .limit(1);
+  const registeredPassword = registeredPasswords[0];
+  if (!registeredPassword) {
+    return null;
+  }
 
-//   if (!hituser || !hituser.password) {
-//     return null;
-//   }
-
-//   // パスワード検証
-//   const isValid = await verifyPassword(password, user.password);
-
-//   if (!isValid) {
-//     return null;
-//   }
-
-//   // パスワードを除いたユーザー情報を返す
-//   const { password: _, ...userWithoutPassword } = user;
-//   return userWithoutPassword;
-// }
+  const isValid = await verifyPassword(
+    password,
+    registeredPassword.passwordHash,
+  );
+  if (!isValid) {
+    return null;
+  }
+  return hituser;
+}

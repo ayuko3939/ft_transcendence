@@ -57,14 +57,10 @@ function LoginContent() {
     try {
       const result = await signIn("credentials", {
         username,
-        password,
-        redirect: false,
+        password
       });
-
       if (result?.error) {
-        setError(
-          "ログインに失敗しました。ユーザー名またはパスワードが間違っています。",
-        );
+        setError("ユーザー名またはパスワードが間違っています。");
       } else {
         router.push("/");
       }
