@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { createUser, getUserByEmail } from "@/api/auth/users";
+import { createAccount, createUser, getUserByEmail } from "@/api/auth/users";
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const newUser = await createUser(name, email, password);
+    await createAccount(newUser.id);
     return NextResponse.json({ user: newUser }, { status: 201 });
   } catch (error) {
     console.error("ユーザー登録エラー:", error);
