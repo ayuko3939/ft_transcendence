@@ -2,12 +2,13 @@ import type { InferSelectModel } from "drizzle-orm";
 import { client } from "@/api/db";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
-import { session, user, userPassword } from "drizzle/schema";
+import { account, session, user, userPassword } from "drizzle/schema";
 
 import { hashPassword, verifyPassword } from "./utils";
 
 type UserData = InferSelectModel<typeof user>;
 type SessionData = InferSelectModel<typeof session>;
+type AccountData = InferSelectModel<typeof account>;
 
 export async function getUserByEmail(email?: string): Promise<UserData | null> {
   if (!email) {
@@ -60,31 +61,55 @@ export async function createUser(
   };
 }
 
-// export async function updateSession(
-//   userID: string
-// ): Promise<SessionData> {
-//   const db = drizzle(client, { logger: true });
-//   const newSession = {
-//     sessionToken: crypto.randomUUID(),
-//     userId: userID,
-//     expires: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
-//   };
-//   const getExistSessions = await db
-//     .select()
-//     .from(session)
-//     .where(eq(session.userId, userID))
-//     .limit(1);
-//   const existSession = getExistSessions[0];
-//   if (existSession) {
-//     await db
-//       .update(session)
-//       .set(newSession)
-//       .where(eq(session.userId, userID))
-//     return existSession;
-//   }
-//   await db.insert(session).values(newSession);
-//   return newSession;
-// }
+export async function createAccount(userId: string): Promise<AccountData> {
+  const db = drizzle(client, { logger: true });
+
+  const getExistAccounts = await db
+    .select()
+    .from(account)
+    .where(eq(account.userId, userId))
+    .limit(1);
+  const existAccount = getExistAccounts[0];
+  if (existAccount) {
+    return existAccount;
+  }
+  const newAccount = {
+    userId,
+    type: "credentials",
+    provider: "credentials",
+    providerAccountId: userId,
+    refreshToken: null,
+    accessToken: null,
+    expiresAt: null,
+    tokenType: null,
+    scope: null,
+    idToken: null,
+    sessionState: null,
+  };
+  await db.insert(account).values(newAccount);
+  return newAccount;
+}
+
+export async function updateSession(userID: string): Promise<SessionData> {
+  const db = drizzle(client, { logger: true });
+  const newSession = {
+    sessionToken: crypto.randomUUID(),
+    userId: userID,
+    expires: Math.floor(Date.now()) + (30 * 24 * 60 * 60 * 1000),
+  };
+  const getExistSessions = await db
+    .select()
+    .from(session)
+    .where(eq(session.userId, userID))
+    .limit(1);
+  const existSession = getExistSessions[0];
+  if (existSession) {
+    await db.update(session).set(newSession).where(eq(session.userId, userID));
+    return newSession;
+  }
+  await db.insert(session).values(newSession);
+  return newSession;
+}
 
 export async function authenticateUser(
   email: string,
