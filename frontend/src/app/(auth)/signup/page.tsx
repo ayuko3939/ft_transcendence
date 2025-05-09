@@ -1,42 +1,74 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { registerUser } from "@/api/auth/api-client";
+
 import styles from "./signup.module.css";
 
 export default function Signup() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center text-white">
+          <p>Loading...</p>
+        </div>
+      }
+    >
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [displayName, setDisplayName] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  // const searchParams = useSearchParams();
+  // const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !displayName || !password || !confirmPassword) {
+    if (!email || !name || !password || !confirmPassword) {
       setError("すべての項目を入力してください");
       return;
     }
-
     if (password !== confirmPassword) {
       setError("パスワードが一致しません");
       return;
     }
-
+    const emailRegex =
+      /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/i;
+    if (!emailRegex.test(email)) {
+      setError("有効なメールアドレスを入力してください");
+      return;
+    }
+    if (password.length < 8) {
+      setError("パスワードは最低8文字必要です");
+      return;
+    }
     setIsLoading(true);
     setError("");
-
     try {
-      // TODO: APIとの連携を実装
-      // 仮の実装: サインアップ成功とする
-      router.push("/login");
+      const response = await registerUser(
+        name,
+        email,
+        password,
+        confirmPassword,
+      );
+      if (response.error) {
+        setError(response.error);
+        return;
+      }
+      router.push("/login?registered=true");
     } catch (error) {
+      console.error("Error during signup:", error);
       setError("アカウント登録に失敗しました。もう一度お試しください。");
     } finally {
       setIsLoading(false);
@@ -46,8 +78,8 @@ export default function Signup() {
   return (
     <div className={styles.container}>
       <div className="cyber-container glow-animation">
-        <div className="circuit-dot circuit-dot-1"/>
-        <div className="circuit-dot circuit-dot-2"/>
+        <div className="circuit-dot circuit-dot-1" />
+        <div className="circuit-dot circuit-dot-2" />
         <h1 className="cyber-title">PONG GAME</h1>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
@@ -65,15 +97,15 @@ export default function Signup() {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="displayName" className={styles.formLabel}>
+            <label htmlFor="name" className={styles.formLabel}>
               ユーザー名
             </label>
             <input
-              id="displayName"
+              id="name"
               type="text"
               className={styles.formInput}
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
             />
           </div>

@@ -5,7 +5,7 @@ services:
     image: ft_transcendence_frontend:${COMMIT_HASH}
     build:
       context: ./
-      dockerfile: ./src/frontend/Dockerfile
+      dockerfile: ./frontend/Dockerfile
     entrypoint: ["pnpm", "start"]
     ports:
       - "4173:4173"
@@ -13,15 +13,15 @@ services:
     image: ft_transcendence_backend:${COMMIT_HASH}
     build:
       context: ./
-      dockerfile: ./src/backend/Dockerfile
+      dockerfile: ./backend/Dockerfile
     command: [ "/app/dist/index.js"]
     ports:
       - "3000:3000"
     volumes:
       - logdir:/app/logs
-    depends_on:
-      kibana:
-        condition: service_healthy
+    # depends_on:
+    #   kibana:
+    #     condition: service_healthy
 
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
