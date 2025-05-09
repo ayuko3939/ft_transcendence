@@ -1,5 +1,4 @@
 import type { NextAuthOptions } from "next-auth";
-import { cookies } from "next/headers";
 import { authenticateUser, updateSession } from "@/api/auth/users";
 import { client } from "@/api/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
@@ -48,16 +47,6 @@ export const authOptions: NextAuthOptions = {
     strategy: "database",
   },
   callbacks: {
-    // async signIn({ user, account, profile, email, credentials }) {
-    //   console.log("signIn", { user, account, profile, email, credentials });
-    //   if (account?.provider === "credentials") {
-    //     const session = await updateSession(user.id);
-    //     if (!session) {
-    //       return false;
-    //     }
-    //   }
-    //   return true;
-    // },
     async redirect({ url, baseUrl }) {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       if (new URL(url).origin === baseUrl) return "/dashboard";
@@ -70,16 +59,6 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-    // async jwt({ token, user }) {
-    //   if (!token.sub) return token;
-    //   if (user) {
-    //     token.sub = user.id;
-    //     token.name = user.name;
-    //     token.email = user.email;
-    //     token.picture = user.image;
-    //   }
-    //   return token;
-    // },
   },
   jwt: {
     encode: async ({ token, secret, maxAge }) => {
