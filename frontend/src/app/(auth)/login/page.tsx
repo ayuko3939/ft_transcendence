@@ -48,7 +48,7 @@ function LoginContent() {
     e.preventDefault();
 
     if (!username || !password) {
-      setError("ユーザー名とパスワードを入力してください");
+      setError("メールアドレスとパスワードを入力してください");
       return;
     }
     setIsLoading(true);
@@ -60,7 +60,7 @@ function LoginContent() {
         password,
       });
       if (result?.error) {
-        setError("ユーザー名またはパスワードが間違っています。");
+        setError("メールアドレスまたはパスワードが間違っています。");
       } else {
         router.push("/");
       }
@@ -82,7 +82,7 @@ function LoginContent() {
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
               <label htmlFor="username" className={styles.formLabel}>
-                ユーザー名またはメール
+                メールアドレス
               </label>
               <input
                 id="username"
