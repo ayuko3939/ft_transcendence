@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-   "frontend": "pnpm -F \"frontend\"",
-   "backend": "pnpm -F \"backend\""
+    "frontend": "pnpm -F \"frontend\"",
+    "backend": "pnpm -F \"backend\"",
+    "db": "pnpm -F \"database\""
   },
-  "engines":{
+  "engines": {
     "pnpm": ">=9.15.0",
-    "npm":"please use pnpm"
+    "npm": "please use pnpm"
   },
   "packageManager": "pnpm@9.15.0",
   "keywords": [],

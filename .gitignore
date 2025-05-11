@@ -5,3 +5,6 @@ logs
 *.pdf
 .pnpm-store
 mise.local.toml
+database/drizzle/
+*.db
+!*dummy.db

@@ -1,12 +1,17 @@
 DOCKER_COMPOSE_FILE := docker-compose.yml
+DOCKER_COMPOSE_FILE_MINIMUM := docker-compose.min.yml
 
 COMMIT_HASH := $(shell git rev-parse --short HEAD)
 
-DOCKER_COMPOSE := COMMIT_HASH=$(COMMIT_HASH) docker compose -f $(DOCKER_COMPOSE_FILE) 
+DOCKER_COMPOSE := COMMIT_HASH=$(COMMIT_HASH) docker compose
 
 .PHONY: all
 all:
-	$(DOCKER_COMPOSE) up --build -d
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE)  up --build -d
+
+.PHONY: min
+min:
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE_MINIMUM) up --build -d
 
 .PHONY: down
 down:
