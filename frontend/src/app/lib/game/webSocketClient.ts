@@ -22,24 +22,42 @@ export class PongSocketClient {
   }
 
   public connect(url: string): void {
-    this.ws = new WebSocket(url);
+    let wsUrl = url;
+    if (url.startsWith("/")) {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      wsUrl = `${protocol}//${window.location.host}${url}`;
+    }
 
-    this.ws.onopen = () => {
-      console.log("WebSocket接続が確立されました");
-    };
+    console.log(`WebSocket接続開始: ${wsUrl}`);
 
-    this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      this.handleMessage(data);
-    };
+    try {
+      this.ws = new WebSocket(wsUrl);
 
-    this.ws.onerror = (error) => {
-      console.error("WebSocket接続エラー:", error);
-    };
+      this.ws.onopen = () => {
+        console.log("WebSocket接続が確立されました");
+      };
 
-    this.ws.onclose = () => {
-      console.log("WebSocket接続が閉じられました");
-    };
+      this.ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          this.handleMessage(data);
+        } catch (e) {
+          console.error("WebSocketメッセージの解析エラー:", e, event.data);
+        }
+      };
+
+      this.ws.onerror = (error) => {
+        console.error("WebSocket接続エラー:", error);
+      };
+
+      this.ws.onclose = (event) => {
+        console.log(
+          `WebSocket接続が閉じられました: コード=${event.code}, 理由=${event.reason}`,
+        );
+      };
+    } catch (error) {
+      console.error("WebSocket初期化エラー:", error);
+    }
   }
 
   public disconnect(): void {
@@ -66,7 +84,15 @@ export class PongSocketClient {
 
   private sendMessage(message: WebSocketMessage): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(message));
+      try {
+        this.ws.send(JSON.stringify(message));
+      } catch (error) {
+        console.error("WebSocketメッセージ送信エラー:", error);
+      }
+    } else {
+      console.warn(
+        "WebSocketが接続されていないため、メッセージを送信できません",
+      );
     }
   }
 
