@@ -1,15 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "commonjs",
+    "module": "CommonJS",
+    "outDir": "./dist",
+    "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "rootDir": ".",
-    "moduleResolution": "node"
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "baseUrl": "./"
   },
-  "include": ["./**/*"],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules"]
 }

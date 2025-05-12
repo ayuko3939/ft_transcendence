@@ -42,7 +42,10 @@ export class GameEngine {
     this.gameState.ball.y += this.gameState.ball.dy;
 
     // 上下の壁との衝突判定
-    if (this.gameState.ball.y <= 0 || this.gameState.ball.y >= this.CANVAS_HEIGHT) {
+    if (
+      this.gameState.ball.y <= 0 ||
+      this.gameState.ball.y >= this.CANVAS_HEIGHT
+    ) {
       this.gameState.ball.dy *= -1;
     }
 
@@ -56,9 +59,11 @@ export class GameEngine {
   private checkPaddleCollision(): void {
     // 左パドルとの衝突
     if (
-      this.gameState.ball.x <= this.gameState.paddleLeft.x + this.gameState.paddleLeft.width &&
+      this.gameState.ball.x <=
+        this.gameState.paddleLeft.x + this.gameState.paddleLeft.width &&
       this.gameState.ball.y >= this.gameState.paddleLeft.y &&
-      this.gameState.ball.y <= this.gameState.paddleLeft.y + this.gameState.paddleLeft.height
+      this.gameState.ball.y <=
+        this.gameState.paddleLeft.y + this.gameState.paddleLeft.height
     ) {
       this.gameState.ball.dx *= -1;
     }
@@ -67,7 +72,8 @@ export class GameEngine {
     if (
       this.gameState.ball.x >= this.gameState.paddleRight.x &&
       this.gameState.ball.y >= this.gameState.paddleRight.y &&
-      this.gameState.ball.y <= this.gameState.paddleRight.y + this.gameState.paddleRight.height
+      this.gameState.ball.y <=
+        this.gameState.paddleRight.y + this.gameState.paddleRight.height
     ) {
       this.gameState.ball.dx *= -1;
     }
@@ -92,7 +98,7 @@ export class GameEngine {
       y: this.CANVAS_HEIGHT / 2,
       dx: this.BALL_SPEED * (Math.random() > 0.5 ? 1 : -1),
       dy: this.BALL_SPEED * (Math.random() > 0.5 ? 1 : -1),
-      radius: this.BALL_RADIUS
+      radius: this.BALL_RADIUS,
     };
   }
 }
