@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChatMessage, GameState, PlayerSide } from "@/lib/pong/types";
+import type { ChatMessage, GameState, PlayerSide } from "src/types/game";
 import { useEffect, useRef, useState } from "react";
 import { PongController } from "@/lib/pong/gameController";
 import { PongSocketClient } from "@/lib/pong/webSocketClient";

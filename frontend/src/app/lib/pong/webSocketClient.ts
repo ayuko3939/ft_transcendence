@@ -3,7 +3,7 @@ import type {
   GameState,
   PlayerSide,
   WebSocketMessage,
-} from "./types";
+} from "src/types/game";
 
 export interface WebSocketHandlers {
   onInit: (side: PlayerSide, gameState: GameState) => void;
