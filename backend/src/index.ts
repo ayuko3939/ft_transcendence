@@ -4,6 +4,7 @@ import type { WebSocket } from "@fastify/websocket";
 import websocket from "@fastify/websocket";
 import { GameEngine } from "./game/GameState";
 import { mkdirSync } from "node:fs";
+import routes from "./routes";
 
 // ログファイルのディレクトリを作成
 mkdirSync("logs", { recursive: true });
@@ -22,6 +23,9 @@ const startServer = async () => {
   });
 
   await fastify.register(websocket);
+
+  // APIルートを登録
+  await fastify.register(routes);
 
   type GameRoom = {
     players: {

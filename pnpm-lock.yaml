@@ -16,6 +16,12 @@ importers:
       '@fastify/websocket':
         specifier: ^11.0.2
         version: 11.0.2
+      '@libsql/client':
+        specifier: ^0.15.4
+        version: 0.15.4
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
       drizzle-orm:
         specifier: ^0.43.1
         version: 0.43.1(@libsql/client@0.15.4)
