@@ -26,6 +26,7 @@ services:
       - NEXTAUTH_URL=${NEXTAUTH_URL}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - BACKEND_WS_URL="ws://backend:3001/game"
     ports:
       - "3000:3000"
     volumes:
