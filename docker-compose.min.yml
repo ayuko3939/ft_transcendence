@@ -40,6 +40,9 @@ services:
     build:
       context: ./
       dockerfile: ./backend/Dockerfile
+    environment:
+      - DB_FILE_DIR=/var/lib/db
+      - DB_FILE_NAME=${DB_FILE_NAME}
     command: [ "/app/dist/index.js"]
     ports:
       - "3001:3001"
