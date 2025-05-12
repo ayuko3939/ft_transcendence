@@ -9,7 +9,7 @@ const databaseFileName = `file:${path.join(
 )}`;
 
 export const client = createClient({
-  url: process.env.NEXT_BUILD === "true" ? "file:./dummy.db" : databaseFileName,
+  url: databaseFileName,
 });
 
 export const db = drizzle(client, { logger: true });
