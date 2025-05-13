@@ -1,9 +1,9 @@
 "use client";
 
-import type { ChatMessage, GameState, PlayerSide } from "@/lib/pong/types";
+import type { ChatMessage, GameState, PlayerSide } from "src/types/game";
 import { useEffect, useRef, useState } from "react";
-import { PongController } from "@/lib/pong/gameController";
-import { PongSocketClient } from "@/lib/pong/webSocketClient";
+import { PongController } from "@/lib/game/gameController";
+import { PongSocketClient } from "@/lib/game/webSocketClient";
 
 import styles from "./game.module.css";
 
@@ -45,7 +45,7 @@ const PongGame = () => {
   const socketClientRef = useRef<PongSocketClient | null>(null);
 
   useEffect(() => {
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:3001/game";
+    const wsUrl = "/api/ws-proxy";
 
     const socketClient = new PongSocketClient({
       onInit: (side, state) => {
