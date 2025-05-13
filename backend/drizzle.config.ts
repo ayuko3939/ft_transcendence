@@ -4,7 +4,7 @@ import { defineConfig } from "drizzle-kit";
 
 const databaseFileName = `file:${path.join(
   process.env.DB_FILE_DIR ?? "../database",
-  process.env.DB_FILE_NAME ?? "database.db"
+  process.env.DB_FILE_NAME ?? "database.db",
 )}`;
 
 export default defineConfig({

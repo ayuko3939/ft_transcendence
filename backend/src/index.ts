@@ -1,10 +1,13 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import type { WebSocket } from "@fastify/websocket";
-import websocket from "@fastify/websocket";
 import { GameEngine } from "./game/GameState";
 import { mkdirSync } from "node:fs";
+import websocket from "@fastify/websocket";
+import dotenv from "dotenv";
 import routes from "./routes";
+
+dotenv.config();
 
 // ログファイルのディレクトリを作成
 mkdirSync("logs", { recursive: true });
@@ -19,7 +22,7 @@ const fastify = Fastify({
 // 非同期処理を関数にまとめる
 const startServer = async () => {
   await fastify.register(cors, {
-    origin: true,
+    origin: [process.env.FRONTEND_URL ?? "http://localhost:3000"],
   });
 
   await fastify.register(websocket);
@@ -222,7 +225,7 @@ const startServer = async () => {
         type: "init",
         side: playerSide,
         gameState: room.gameState,
-      })
+      }),
     );
   });
 
@@ -232,13 +235,13 @@ const startServer = async () => {
   });
 
   try {
-    await fastify.listen({ port: 3001, host: "0.0.0.0" });
-    console.log("Server running at http://localhost:3001");
+    const port = Number(process.env.PORT) || 3001;
+    await fastify.listen({ port: port, host: "0.0.0.0" });
+    console.log(`Server running at http://localhost:${port}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
 };
 
-// サーバーを起動
 startServer();
