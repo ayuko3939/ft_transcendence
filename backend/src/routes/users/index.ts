@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
-import { db } from "../db";
-import { user } from "../../drizzle/schema";
+import { db } from "../../db";
+import { user } from "../../../drizzle/schema";
 import { eq } from "drizzle-orm";
 
 export default async function usersRoutes(fastify: FastifyInstance) {
