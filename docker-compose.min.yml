@@ -26,6 +26,7 @@ services:
       - NEXTAUTH_URL=${NEXTAUTH_URL}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - BACKEND_WS_URL="ws://backend:3001/game"
     ports:
       - "3000:3000"
     volumes:
@@ -43,6 +44,7 @@ services:
     environment:
       - DB_FILE_DIR=/var/lib/db
       - DB_FILE_NAME=${DB_FILE_NAME}
+      - FRONTEND_URL="http://frontend:3000"
     command: [ "/app/dist/index.js"]
     ports:
       - "3001:3001"

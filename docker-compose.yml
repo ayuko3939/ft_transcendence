@@ -44,6 +44,7 @@ services:
     environment:
       - DB_FILE_DIR=/var/lib/db
       - DB_FILE_NAME=${DB_FILE_NAME}
+      - FRONTEND_URL="http://frontend:3000"
     command: [ "/app/dist/index.js"]
     ports:
       - "3001:3001"
