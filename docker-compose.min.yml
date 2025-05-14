@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   database-init:
     image: ft_transcendence_databaseinit:${COMMIT_HASH}
@@ -9,7 +7,7 @@ services:
     environment:
       - DB_FILE_DIR=/var/lib/db
       - DB_FILE_NAME=${DB_FILE_NAME}
-    entrypoint: [ "/app/init.sh" ]
+    entrypoint: ["/app/init.sh"]
     volumes:
       - logdir:/app/logs
       - dbdir:/var/lib/db
@@ -26,6 +24,7 @@ services:
       - NEXTAUTH_URL=${NEXTAUTH_URL}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - BACKEND_WS_URL=ws://backend:3001/game
     ports:
       - "3000:3000"
     volumes:
@@ -34,6 +33,8 @@ services:
     depends_on:
       database-init:
         condition: service_completed_successfully
+    networks:
+      - app-network
 
   backend:
     image: ft_transcendence_backend:${COMMIT_HASH}
@@ -43,7 +44,8 @@ services:
     environment:
       - DB_FILE_DIR=/var/lib/db
       - DB_FILE_NAME=${DB_FILE_NAME}
-    command: [ "/app/dist/index.js"]
+      - FRONTEND_URL=http://frontend:3000
+    command: ["/app/dist/index.js"]
     ports:
       - "3001:3001"
     volumes:
@@ -52,7 +54,13 @@ services:
     depends_on:
       database-init:
         condition: service_completed_successfully
+    networks:
+      - app-network
 
 volumes:
   logdir:
   dbdir:
+
+networks:
+  app-network:
+    driver: bridge
