@@ -95,7 +95,7 @@ export async function updateSession(userID: string): Promise<SessionData> {
   const newSession = {
     sessionToken: crypto.randomUUID(),
     userId: userID,
-    expires: Math.floor(Date.now()) + (30 * 24 * 60 * 60 * 1000),
+    expires: Math.floor(Date.now()) + 30 * 24 * 60 * 60 * 1000,
   };
   const getExistSessions = await db
     .select()
