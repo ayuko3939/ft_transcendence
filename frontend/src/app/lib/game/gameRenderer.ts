@@ -1,4 +1,4 @@
-import type { GameState } from "./types";
+import type { GameState } from "src/types/game";
 
 export class PongRenderer {
   private ctx: CanvasRenderingContext2D;
@@ -14,6 +14,8 @@ export class PongRenderer {
   }
 
   public render(gameState: GameState): void {
+    if (!gameState) return;
+    
     // キャンバスのクリア
     this.ctx.fillStyle = "black";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -64,5 +66,38 @@ export class PongRenderer {
     this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
     this.ctx.strokeStyle = "white";
     this.ctx.stroke();
+
+    // 追加の視覚エフェクト
+    // ボールの軌跡を表現する薄い円を描画
+    this.ctx.globalAlpha = 0.3;
+    this.ctx.beginPath();
+    this.ctx.arc(
+      gameState.ball.x,
+      gameState.ball.y,
+      gameState.ball.radius * 1.5,
+      0,
+      Math.PI * 2,
+    );
+    this.ctx.fillStyle = "#00ffff";
+    this.ctx.fill();
+    this.ctx.globalAlpha = 1.0;
+
+    // パドルの動きに合わせて微妙なグロー効果を追加
+    this.ctx.shadowBlur = 10;
+    this.ctx.shadowColor = "#00ffff";
+    this.ctx.fillStyle = "#ffffff";
+    this.ctx.fillRect(
+      gameState.paddleLeft.x,
+      gameState.paddleLeft.y,
+      gameState.paddleLeft.width,
+      gameState.paddleLeft.height,
+    );
+    this.ctx.fillRect(
+      gameState.paddleRight.x,
+      gameState.paddleRight.y,
+      gameState.paddleRight.width,
+      gameState.paddleRight.height,
+    );
+    this.ctx.shadowBlur = 0;
   }
 }

@@ -1,27 +1,34 @@
-import type { GameState, PlayerSide } from "./types";
-import type { PongSocketClient } from "./webSocketClient";
+import type { GameState, PlayerSide } from "src/types/game";
 import { PongRenderer } from "./gameRenderer";
+
+// PongSocketClientの代わりに使用するシンプルなインターフェース
+interface GameControlInterface {
+  sendPaddleMove: (y: number) => void;
+}
 
 export class PongController {
   private renderer: PongRenderer;
-  private socketClient: PongSocketClient;
+  private gameInterface: GameControlInterface;
   private gameState: GameState;
   private playerSide: PlayerSide = null;
   private animationId: number | null = null;
+  private isSpectator: boolean = false;
 
   constructor(
     canvas: HTMLCanvasElement,
     initialGameState: GameState,
-    socketClient: PongSocketClient,
+    gameInterface: GameControlInterface
   ) {
     this.renderer = new PongRenderer(canvas);
     this.gameState = initialGameState;
-    this.socketClient = socketClient;
+    this.gameInterface = gameInterface;
   }
 
   public start(): void {
     this.gameLoop();
-    this.setupKeyboardListeners();
+    if (!this.isSpectator) {
+      this.setupKeyboardListeners();
+    }
   }
 
   public stop(): void {
@@ -34,6 +41,14 @@ export class PongController {
 
   public setPlayerSide(side: PlayerSide): void {
     this.playerSide = side;
+    this.isSpectator = side === "spectator";
+    
+    // 観戦者モードの場合はキーボードリスナーを削除
+    if (this.isSpectator) {
+      this.removeKeyboardListeners();
+    } else {
+      this.setupKeyboardListeners();
+    }
   }
 
   public updateGameState(newState: GameState): void {
@@ -46,6 +61,7 @@ export class PongController {
   };
 
   private handleKeyPress = (e: KeyboardEvent): void => {
+    if (this.isSpectator) return;
     if (!this.playerSide) return;
 
     const speed = 10;
@@ -71,11 +87,12 @@ export class PongController {
     }
 
     if (paddleMove) {
-      this.socketClient.sendPaddleMove(newY);
+      this.gameInterface.sendPaddleMove(newY);
     }
   };
 
   private setupKeyboardListeners(): void {
+    this.removeKeyboardListeners(); // 既存のリスナーを削除してから追加
     window.addEventListener("keydown", this.handleKeyPress);
   }
 

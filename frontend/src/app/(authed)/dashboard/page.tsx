@@ -32,9 +32,16 @@ export default function DashboardPage() {
           <button
             type="button"
             className="cyber-button"
+            onClick={() => router.push("/games")}
+          >
+            ゲームセッションを探す
+          </button>
+          <button
+            type="button"
+            className="cyber-button mt-4"
             onClick={() => router.push("/game")}
           >
-            ゲームを始める
+            クイックマッチ
           </button>
         </div>
       </div>

@@ -12,20 +12,38 @@ export default function Header() {
         <h1 className="text-2xl font-bold">Pong Game</h1>
       </Link>
       <nav>
-        <ul className="flex space-x-4">
-          {status === "authenticated" ? (
-            <li>
-              <button
-                type="button"
-                onClick={() =>
-                  signOut({ redirect: true, callbackUrl: "/login" })
-                }
-                className="rounded-md border-2 border-cyan-400 bg-transparent px-6 py-3 font-bold text-cyan-400 transition-colors hover:bg-cyan-900"
-              >
-                Sign Out
-              </button>
-            </li>
-          ) : null}
+        <ul className="flex items-center space-x-6">
+          {status === "authenticated" && (
+            <>
+              <li>
+                <Link 
+                  href="/dashboard" 
+                  className="text-cyan-400 hover:text-cyan-300"
+                >
+                  ダッシュボード
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/games" 
+                  className="text-cyan-400 hover:text-cyan-300"
+                >
+                  ゲーム
+                </Link>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() =>
+                    signOut({ redirect: true, callbackUrl: "/login" })
+                  }
+                  className="rounded-md border-2 border-cyan-400 bg-transparent px-6 py-3 font-bold text-cyan-400 transition-colors hover:bg-cyan-900"
+                >
+                  Sign Out
+                </button>
+              </li>
+            </>
+          )}
         </ul>
       </nav>
     </header>
