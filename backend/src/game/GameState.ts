@@ -1,31 +1,7 @@
-export type GameState = {
-  ball: {
-    x: number;
-    y: number;
-    dx: number;
-    dy: number;
-    radius: number;
-  };
-  paddleLeft: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  paddleRight: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  score: {
-    left: number;
-    right: number;
-  };
-};
+import { GameState } from '../types';
 
 export class GameEngine {
-  private readonly BALL_SPEED = 1;
+  private readonly BALL_SPEED = 5;
   private readonly CANVAS_WIDTH = 800;
   private readonly CANVAS_HEIGHT = 600;
   private readonly PADDLE_HEIGHT = 100;

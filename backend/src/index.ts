@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import type { WebSocket } from "@fastify/websocket";
 import { GameEngine } from "./game/GameState";
+import { GameState, GameRoom } from './types';
 import { mkdirSync } from "node:fs";
 import websocket from "@fastify/websocket";
 import dotenv from "dotenv";
@@ -30,42 +31,42 @@ const startServer = async () => {
   // APIルートを登録
   await fastify.register(routes);
 
-  type GameRoom = {
-    players: {
-      left?: WebSocket;
-      right?: WebSocket;
-    };
-    gameState: {
-      ball: {
-        x: number;
-        y: number;
-        dx: number;
-        dy: number;
-        radius: number;
-      };
-      paddleLeft: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      };
-      paddleRight: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      };
-      score: {
-        left: number;
-        right: number;
-      };
-    };
-    chats: {
-      name: string;
-      message: string;
-    }[];
-    gameStarted: boolean;
-  };
+  // type GameRoom = {
+  //   players: {
+  //     left?: WebSocket;
+  //     right?: WebSocket;
+  //   };
+  //   gameState: {
+  //     ball: {
+  //       x: number;
+  //       y: number;
+  //       dx: number;
+  //       dy: number;
+  //       radius: number;
+  //     };
+  //     paddleLeft: {
+  //       x: number;
+  //       y: number;
+  //       width: number;
+  //       height: number;
+  //     };
+  //     paddleRight: {
+  //       x: number;
+  //       y: number;
+  //       width: number;
+  //       height: number;
+  //     };
+  //     score: {
+  //       left: number;
+  //       right: number;
+  //     };
+  //   };
+  //   chats: {
+  //     name: string;
+  //     message: string;
+  //   }[];
+  //   gameStarted: boolean;
+  // };
 
   const gameRooms = new Map<string, GameRoom>();
 
