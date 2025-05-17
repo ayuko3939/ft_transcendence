@@ -151,7 +151,16 @@ const PongGame = () => {
             type="text"
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendChat()}
+            onKeyDown={(e) => {
+              // チャット入力中のwキーとsキーのイベント伝播を停止
+              if (e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+                e.stopPropagation();
+              }
+              // Enterキーが押されたらチャット送信
+              if (e.key === "Enter") {
+                sendChat();
+              }
+            }}
             className={styles.chatInput}
             placeholder="メッセージを入力..."
           />
