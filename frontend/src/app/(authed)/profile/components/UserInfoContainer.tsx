@@ -67,18 +67,19 @@ export default function UserInfoContainer() {
 
       if (!saveResponse.ok) {
         const saveErrorData = await saveResponse.json();
-        throw new Error(saveErrorData.error || "アバター情報の保存に失敗しました");
+        throw new Error(
+          saveErrorData.error || "アバター情報の保存に失敗しました",
+        );
       }
 
       // 4. セッションを更新して新しいアバターを表示
       await update({
-        ...session,
-        user: {
-          ...session?.user,
-          image: publicUrl,
+        data: {
+          user: {
+            image: publicUrl,
+          },
         },
       });
-      
     } catch (error) {
       console.error("アバターアップロードエラー:", error);
       alert("アバターのアップロードに失敗しました");

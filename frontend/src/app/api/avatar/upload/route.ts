@@ -45,14 +45,15 @@ export async function POST(request: NextRequest) {
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: objectKey,
-      ContentType: fileType
+      ContentType: fileType,
     });
 
     const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 900 });
 
-    const minioPublicEndpoint = process.env.AWS_ENDPOINT || "http://localhost:9000";
+    const minioPublicEndpoint =
+      process.env.AWS_ENDPOINT || "http://localhost:9000";
     const publicUrl = `${minioPublicEndpoint}/${BUCKET_NAME}/${objectKey}`;
-    
+
     return NextResponse.json({
       success: true,
       signedUrl: signedUrl,

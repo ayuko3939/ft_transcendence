@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "アバター情報が更新されました",
-      avatarUrl: publicUrl
+      avatarUrl: publicUrl,
     });
   } catch (error) {
     console.error("アバター保存エラー:", error);

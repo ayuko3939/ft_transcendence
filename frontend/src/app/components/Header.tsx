@@ -49,6 +49,7 @@ export default function Header() {
                       width={32}
                       height={32}
                       className="h-full w-full object-cover"
+                      unoptimized={true} // MinIOの画像はNext.jsのImage Optimizationをバイパスするのでこれが必要
                     />
                   </div>
                 ) : null}
