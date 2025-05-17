@@ -1,0 +1,305 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  z-index: 5;
+  padding: 100px 20px 20px 20px;
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 20px;
+  margin-bottom: 20px;
+  justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+  }
+}
+
+/* ユーザー情報コンテナ */
+.userInfoContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-color: rgba(0, 20, 40, 0.7);
+  border: 1px solid var(--cyber-primary);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  padding: 30px;
+  width: calc(50% - 10px);
+}
+
+.avatarWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid var(--cyber-primary);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 30, 60, 0.5);
+  position: relative;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.editAvatarButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: var(--cyber-primary);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.editAvatarButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.9);
+}
+
+.userName {
+  font-size: 1.8rem;
+  color: white;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.userEmail {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.changePasswordLink {
+  color: var(--cyber-primary);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.changePasswordLink:hover {
+  text-decoration: underline;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.7);
+}
+
+/* 戦歴統計コンテナ */
+.statsContainer {
+  flex: 1;
+  background-color: rgba(0, 20, 40, 0.7);
+  border: 1px solid var(--cyber-primary);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  width: calc(50% - 10px);
+}
+
+.statsTitle {
+  color: var(--cyber-primary);
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+}
+
+.statsTable {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.statDivider {
+  height: 1px;
+  background-color: var(--cyber-primary);
+  margin: 15px 0;
+  opacity: 0.5;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: var(--cyber-primary);
+  font-weight: normal;
+}
+
+.statValue {
+  font-size: 1.2rem;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.statIcon {
+  margin-left: 5px;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+/* 試合履歴コンテナ */
+.matchHistoryContainer {
+  width: 100%;
+  margin-top: 20px;
+  background-color: rgba(0, 20, 40, 0.7);
+  border: 1px solid var(--cyber-primary);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  padding: 30px;
+}
+
+.historyTitle {
+  color: var(--cyber-primary);
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+}
+
+.matchList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.matchList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.matchList::-webkit-scrollbar-track {
+  background: rgba(0, 30, 60, 0.3);
+  border-radius: 10px;
+}
+
+.matchList::-webkit-scrollbar-thumb {
+  background: var(--cyber-primary);
+  border-radius: 10px;
+}
+
+.matchItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  background-color: rgba(0, 30, 60, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.matchItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
+}
+
+.matchInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.matchOpponent {
+  font-size: 1.1rem;
+  color: white;
+}
+
+.matchDate {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.matchScore {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.winScore {
+  color: #4ade80; /* 緑 */
+}
+
+.loseScore {
+  color: #f87171; /* 赤 */
+}
+
+.matchResult {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.win {
+  background-color: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+}
+
+.lose {
+  background-color: rgba(248, 113, 113, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+}
+
+.loadMoreButton {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: transparent;
+  color: var(--cyber-primary);
+  border: 1px solid var(--cyber-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.loadMoreButton:hover {
+  background-color: rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
