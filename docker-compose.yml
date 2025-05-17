@@ -59,6 +59,23 @@ services:
     networks:
       - app-network
 
+  nginx:
+    image: ft_transcendence_nginx:${COMMIT_HASH}
+    build:
+      context: ./
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx_ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+
+
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
@@ -182,6 +199,8 @@ volumes:
   logstashdata:
     driver: local
   dbdir:
+    driver: local
+  nginx_ssl:
     driver: local
 
 networks:

@@ -57,9 +57,26 @@ services:
     networks:
       - app-network
 
+  nginx:
+    image: ft_transcendence_nginx:${COMMIT_HASH}
+    build:
+      context: ./
+      dockerfile: ./nginx/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx_ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+
 volumes:
   logdir:
   dbdir:
+  nginx_ssl:
 
 networks:
   app-network:
