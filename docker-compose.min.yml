@@ -1,6 +1,6 @@
 services:
   database-init:
-    image: ft_transcendence_databaseinit:${COMMIT_HASH}
+    image: ft_transcendence_databaseinit:${COMMIT_HASH:-latest}
     build:
       context: ./
       dockerfile: ./database/Dockerfile
@@ -13,7 +13,7 @@ services:
       - dbdir:/var/lib/db
 
   frontend:
-    image: ft_transcendence_frontend:${COMMIT_HASH}
+    image: ft_transcendence_frontend:${COMMIT_HASH:-latest}
     build:
       context: ./
       dockerfile: ./frontend/Dockerfile
@@ -37,7 +37,7 @@ services:
       - app-network
 
   backend:
-    image: ft_transcendence_backend:${COMMIT_HASH}
+    image: ft_transcendence_backend:${COMMIT_HASH:-latest}
     build:
       context: ./
       dockerfile: ./backend/Dockerfile
@@ -57,9 +57,39 @@ services:
     networks:
       - app-network
 
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    container_name: ft_transcendence_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodir:/data
+    environment:
+      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID:-rootuser}
+      - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY:-changeme123}
+    networks:
+      - app-network
+    command: ["server", "/data", "--console-address", ":9001"]
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-04-16T18-13-26Z
+    depends_on:
+      - minio
+    environment:
+      - MINIO_ROOT_USER=${AWS_ACCESS_KEY_ID:-rootuser}
+      - MINIO_ROOT_PASSWORD=${AWS_SECRET_ACCESS_KEY:-changeme123}
+      - UPLOAD_BUCKET_NAME=${UPLOAD_BUCKET_NAME:-default-bucket}
+    volumes:
+      - ./internal/settings/minio_entrypoint.sh:/minio_entrypoint.sh
+    entrypoint: ["/bin/sh", "/minio_entrypoint.sh"]
+    networks:
+      - app-network
+
 volumes:
   logdir:
   dbdir:
+  miniodir:
 
 networks:
   app-network:
