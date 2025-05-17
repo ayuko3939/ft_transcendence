@@ -25,6 +25,11 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - BACKEND_WS_URL=ws://backend:3001/game
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ENDPOINT=${AWS_ENDPOINT}
+      - AWS_REGION=ap-northeast-1
+      - UPLOAD_BUCKET_NAME=${UPLOAD_BUCKET_NAME}
     ports:
       - "3000:3000"
     volumes:
@@ -59,7 +64,6 @@ services:
 
   minio:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
-    container_name: ft_transcendence_minio
     ports:
       - "9000:9000"
       - "9001:9001"

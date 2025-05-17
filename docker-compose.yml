@@ -24,7 +24,12 @@ services:
       - NEXTAUTH_URL=${NEXTAUTH_URL}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - BACKEND_WS_URL="ws://localhost:3001/game"
+      - BACKEND_WS_URL=ws://backend:3001/game
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_ENDPOINT=${AWS_ENDPOINT}
+      - AWS_REGION=ap-northeast-1
+      - UPLOAD_BUCKET_NAME=${UPLOAD_BUCKET_NAME}
     ports:
       - "3000:3000"
     volumes:

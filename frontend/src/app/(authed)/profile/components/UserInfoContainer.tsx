@@ -1,18 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 
 import styles from "../profile.module.css";
 
 export default function UserInfoContainer() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [isHovering, setIsHovering] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarEdit = () => {
-    // 実装予定: 画像アップロード機能
-    console.log("アバター編集ボタンがクリックされました");
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+
+      // 1. 署名付きURLを取得
+      const formData = new FormData();
+      formData.append("fileType", file.type);
+
+      const urlResponse = await fetch("/api/avatar/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!urlResponse.ok) {
+        const errorData = await urlResponse.json();
+        throw new Error(errorData.error || "署名付きURLの取得に失敗しました");
+      }
+
+      const urlData = await urlResponse.json();
+      const { signedUrl, objectKey, publicUrl } = urlData;
+
+      // 2. 署名付きURLを使ってMinIOに直接アップロード
+      const uploadResponse = await fetch(signedUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("ファイルのアップロードに失敗しました");
+      }
+
+      // 3. アップロード成功後、データベースにアバター情報を保存
+      const saveResponse = await fetch("/api/avatar/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          objectKey,
+          publicUrl,
+        }),
+      });
+
+      if (!saveResponse.ok) {
+        const saveErrorData = await saveResponse.json();
+        throw new Error(saveErrorData.error || "アバター情報の保存に失敗しました");
+      }
+
+      // 4. セッションを更新して新しいアバターを表示
+      await update({
+        ...session,
+        user: {
+          ...session?.user,
+          image: publicUrl,
+        },
+      });
+      
+    } catch (error) {
+      console.error("アバターアップロードエラー:", error);
+      alert("アバターのアップロードに失敗しました");
+    } finally {
+      setIsUploading(false);
+      // ファイル入力をリセット
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   const handlePasswordChange = () => {
@@ -22,6 +98,14 @@ export default function UserInfoContainer() {
 
   return (
     <div className={styles.userInfoContainer}>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        className="hidden"
+        style={{ display: "none" }}
+      />
       <div className={styles.avatarWrapper}>
         <div
           className={styles.avatar}
@@ -36,13 +120,16 @@ export default function UserInfoContainer() {
                 width={120}
                 height={120}
                 className={styles.avatarImage}
+                unoptimized={true} // MinIOの画像はNext.jsのImage Optimizationをバイパス
               />
               {isHovering && (
                 <div
                   className={styles.avatarOverlay}
                   onClick={handleAvatarEdit}
                 >
-                  <span className={styles.editText}>編集</span>
+                  <span className={styles.editText}>
+                    {isUploading ? "アップロード中..." : "編集"}
+                  </span>
                 </div>
               )}
             </div>
@@ -54,7 +141,9 @@ export default function UserInfoContainer() {
                   className={styles.avatarOverlay}
                   onClick={handleAvatarEdit}
                 >
-                  <span className={styles.editText}>アップロード</span>
+                  <span className={styles.editText}>
+                    {isUploading ? "アップロード中..." : "アップロード"}
+                  </span>
                 </div>
               )}
             </div>
