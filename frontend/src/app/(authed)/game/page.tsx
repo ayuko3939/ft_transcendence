@@ -10,7 +10,7 @@ const CanvasComponent = dynamic(() => import("./_components/PongGame"), {
 
 export default function Game() {
   const [isGameReady, setIsGameReady] = useState(true);
-  
+
   useEffect(() => {
     window.history.pushState(null, "", window.location.pathname);
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -18,21 +18,23 @@ export default function Game() {
       (e || window.event).returnValue = message;
       return message;
     };
-    
+
     const handlePopState = () => {
       if (isGameReady) {
-        const confirmLeave = confirm("ゲームをプレイ中です。このページを離れますか？");
+        const confirmLeave = confirm(
+          "ゲームをプレイ中です。このページを離れますか？",
+        );
         if (!confirmLeave) {
           window.history.pushState(null, "", window.location.pathname);
         }
       }
     };
-    
+
     if (isGameReady) {
       window.addEventListener("beforeunload", handleBeforeUnload);
       window.addEventListener("popstate", handlePopState);
     }
-    
+
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
@@ -42,7 +44,7 @@ export default function Game() {
   const handleGameReady = () => {
     setIsGameReady(false);
   };
-  
+
   return (
     <div className="grid min-h-screen place-items-center">
       <main>
