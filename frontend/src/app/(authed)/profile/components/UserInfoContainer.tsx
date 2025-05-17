@@ -153,7 +153,7 @@ export default function UserInfoContainer() {
 
         <div className={styles.userNameContainer}>
           <h2 className={styles.userName}>
-            {session?.user?.name || "プレイヤー"}
+            {session?.user?.name || "unknown"}
           </h2>
           {session?.user?.id && (
             <div className={styles.userIdTooltip}>{session.user.id}</div>
@@ -161,7 +161,7 @@ export default function UserInfoContainer() {
         </div>
 
         <p className={styles.userEmail}>
-          {session?.user?.email || "example@example.com"}
+          {session?.user?.email || null}
         </p>
 
         <p className={styles.changePasswordLink} onClick={handlePasswordChange}>
