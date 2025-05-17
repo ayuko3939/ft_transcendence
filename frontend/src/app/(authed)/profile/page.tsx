@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-import UserInfoContainer from "./components/UserInfoContainer";
-import StatsContainer from "./components/StatsContainer";
 import MatchHistory from "./components/MatchHistory";
+import StatsContainer from "./components/StatsContainer";
+import UserInfoContainer from "./components/UserInfoContainer";
 import styles from "./profile.module.css";
 
 export default function ProfilePage() {
@@ -16,7 +16,7 @@ export default function ProfilePage() {
     router.push("/login");
     return null;
   }
-  
+
   if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center text-white">
@@ -24,7 +24,7 @@ export default function ProfilePage() {
       </div>
     );
   }
-  
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
