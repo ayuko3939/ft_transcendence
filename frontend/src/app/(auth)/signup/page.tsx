@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/api/auth/api-client";
+import { useSession } from "next-auth/react";
 
 import styles from "./signup.module.css";
 
@@ -23,12 +24,29 @@ export default function Signup() {
 
 function SignupContent() {
   const router = useRouter();
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
+
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-white">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   // const searchParams = useSearchParams();
   // const callbackUrl = searchParams.get("callbackUrl") || "/";
 

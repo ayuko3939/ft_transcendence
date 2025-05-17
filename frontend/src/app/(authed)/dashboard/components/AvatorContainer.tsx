@@ -18,6 +18,7 @@ export default function AvatorCard() {
               alt="User Avatar"
               width={100}
               height={100}
+              unoptimized={true} // MinIOの画像のときは必要
             />
           ) : (
             <DefaultAvator />

@@ -16,6 +16,12 @@ export default function Game() {
   const [isGameReady, setIsGameReady] = useState(true);
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
+  useEffect(() => {
     window.history.pushState(null, "", window.location.pathname);
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       const message = "ゲームをプレイ中です。このページを離れますか？";
@@ -49,10 +55,6 @@ export default function Game() {
     setIsGameReady(false);
   };
 
-  if (status === "unauthenticated") {
-    router.push("/login");
-    return null;
-  }
   if (status === "loading") {
     return (
       <div className="relative z-5 flex min-h-screen items-center justify-center overflow-hidden">

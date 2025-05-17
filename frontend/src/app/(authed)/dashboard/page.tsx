@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -7,13 +8,15 @@ import AvatorCard from "./components/AvatorContainer";
 import styles from "./dashboard.module.css";
 
 export default function DashboardPage() {
-  const { status } = useSession();
   const router = useRouter();
+  const { status } = useSession();
 
-  if (status === "unauthenticated") {
-    router.push("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
   if (status === "loading") {
     return (
       <div className={styles.container}>
