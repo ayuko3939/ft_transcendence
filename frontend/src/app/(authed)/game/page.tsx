@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 // SSRを無効化したコンポーネントの読み込み
 const CanvasComponent = dynamic(() => import("./_components/PongGame"), {
@@ -9,6 +11,8 @@ const CanvasComponent = dynamic(() => import("./_components/PongGame"), {
 });
 
 export default function Game() {
+  const { status } = useSession();
+  const router = useRouter();
   const [isGameReady, setIsGameReady] = useState(true);
 
   useEffect(() => {
@@ -44,6 +48,18 @@ export default function Game() {
   const handleGameReady = () => {
     setIsGameReady(false);
   };
+
+  if (status === "unauthenticated") {
+    router.push("/login");
+    return null;
+  }
+  if (status === "loading") {
+    return (
+      <div className="relative z-5 flex min-h-screen items-center justify-center overflow-hidden">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid min-h-screen place-items-center">
