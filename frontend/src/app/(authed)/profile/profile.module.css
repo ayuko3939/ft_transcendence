@@ -204,23 +204,6 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-.matchList::-webkit-scrollbar {
-  width: 8px;
-}
-
-.matchList::-webkit-scrollbar-track {
-  background: rgba(0, 30, 60, 0.3);
-  border-radius: 10px;
-}
-
-.matchList::-webkit-scrollbar-thumb {
-  background: var(--cyber-primary);
-  border-radius: 10px;
 }
 
 .matchItem {
