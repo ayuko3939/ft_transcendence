@@ -62,7 +62,9 @@ export default function MatchHistory() {
             </div>
             
             <div className={`${styles.matchScore} ${match.result === "win" ? styles.winScore : styles.loseScore}`}>
-              {match.playerScore} - {match.opponentScore}
+              <span>{match.playerScore}</span>
+              <span style={{ margin: "0 5px" }}>-</span>
+              <span>{match.opponentScore}</span>
             </div>
             
             <div className={`${styles.matchResult} ${styles[match.result]}`}>

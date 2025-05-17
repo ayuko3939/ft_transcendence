@@ -207,9 +207,9 @@
 }
 
 .matchItem {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   padding: 15px;
   background-color: rgba(0, 30, 60, 0.5);
   border-radius: 8px;
@@ -226,6 +226,7 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  margin-right: auto;
 }
 
 .matchOpponent {
@@ -241,6 +242,12 @@
 .matchScore {
   font-size: 1.2rem;
   font-weight: bold;
+  text-align: center;
+  min-width: 100px;
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
+  padding: 0 20px;
 }
 
 .winScore {
@@ -256,6 +263,8 @@
   border-radius: 4px;
   font-weight: bold;
   font-size: 0.9rem;
+  text-align: right;
+  margin-left: auto;
 }
 
 .win {
