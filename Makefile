@@ -1,5 +1,6 @@
 DOCKER_COMPOSE_FILE := docker-compose.yml
 DOCKER_COMPOSE_FILE_MINIMUM := docker-compose.min.yml
+DOCKER_COMPOSE_FILE_MINIO := docker-compose.minio.yml
 
 COMMIT_HASH := $(shell git rev-parse --short HEAD)
 
@@ -12,6 +13,10 @@ all:
 .PHONY: min
 min:
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE_MINIMUM) up --build -d
+
+.PHONY: minio
+minio:
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE_MINIO) up --build -d
 
 .PHONY: down
 down:
