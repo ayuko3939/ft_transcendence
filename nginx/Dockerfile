@@ -4,10 +4,6 @@ FROM nginx:alpine
 # 必要なパッケージをインストール
 RUN apk add --no-cache openssl
 
-# 設定ファイルをコピー
-COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
-COPY ./nginx/conf.d/ /etc/nginx/conf.d/
-
 # 起動スクリプトを作成
 COPY ./nginx/docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh

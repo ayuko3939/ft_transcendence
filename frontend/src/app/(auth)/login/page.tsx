@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
@@ -10,7 +10,14 @@ import ToastRegisterSuccess from "./components/toast-register-success";
 import styles from "./login.module.css";
 
 export default function Login() {
+  const router = useRouter();
   const { status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
 
   if (status === "loading") {
     return (
@@ -19,7 +26,6 @@ export default function Login() {
       </div>
     );
   }
-
   return (
     <Suspense
       fallback={
