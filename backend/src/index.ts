@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import type { WebSocket } from "@fastify/websocket";
 import { GameEngine } from "./game/GameState";
+import { GameState, GameRoom } from './types';
 import { mkdirSync } from "node:fs";
 import websocket from "@fastify/websocket";
 import dotenv from "dotenv";
@@ -30,43 +31,6 @@ const startServer = async () => {
   // APIルートを登録
   await fastify.register(routes);
 
-  type GameRoom = {
-    players: {
-      left?: WebSocket;
-      right?: WebSocket;
-    };
-    gameState: {
-      ball: {
-        x: number;
-        y: number;
-        dx: number;
-        dy: number;
-        radius: number;
-      };
-      paddleLeft: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      };
-      paddleRight: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      };
-      score: {
-        left: number;
-        right: number;
-      };
-    };
-    chats: {
-      name: string;
-      message: string;
-    }[];
-    gameStarted: boolean;
-  };
-
   const gameRooms = new Map<string, GameRoom>();
 
   fastify.get("/game", { websocket: true }, (connection, req) => {
@@ -75,6 +39,9 @@ const startServer = async () => {
     let room = gameRooms.get(roomId);
 
     if (!room) {
+
+      const WINNING_SCORE = 10; // 勝利点数を設定 // UIで設定できるようにする
+
       room = {
         players: {},
         gameState: {
@@ -98,6 +65,9 @@ const startServer = async () => {
             height: 100,
           },
           score: { left: 0, right: 0 },
+          gameOver: false,
+          winner: null,
+          winningScore: WINNING_SCORE,
         },
         chats: [],
         gameStarted: false,
@@ -158,6 +128,23 @@ const startServer = async () => {
 
                 room.players.left.send(stateMessage);
                 room.players.right.send(stateMessage);
+
+                // ゲームが終了した場合
+                if (room.gameState.gameOver) {
+                  // ゲーム終了メッセージを送信
+                  const gameOverMessage = JSON.stringify({
+                    type: "gameOver",
+                    winner: room.gameState.winner,
+                    leftScore: room.gameState.score.left,
+                    rightScore: room.gameState.score.right
+                  });
+                  
+                  room.players.left.send(gameOverMessage);
+                  room.players.right.send(gameOverMessage);
+                  
+                  // ゲームループを停止
+                  clearInterval(gameInterval);
+                }
               } else {
                 clearInterval(gameInterval);
               }
