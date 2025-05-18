@@ -8,8 +8,6 @@ const dummyStats = {
   wins: 26,
   losses: 16,
   winRate: 61.9, // (wins / totalGames) * 100
-  highestScore: 15,
-  averageScore: 8.3,
   longestStreak: 7,
   currentStreak: 3,
 };
@@ -20,7 +18,7 @@ export default function StatsContainer() {
 
   return (
     <div className={styles.statsContainer}>
-      <h2 className={styles.statsTitle}>戦績統計</h2>
+      <h2 className={styles.statsTitle}>統計</h2>
 
       <div className={styles.statsTable}>
         <div className={styles.statRow}>
@@ -41,16 +39,6 @@ export default function StatsContainer() {
         <div className={styles.statRow}>
           <div className={styles.statLabel}>勝率</div>
           <div className={styles.statValue}>{stats.winRate}%</div>
-        </div>
-
-        <div className={styles.statRow}>
-          <div className={styles.statLabel}>最高スコア</div>
-          <div className={styles.statValue}>{stats.highestScore}</div>
-        </div>
-
-        <div className={styles.statRow}>
-          <div className={styles.statLabel}>平均スコア</div>
-          <div className={styles.statValue}>{stats.averageScore}</div>
         </div>
       </div>
     </div>
