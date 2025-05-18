@@ -1,4 +1,4 @@
-import { WebSocket } from 'ws';
+import { WebSocket } from "ws";
 
 // ゲームの状態
 export interface GameState {
@@ -26,9 +26,9 @@ export interface GameState {
     right: number;
   };
   gameOver: boolean;
-  winner: 'left' | 'right' | null;
+  winner: "left" | "right" | null;
   winningScore: number;
-};
+}
 
 export interface GameRoom {
   players: {
@@ -41,4 +41,4 @@ export interface GameRoom {
     message: string;
   }[];
   gameStarted: boolean;
-};
+}

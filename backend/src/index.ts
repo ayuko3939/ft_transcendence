@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import type { WebSocket } from "@fastify/websocket";
 import { GameEngine } from "./game/GameState";
-import { GameState, GameRoom } from './types';
+import { GameState, GameRoom } from "./types";
 import { mkdirSync } from "node:fs";
 import websocket from "@fastify/websocket";
 import dotenv from "dotenv";
@@ -39,7 +39,6 @@ const startServer = async () => {
     let room = gameRooms.get(roomId);
 
     if (!room) {
-
       const WINNING_SCORE = 10; // 勝利点数を設定 // UIで設定できるようにする
 
       room = {
@@ -136,12 +135,12 @@ const startServer = async () => {
                     type: "gameOver",
                     winner: room.gameState.winner,
                     leftScore: room.gameState.score.left,
-                    rightScore: room.gameState.score.right
+                    rightScore: room.gameState.score.right,
                   });
-                  
+
                   room.players.left.send(gameOverMessage);
                   room.players.right.send(gameOverMessage);
-                  
+
                   // ゲームループを停止
                   clearInterval(gameInterval);
                 }
