@@ -1,23 +1,22 @@
 /**
  * PONGゲームのエンジンを実装するクラス
- * 
+ *
  * 処理の流れ：
  * 1. ボールの移動
  * 2. 得点判定（左右の壁に到達した場合）
  * 3. パドル衝突判定（優先的に処理）
  * 4. 壁衝突判定（パドルと衝突していない場合のみ）
  * 5. 勝者判定
- * 
+ *
  * 設計の特徴：
  * - パドル衝突判定を優先し、パドルの表面でのみ衝突を判定
  * - 上下の壁とパドルの交差点での特殊処理を実装
  * - 勝利条件を明確に定義（デフォルト10点）
  */
 
-import { GameState } from '../types';
+import { GameState } from "../types";
 
 export class GameEngine {
-
   // ゲーム定数の設定
   private readonly BALL_SPEED = 5;
   private readonly CANVAS_WIDTH = 800;
@@ -83,24 +82,27 @@ export class GameEngine {
    * - 表側からアプローチしている場合のみ衝突判定
    * - パドルの範囲内でのみ衝突を判定
    * - 上下の壁とパドルの交差点では両方向の速度を反転
-   * 
+   *
    * @returns パドルと衝突したかどうか
    */
   private checkPaddleCollision(): boolean {
     let paddleCollided = false;
-    
+
     // ===== 左パドルとの衝突判定 =====
     if (
       this.gameState.ball.dx < 0 && // 左方向に移動中（表側からアプローチ）
-      this.gameState.ball.x <= this.gameState.paddleLeft.x + this.gameState.paddleLeft.width &&
+      this.gameState.ball.x <=
+        this.gameState.paddleLeft.x + this.gameState.paddleLeft.width &&
       this.gameState.ball.x >= this.gameState.paddleLeft.x &&
       this.gameState.ball.y >= this.gameState.paddleLeft.y &&
-      this.gameState.ball.y <= this.gameState.paddleLeft.y + this.gameState.paddleLeft.height
+      this.gameState.ball.y <=
+        this.gameState.paddleLeft.y + this.gameState.paddleLeft.height
     ) {
       // 壁との交差点かどうかをチェック
       const nearTopWall = this.gameState.ball.y <= this.BALL_RADIUS;
-      const nearBottomWall = this.gameState.ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS;
-      
+      const nearBottomWall =
+        this.gameState.ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS;
+
       // パドルと壁の交差点にいる場合、両方向に反転
       if (nearTopWall || nearBottomWall) {
         this.gameState.ball.dx *= -1;
@@ -109,7 +111,7 @@ export class GameEngine {
         // 通常のパドル衝突
         this.gameState.ball.dx *= -1;
       }
-      
+
       paddleCollided = true;
     }
 
@@ -118,14 +120,17 @@ export class GameEngine {
       !paddleCollided && // 左パドルとの衝突がない場合のみ
       this.gameState.ball.dx > 0 && // 右方向に移動中（表側からアプローチ）
       this.gameState.ball.x >= this.gameState.paddleRight.x &&
-      this.gameState.ball.x <= this.gameState.paddleRight.x + this.gameState.paddleRight.width &&
+      this.gameState.ball.x <=
+        this.gameState.paddleRight.x + this.gameState.paddleRight.width &&
       this.gameState.ball.y >= this.gameState.paddleRight.y &&
-      this.gameState.ball.y <= this.gameState.paddleRight.y + this.gameState.paddleRight.height
+      this.gameState.ball.y <=
+        this.gameState.paddleRight.y + this.gameState.paddleRight.height
     ) {
       // 壁との交差点かどうかをチェック
       const nearTopWall = this.gameState.ball.y <= this.BALL_RADIUS;
-      const nearBottomWall = this.gameState.ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS;
-      
+      const nearBottomWall =
+        this.gameState.ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS;
+
       // パドルと壁の交差点にいる場合、両方向に反転
       if (nearTopWall || nearBottomWall) {
         this.gameState.ball.dx *= -1;
@@ -134,7 +139,7 @@ export class GameEngine {
         // 通常のパドル衝突
         this.gameState.ball.dx *= -1;
       }
-      
+
       paddleCollided = true;
     }
 
@@ -159,7 +164,7 @@ export class GameEngine {
    * 得点判定
    * - ボールが左右の壁に到達した場合、得点を加算
    * - 得点が入った場合はボールをリセット
-   * 
+   *
    * @returns 得点が入ったかどうか
    */
   private checkScore(): boolean {
@@ -185,13 +190,13 @@ export class GameEngine {
    */
   private checkWinner(): void {
     const winningScore = this.gameState.winningScore || 10;
-    
+
     if (this.gameState.score.left >= winningScore) {
       this.gameState.gameOver = true;
-      this.gameState.winner = 'left';
+      this.gameState.winner = "left";
     } else if (this.gameState.score.right >= winningScore) {
       this.gameState.gameOver = true;
-      this.gameState.winner = 'right';
+      this.gameState.winner = "right";
     }
   }
 
