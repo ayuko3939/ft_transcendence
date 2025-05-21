@@ -2,7 +2,7 @@
 
 オンラインでPongゲームを楽しめるWebアプリケーションです。リアルタイムで他のプレイヤーと対戦したり、プロフィールを管理したりすることができます。
 
-![Pong Game Screenshot](https://placeholder.example.com/pong-game.png)
+![Pong Game Screenshot](https://github.com/user-attachments/assets/47b94a01-9c7b-4593-921b-19d6f256ec22)
 
 ## 目次
 
