@@ -160,9 +160,7 @@ export default function UserInfoContainer() {
           )}
         </div>
 
-        <p className={styles.userEmail}>
-          {session?.user?.email || null}
-        </p>
+        <p className={styles.userEmail}>{session?.user?.email || null}</p>
 
         <p className={styles.changePasswordLink} onClick={handlePasswordChange}>
           パスワードを変更する

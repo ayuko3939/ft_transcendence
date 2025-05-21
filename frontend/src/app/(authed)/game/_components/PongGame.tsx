@@ -1,10 +1,16 @@
 "use client";
 
-import type { ChatMessage, GameState, PlayerSide, GameSettings, GameResult } from "src/types/game";
+import type {
+  ChatMessage,
+  GameResult,
+  GameSettings,
+  GameState,
+  PlayerSide,
+} from "src/types/game";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { PongController } from "@/lib/game/gameController";
 import { PongSocketClient } from "@/lib/game/webSocketClient";
-import { useRouter } from "next/navigation";
 
 import styles from "./game.module.css";
 
@@ -43,12 +49,12 @@ const PongGame = () => {
   const [countdown, setCountdown] = useState<number | null>(null);
   // 中断確認ダイアログの表示状態
   const [showSurrenderConfirm, setShowSurrenderConfirm] = useState(false);
-  
+
   // ゲーム設定関連の状態
   const [showSettings, setShowSettings] = useState(false);
   const [gameSettings, setGameSettings] = useState<GameSettings>({
     ballSpeed: 3, // 初期値は3
-    winningScore: 10 // 初期値は10
+    winningScore: 10, // 初期値は10
   });
   const [settingsConfirmed, setSettingsConfirmed] = useState(false);
 
@@ -103,7 +109,7 @@ const PongGame = () => {
         if (controllerRef.current) {
           controllerRef.current.stop();
         }
-      }
+      },
     });
 
     socketClientRef.current = socketClient;
@@ -170,9 +176,9 @@ const PongGame = () => {
 
   // 設定変更ハンドラ
   const handleSettingChange = (setting: keyof GameSettings, value: number) => {
-    setGameSettings(prev => ({
+    setGameSettings((prev) => ({
       ...prev,
-      [setting]: value
+      [setting]: value,
     }));
   };
 
@@ -182,7 +188,7 @@ const PongGame = () => {
     // 現状は単に設定ダイアログを閉じるだけ
     setSettingsConfirmed(true);
     setShowSettings(false);
-    
+
     // 実際のwebsocket通信はここで行う予定
     if (socketClientRef.current) {
       socketClientRef.current.sendGameSettings(gameSettings);
@@ -202,10 +208,7 @@ const PongGame = () => {
       {/* 中断ボタン - ゲーム終了時は非表示 */}
       {!isGameOver && (
         <div className={styles.surrenderButtonContainer}>
-          <button
-            onClick={handleSurrender}
-            className={styles.surrenderButton}
-          >
+          <button onClick={handleSurrender} className={styles.surrenderButton}>
             中断
           </button>
         </div>
@@ -224,13 +227,13 @@ const PongGame = () => {
             <div className={styles.countdownText}>{countdown}</div>
           </div>
         )}
-        
+
         {/* ゲーム結果画面 - ゲーム終了時のみ表示 */}
         {isGameOver && gameResult && (
           <div className={styles.gameOverOverlay}>
             <div className={styles.gameOverContent}>
               <h2 className={styles.resultTitle}>
-                {playerSide === gameResult.winner ? 'WIN' : 'LOSE'}
+                {playerSide === gameResult.winner ? "WIN" : "LOSE"}
               </h2>
               <div className={styles.finalScore}>
                 <span>{gameResult.leftScore}</span>
@@ -240,51 +243,65 @@ const PongGame = () => {
               {gameResult.message && (
                 <p className={styles.resultMessage}>{gameResult.message}</p>
               )}
-              <button 
-                onClick={handleBackToHome}
-                className={styles.backButton}
-              >
+              <button onClick={handleBackToHome} className={styles.backButton}>
                 戻る
               </button>
             </div>
           </div>
         )}
-        
+
         {/* ゲーム設定モーダル */}
         {showSettings && !settingsConfirmed && (
           <div className={styles.settingsOverlay}>
             <div className={styles.settingsModal}>
-              <h2 className={styles.settingsTitle}>ゲーム内容を設定してください。</h2>
-              
+              <h2 className={styles.settingsTitle}>
+                ゲーム内容を設定してください。
+              </h2>
+
               <div className={styles.settingItem}>
-                <label htmlFor="ballSpeed" className={styles.settingLabel}>スピード:</label>
-                <select 
+                <label htmlFor="ballSpeed" className={styles.settingLabel}>
+                  スピード:
+                </label>
+                <select
                   id="ballSpeed"
                   value={gameSettings.ballSpeed}
-                  onChange={(e) => handleSettingChange('ballSpeed', parseInt(e.target.value))}
+                  onChange={(e) =>
+                    handleSettingChange("ballSpeed", parseInt(e.target.value))
+                  }
                   className={styles.settingSelect}
                 >
-                  {Array.from({length: 10}, (_, i) => i + 1).map(value => (
-                    <option key={value} value={value}>{value}</option>
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div className={styles.settingItem}>
-                <label htmlFor="winningScore" className={styles.settingLabel}>勝利得点:</label>
-                <select 
+                <label htmlFor="winningScore" className={styles.settingLabel}>
+                  勝利得点:
+                </label>
+                <select
                   id="winningScore"
                   value={gameSettings.winningScore}
-                  onChange={(e) => handleSettingChange('winningScore', parseInt(e.target.value))}
+                  onChange={(e) =>
+                    handleSettingChange(
+                      "winningScore",
+                      parseInt(e.target.value),
+                    )
+                  }
                   className={styles.settingSelect}
                 >
-                  {[5, 10, 15, 20].map(value => (
-                    <option key={value} value={value}>{value}</option>
+                  {[5, 10, 15, 20].map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
                   ))}
                 </select>
               </div>
-              
-              <button 
+
+              <button
                 onClick={confirmSettings}
                 className={styles.settingsButton}
               >
@@ -339,7 +356,12 @@ const PongGame = () => {
               onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={(e) => {
                 // チャット入力中のwキーとsキーのイベント伝播を停止
-                if (e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+                if (
+                  e.key === "w" ||
+                  e.key === "W" ||
+                  e.key === "s" ||
+                  e.key === "S"
+                ) {
                   e.stopPropagation();
                 }
                 // Enterキーが押されたらチャット送信

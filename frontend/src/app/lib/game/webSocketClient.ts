@@ -1,10 +1,10 @@
 import type {
   ChatMessage,
-  GameState, 
+  GameResult,
+  GameSettings,
+  GameState,
   PlayerSide,
   WebSocketMessage,
-  GameSettings,
-  GameResult
 } from "src/types/game";
 
 export interface WebSocketHandlers {
@@ -74,7 +74,7 @@ export class PongSocketClient {
   public sendGameSettings(settings: GameSettings): void {
     this.sendMessage({
       type: "gameSettings",
-      settings
+      settings,
     });
   }
 
@@ -96,7 +96,7 @@ export class PongSocketClient {
   // webSocketClient.ts に追加
   public sendSurrenderMessage(): void {
     this.sendMessage({
-      type: "surrender"
+      type: "surrender",
     });
   }
 
@@ -137,7 +137,7 @@ export class PongSocketClient {
         leftScore: data.leftScore,
         rightScore: data.rightScore,
         reason: data.reason,
-        message: data.message
+        message: data.message,
       });
     } else if (data.type === "gameState" || data.ball) {
       // ゲーム状態の更新
