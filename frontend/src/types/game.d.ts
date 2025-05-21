@@ -42,3 +42,11 @@ export interface GameSettings {
   ballSpeed: number;
   winningScore: number;
 }
+
+export interface GameResult {
+  winner: "left" | "right" | null;
+  leftScore: number;
+  rightScore: number;
+  reason?: string;
+  message?: string;
+}

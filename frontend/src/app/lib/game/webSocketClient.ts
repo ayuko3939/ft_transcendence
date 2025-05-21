@@ -3,7 +3,8 @@ import type {
   GameState, 
   PlayerSide,
   WebSocketMessage,
-  GameSettings
+  GameSettings,
+  GameResult
 } from "src/types/game";
 
 export interface WebSocketHandlers {
@@ -12,6 +13,7 @@ export interface WebSocketHandlers {
   onChatMessages: (messages: ChatMessage[]) => void;
   onCountdown: (count: number) => void;
   onGameStart: (gameState: GameState) => void;
+  onGameOver: (result: GameResult) => void;
 }
 
 export class PongSocketClient {
@@ -128,6 +130,15 @@ export class PongSocketClient {
     } else if (data.type === "gameStart") {
       // ゲーム開始
       this.handlers.onGameStart(this.normalizeGameState(data.gameState));
+    } else if (data.type === "gameOver") {
+      // ゲーム終了 - 追加
+      this.handlers.onGameOver({
+        winner: data.winner,
+        leftScore: data.leftScore,
+        rightScore: data.rightScore,
+        reason: data.reason,
+        message: data.message
+      });
     } else if (data.type === "gameState" || data.ball) {
       // ゲーム状態の更新
       // data.typeがgameStateの場合と、直接ゲーム状態が送られてくる場合の両方に対応

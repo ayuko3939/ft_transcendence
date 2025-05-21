@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChatMessage, GameState, PlayerSide, GameSettings } from "src/types/game";
+import type { ChatMessage, GameState, PlayerSide, GameSettings, GameResult } from "src/types/game";
 import { useEffect, useRef, useState } from "react";
 import { PongController } from "@/lib/game/gameController";
 import { PongSocketClient } from "@/lib/game/webSocketClient";
@@ -52,6 +52,10 @@ const PongGame = () => {
   });
   const [settingsConfirmed, setSettingsConfirmed] = useState(false);
 
+  // ゲーム結果表示用の状態を追加
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [gameResult, setGameResult] = useState<GameResult | null>(null);
+
   const router = useRouter();
   const controllerRef = useRef<PongController | null>(null);
   const socketClientRef = useRef<PongSocketClient | null>(null);
@@ -91,6 +95,15 @@ const PongGame = () => {
           controllerRef.current.updateGameState(state);
         }
       },
+      // ゲーム終了時のハンドラを追加
+      onGameOver: (result) => {
+        setIsGameOver(true);
+        setGameResult(result);
+        // ゲームコントローラーを停止
+        if (controllerRef.current) {
+          controllerRef.current.stop();
+        }
+      }
     });
 
     socketClientRef.current = socketClient;
@@ -176,17 +189,27 @@ const PongGame = () => {
     }
   };
 
+  // ホーム画面に戻るハンドラを追加
+  const handleBackToHome = () => {
+    if (socketClientRef.current) {
+      socketClientRef.current.disconnect();
+    }
+    router.push("/");
+  };
+
   return (
     <div className={styles.container}>
-      {/* 中断ボタン */}
-      <div className={styles.surrenderButtonContainer}>
-        <button
-          onClick={handleSurrender}
-          className={styles.surrenderButton}
-        >
-          中断
-        </button>
-      </div>
+      {/* 中断ボタン - ゲーム終了時は非表示 */}
+      {!isGameOver && (
+        <div className={styles.surrenderButtonContainer}>
+          <button
+            onClick={handleSurrender}
+            className={styles.surrenderButton}
+          >
+            中断
+          </button>
+        </div>
+      )}
 
       <div className={styles.canvasContainer}>
         <canvas
@@ -196,9 +219,34 @@ const PongGame = () => {
           className={styles.canvas}
         />
 
-        {countdown !== null && (
+        {countdown !== null && !isGameOver && (
           <div className={styles.countdownOverlay}>
             <div className={styles.countdownText}>{countdown}</div>
+          </div>
+        )}
+        
+        {/* ゲーム結果画面 - ゲーム終了時のみ表示 */}
+        {isGameOver && gameResult && (
+          <div className={styles.gameOverOverlay}>
+            <div className={styles.gameOverContent}>
+              <h2 className={styles.resultTitle}>
+                {playerSide === gameResult.winner ? 'WIN' : 'LOSE'}
+              </h2>
+              <div className={styles.finalScore}>
+                <span>{gameResult.leftScore}</span>
+                <span className={styles.scoreSeparator}>-</span>
+                <span>{gameResult.rightScore}</span>
+              </div>
+              {gameResult.message && (
+                <p className={styles.resultMessage}>{gameResult.message}</p>
+              )}
+              <button 
+                onClick={handleBackToHome}
+                className={styles.backButton}
+              >
+                戻る
+              </button>
+            </div>
           </div>
         )}
         
@@ -252,7 +300,7 @@ const PongGame = () => {
         <div className={styles.dialogOverlay}>
           <div className={styles.dialog}>
             <p className={styles.dialogText}>
-              中断するとあなたは不戦敗となります。\nゲームを中断しますか？
+              中断するとあなたは不戦敗となります。ゲームを中断しますか？
             </p>
             <div className={styles.dialogButtons}>
               <button
@@ -272,43 +320,46 @@ const PongGame = () => {
         </div>
       )}
 
-      <div className={styles.chatContainer}>
-        <div className={styles.chatMessages}>
-          {chatMessages.map((chat, index) => (
-            <div key={index} className="mb-2">
-              <span className="font-bold">{chat.name}:</span>
-              <span className="ml-2">{chat.message}</span>
-            </div>
-          ))}
-        </div>
+      {/* チャット部分 - ゲーム終了時は非表示 */}
+      {!isGameOver && (
+        <div className={styles.chatContainer}>
+          <div className={styles.chatMessages}>
+            {chatMessages.map((chat, index) => (
+              <div key={index} className="mb-2">
+                <span className="font-bold">{chat.name}:</span>
+                <span className="ml-2">{chat.message}</span>
+              </div>
+            ))}
+          </div>
 
-        <div className={styles.chatInputContainer}>
-          <input
-            type="text"
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            onKeyDown={(e) => {
-              // チャット入力中のwキーとsキーのイベント伝播を停止
-              if (e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
-                e.stopPropagation();
-              }
-              // Enterキーが押されたらチャット送信
-              if (e.key === "Enter") {
-                sendChat();
-              }
-            }}
-            className={styles.chatInput}
-            placeholder="メッセージを入力..."
-          />
-          <button
-            onClick={sendChat}
-            type="button"
-            className={styles.sendButton}
-          >
-            送信
-          </button>
+          <div className={styles.chatInputContainer}>
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => {
+                // チャット入力中のwキーとsキーのイベント伝播を停止
+                if (e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+                  e.stopPropagation();
+                }
+                // Enterキーが押されたらチャット送信
+                if (e.key === "Enter") {
+                  sendChat();
+                }
+              }}
+              className={styles.chatInput}
+              placeholder="メッセージを入力..."
+            />
+            <button
+              onClick={sendChat}
+              type="button"
+              className={styles.sendButton}
+            >
+              送信
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

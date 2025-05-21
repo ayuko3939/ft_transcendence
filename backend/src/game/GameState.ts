@@ -18,7 +18,6 @@ import { GameState } from "../types";
 
 export class GameEngine {
   // ゲーム定数の設定
-  // private readonly BALL_SPEED = 2; // delete 
   private readonly CANVAS_WIDTH = 800;
   private readonly CANVAS_HEIGHT = 600;
   private readonly PADDLE_HEIGHT = 100;
