@@ -82,6 +82,13 @@ export class PongSocketClient {
     });
   }
 
+  // webSocketClient.ts に追加
+  public sendSurrenderMessage(): void {
+    this.sendMessage({
+      type: "surrender"
+    });
+  }
+
   private sendMessage(message: WebSocketMessage): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       try {

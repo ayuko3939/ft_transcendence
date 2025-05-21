@@ -4,6 +4,7 @@ import type { ChatMessage, GameState, PlayerSide } from "src/types/game";
 import { useEffect, useRef, useState } from "react";
 import { PongController } from "@/lib/game/gameController";
 import { PongSocketClient } from "@/lib/game/webSocketClient";
+import { useRouter } from "next/navigation";
 
 import styles from "./game.module.css";
 
@@ -40,7 +41,10 @@ const PongGame = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [countdown, setCountdown] = useState<number | null>(null);
-
+  // 中断確認ダイアログの表示状態
+  const [showSurrenderConfirm, setShowSurrenderConfirm] = useState(false);
+  
+  const router = useRouter();
   const controllerRef = useRef<PongController | null>(null);
   const socketClientRef = useRef<PongSocketClient | null>(null);
 
@@ -119,8 +123,40 @@ const PongGame = () => {
     }
   };
 
+  // ゲーム中断ハンドラ
+  const handleSurrender = () => {
+    setShowSurrenderConfirm(true);
+  };
+
+  // 中断確認ダイアログでの「はい」クリック時
+  const confirmSurrender = () => {
+    if (socketClientRef.current) {
+      // 追加した sendSurrenderMessage メソッドを使用
+      socketClientRef.current.sendSurrenderMessage();
+      socketClientRef.current.disconnect();
+      // ホーム画面に戻る
+      router.push("/");
+    }
+    setShowSurrenderConfirm(false);
+  };
+
+  // 中断確認ダイアログでの「いいえ」クリック時
+  const cancelSurrender = () => {
+    setShowSurrenderConfirm(false);
+  };
+
   return (
     <div className={styles.container}>
+      {/* 中断ボタン */}
+      <div className={styles.surrenderButtonContainer}>
+        <button
+          onClick={handleSurrender}
+          className={styles.surrenderButton}
+        >
+          中断
+        </button>
+      </div>
+
       <div className={styles.canvasContainer}>
         <canvas
           ref={canvasRef}
@@ -135,6 +171,31 @@ const PongGame = () => {
           </div>
         )}
       </div>
+
+      {/* 中断確認ダイアログ */}
+      {showSurrenderConfirm && (
+        <div className={styles.dialogOverlay}>
+          <div className={styles.dialog}>
+            <p className={styles.dialogText}>
+              中断するとあなたは不戦敗となります。\nゲームを中断しますか？
+            </p>
+            <div className={styles.dialogButtons}>
+              <button
+                onClick={confirmSurrender}
+                className={`${styles.dialogButton} ${styles.confirmButton}`}
+              >
+                はい
+              </button>
+              <button
+                onClick={cancelSurrender}
+                className={`${styles.dialogButton} ${styles.cancelButton}`}
+              >
+                いいえ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={styles.chatContainer}>
         <div className={styles.chatMessages}>

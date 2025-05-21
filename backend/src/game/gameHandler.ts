@@ -318,7 +318,10 @@ function handleGameOver(room: GameRoom) {
  * 降参処理を行う関数 (中断ボタン用)
  */
 function handleSurrender(room: GameRoom, playerSide: "left" | "right") {
+  // ゲームが開始されていない場合は何もしない
   if (!room.gameStarted) return;
+  
+  console.log(`Player ${playerSide} surrendered the game`);
   
   // 降参したプレイヤーの相手を勝者とする
   const winner = playerSide === "left" ? "right" : "left";
@@ -332,8 +335,43 @@ function handleSurrender(room: GameRoom, playerSide: "left" | "right") {
     room.gameState.score.right = room.gameState.winningScore;
   }
   
-  // ゲーム終了処理
-  handleGameOver(room);
+  // 降参したプレイヤーに敗北通知を送信
+  const surrenderingPlayer = room.players[playerSide];
+  if (surrenderingPlayer) {
+    const surrenderMessage = JSON.stringify({
+      type: "gameOver",
+      winner: winner,
+      reason: "surrender",
+      message: "あなたは中断して敗北しました。",
+      leftScore: room.gameState.score.left,
+      rightScore: room.gameState.score.right,
+    });
+    
+    surrenderingPlayer.send(surrenderMessage);
+  }
+  
+  // 勝利したプレイヤーに勝利通知を送信
+  const victorPlayer = room.players[winner];
+  if (victorPlayer) {
+    const victoryMessage = JSON.stringify({
+      type: "gameOver",
+      winner: winner,
+      reason: "opponent_surrendered",
+      message: "相手プレイヤーが中断しました。あなたの勝利です！",
+      leftScore: room.gameState.score.left,
+      rightScore: room.gameState.score.right,
+    });
+    
+    victorPlayer.send(victoryMessage);
+  }
+  
+  // ゲームを停止
+  if (room.gameIntervals.gameInterval) {
+    clearInterval(room.gameIntervals.gameInterval);
+    room.gameIntervals.gameInterval = undefined;
+  }
+  
+  room.gameStarted = false;
 }
 
 /**
