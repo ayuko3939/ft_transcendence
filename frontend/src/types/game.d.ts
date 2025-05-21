@@ -36,3 +36,9 @@ export interface WebSocketMessage {
   type: string;
   [key: string]: unknown;
 }
+
+// ゲーム設定
+export interface GameSettings {
+  ballSpeed: number;
+  winningScore: number;
+}

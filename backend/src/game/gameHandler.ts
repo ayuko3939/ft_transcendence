@@ -7,10 +7,12 @@ import {
   GameRoom, 
   ChatMessage, 
   PaddleMoveMessage, 
-  SurrenderMessage, 
-  GameMessage 
+  SurrenderMessage,
+  GameSettingsMessage,
+  GameMessage,
+  GameSettings
 } from "../types";
-import { GAME_CONSTANTS } from "./constants";
+import { GAME_CONSTANTS, DEFAULT_GAME_SETTINGS } from "./constants";
 
 // ゲームルームの保持用Map
 const gameRooms = new Map<string, GameRoom>();
@@ -51,8 +53,9 @@ function handleGameConnection(connection: WebSocket, req: FastifyRequest, fastif
     playerSide = "right";
     console.log("right player connected");
 
-    // 2人目のプレイヤーが参加したら、ゲームの開始処理を行う
-    startGameCountdown(room);
+    // 2人目のプレイヤーが参加した時点では、まだカウントダウンを開始しない
+    // 1人目のプレイヤーが設定完了するのを待つ
+    checkAndStartGame(room);
   } else {
     // 既に2人接続している場合は接続を閉じる
     connection.close();
@@ -102,6 +105,11 @@ function handlePlayerMessage(message: Buffer, room: GameRoom, playerSide: "left"
           handleSurrender(room, playerSide);
         }
         break;
+      case "gameSettings":
+        if (isGameSettingsMessage(data)) {
+          handleGameSettings(data, room, playerSide);
+        }
+        break;
       default:
         console.error(`Unknown message type: ${data.type}`);
     }
@@ -132,6 +140,16 @@ function isPaddleMoveMessage(message: Partial<GameMessage>): message is PaddleMo
  */
 function isSurrenderMessage(message: Partial<GameMessage>): message is SurrenderMessage {
   return message.type === "surrender";
+}
+
+/**
+ * 型ガード: GameSettingsMessage
+ */
+function isGameSettingsMessage(message: Partial<GameMessage>): message is GameSettingsMessage {
+  return message.type === "gameSettings" && 
+    typeof (message as GameSettingsMessage).settings === "object" &&
+    typeof (message as GameSettingsMessage).settings.ballSpeed === "number" &&
+    typeof (message as GameSettingsMessage).settings.winningScore === "number";
 }
 
 /**
@@ -177,17 +195,50 @@ function handlePaddleMove(data: PaddleMoveMessage, room: GameRoom, playerSide: "
 }
 
 /**
+ * ゲーム設定を処理する関数
+ */
+function handleGameSettings(data: GameSettingsMessage, room: GameRoom, playerSide: "left" | "right") {
+  // 左側プレイヤーからの設定のみを受け付ける
+  if (playerSide !== "left") {
+    console.warn("Right player attempted to change game settings, ignored");
+    return;
+  }
+  
+  const { ballSpeed, winningScore } = data.settings;
+  console.log(`Game settings updated: ballSpeed=${ballSpeed}, winningScore=${winningScore}`);
+  
+  // 設定を保存
+  room.settings = {
+    ballSpeed,
+    winningScore
+  };
+  
+  // ゲーム状態に勝利点数を反映
+  room.gameState.winningScore = winningScore;
+  
+  // 左側プレイヤーの準備完了フラグをセット
+  room.leftPlayerReady = true;
+  
+  // 右側プレイヤーが既に接続している場合はゲーム開始準備をチェック
+  checkAndStartGame(room);
+}
+
+/**
  * 新しいゲームルームを作成する関数
  */
 function createGameRoom(): GameRoom {
+  // デフォルト設定値を取得
+  const defaultBallSpeed = DEFAULT_GAME_SETTINGS.BALL_SPEED;
+  const defaultWinningScore = DEFAULT_GAME_SETTINGS.WINNING_SCORE;
+
   return {
     players: {},
     gameState: {
       ball: {
         x: GAME_CONSTANTS.CANVAS_WIDTH / 2,
         y: GAME_CONSTANTS.CANVAS_HEIGHT / 2,
-        dx: GAME_CONSTANTS.INITIAL_BALL_SPEED,
-        dy: GAME_CONSTANTS.INITIAL_BALL_SPEED,
+        dx: defaultBallSpeed * (Math.random() > 0.5 ? 1 : -1),
+        dy: defaultBallSpeed * (Math.random() > 0.5 ? 1 : -1),
         radius: GAME_CONSTANTS.BALL_RADIUS,
       },
       paddleLeft: {
@@ -205,12 +256,30 @@ function createGameRoom(): GameRoom {
       score: { left: 0, right: 0 },
       gameOver: false,
       winner: null,
-      winningScore: GAME_CONSTANTS.WINNING_SCORE,
+      winningScore: defaultWinningScore,
+      ballSpeed: defaultBallSpeed, // ここで明示的にballSpeedを初期化
     },
     chats: [],
     gameStarted: false,
     gameIntervals: {}, // タイマー参照を保持するためのオブジェクト
+    settings: {
+      ballSpeed: defaultBallSpeed,
+      winningScore: defaultWinningScore
+    },
+    leftPlayerReady: false, // 左側プレイヤーの準備状態
   };
+}
+
+/**
+ * ゲーム開始条件をチェックして、条件が揃っていればゲームカウントダウンを開始する関数
+ */
+function checkAndStartGame(room: GameRoom) {
+  // 両方のプレイヤーが接続済みかつ左側プレイヤーが設定完了している場合にのみカウントダウン開始
+  if (room.players.left && room.players.right && room.leftPlayerReady) {
+    startGameCountdown(room);
+  } else {
+    console.log("Waiting for both players to be ready");
+  }
 }
 
 /**
@@ -252,6 +321,9 @@ function startGameCountdown(room: GameRoom) {
 function startGame(room: GameRoom) {
   room.gameStarted = true;
 
+  // カスタム設定を適用したボール初期化
+  initializeBallWithSettings(room);
+
   // ゲーム開始メッセージを送信
   const gameStartMessage = JSON.stringify({
     type: "gameStart",
@@ -287,6 +359,25 @@ function startGame(room: GameRoom) {
   
   // タイマー参照を保存
   room.gameIntervals.gameInterval = gameInterval;
+}
+
+/**
+ * 設定に基づいてボール初期状態を設定する関数
+ */
+function initializeBallWithSettings(room: GameRoom) {
+  const speed = room.settings.ballSpeed;
+  
+  // ゲーム状態にボールスピードを保存
+  room.gameState.ballSpeed = speed;
+  
+  // 初期ボール状態も設定
+  room.gameState.ball = {
+    x: GAME_CONSTANTS.CANVAS_WIDTH / 2,
+    y: GAME_CONSTANTS.CANVAS_HEIGHT / 2,
+    dx: speed * (Math.random() > 0.5 ? 1 : -1),
+    dy: speed * (Math.random() > 0.5 ? 1 : -1),
+    radius: GAME_CONSTANTS.BALL_RADIUS,
+  };
 }
 
 /**

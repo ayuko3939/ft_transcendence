@@ -1,8 +1,9 @@
 import type {
   ChatMessage,
-  GameState,
+  GameState, 
   PlayerSide,
   WebSocketMessage,
+  GameSettings
 } from "src/types/game";
 
 export interface WebSocketHandlers {
@@ -65,6 +66,14 @@ export class PongSocketClient {
       this.ws.close();
       this.ws = null;
     }
+  }
+
+  // ゲーム設定送信メソッドの追加・宣言
+  public sendGameSettings(settings: GameSettings): void {
+    this.sendMessage({
+      type: "gameSettings",
+      settings
+    });
   }
 
   public sendPaddleMove(y: number): void {

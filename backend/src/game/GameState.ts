@@ -18,7 +18,7 @@ import { GameState } from "../types";
 
 export class GameEngine {
   // ゲーム定数の設定
-  private readonly BALL_SPEED = 2;
+  // private readonly BALL_SPEED = 2; // delete 
   private readonly CANVAS_WIDTH = 800;
   private readonly CANVAS_HEIGHT = 600;
   private readonly PADDLE_HEIGHT = 100;
@@ -37,9 +37,12 @@ export class GameEngine {
     if (this.gameState.winner === undefined) {
       this.gameState.winner = null;
     }
-    // 勝利点数が設定されていない場合はデフォルト値を設定 (デフォルトは10点)
     if (this.gameState.winningScore === undefined) {
       this.gameState.winningScore = 10;
+    }
+    if (this.gameState.ballSpeed === undefined) {
+      // 既存のdx値からスピードを推測
+      this.gameState.ballSpeed = Math.abs(this.gameState.ball.dx);
     }
   }
 
@@ -206,11 +209,13 @@ export class GameEngine {
    * - ランダムな方向（左右・上下）に初期速度を設定
    */
   private resetBall(): void {
+    const ballSpeed = this.gameState.ballSpeed; // GameStateから速度を取得
+    
     this.gameState.ball = {
       x: this.CANVAS_WIDTH / 2,
       y: this.CANVAS_HEIGHT / 2,
-      dx: this.BALL_SPEED * (Math.random() > 0.5 ? 1 : -1),
-      dy: this.BALL_SPEED * (Math.random() > 0.5 ? 1 : -1),
+      dx: ballSpeed * (Math.random() > 0.5 ? 1 : -1),
+      dy: ballSpeed * (Math.random() > 0.5 ? 1 : -1),
       radius: this.BALL_RADIUS,
     };
   }
