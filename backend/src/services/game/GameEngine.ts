@@ -1,20 +1,4 @@
-/**
- * PONGゲームのエンジンを実装するクラス
- *
- * 処理の流れ：
- * 1. ボールの移動
- * 2. 得点判定（左右の壁に到達した場合）
- * 3. パドル衝突判定（優先的に処理）
- * 4. 壁衝突判定（パドルと衝突していない場合のみ）
- * 5. 勝者判定
- *
- * 設計の特徴：
- * - パドル衝突判定を優先し、パドルの表面でのみ衝突を判定
- * - 上下の壁とパドルの交差点での特殊処理を実装
- * - 勝利条件を明確に定義（デフォルト10点）
- */
-
-import { GameState } from "../types";
+import type { GameState } from "../../types/game";
 
 export class GameEngine {
   // ゲーム定数の設定
@@ -68,7 +52,7 @@ export class GameEngine {
     }
 
     // 3.パドルとの衝突判定を優先
-    let paddleCollision = this.checkPaddleCollision();
+    const paddleCollision = this.checkPaddleCollision();
 
     // 4.パドルと衝突していない場合のみ、上下の壁との衝突判定
     if (!paddleCollision) {
@@ -209,7 +193,7 @@ export class GameEngine {
    */
   private resetBall(): void {
     const ballSpeed = this.gameState.ballSpeed; // GameStateから速度を取得
-    
+
     this.gameState.ball = {
       x: this.CANVAS_WIDTH / 2,
       y: this.CANVAS_HEIGHT / 2,

@@ -4,7 +4,6 @@ import websocket from "@fastify/websocket";
 import { mkdirSync } from "node:fs";
 import dotenv from "dotenv";
 import routes from "./routes";
-import { registerGameHandler } from "./game/gameHandler";
 
 // 環境変数の読み込み
 dotenv.config();
@@ -32,9 +31,6 @@ const startServer = async () => {
 
   // REST APIルートの登録
   await fastify.register(routes);
-
-  // ゲームWebSocketハンドラの登録
-  registerGameHandler(fastify);
 
   // ルートヘルスチェック
   fastify.get("/", (request, reply) => {

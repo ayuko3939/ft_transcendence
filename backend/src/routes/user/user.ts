@@ -1,21 +1,9 @@
 import type { FastifyInstance } from "fastify";
-import { db } from "../db";
-import { user } from "../../drizzle/schema";
+import { db } from "../../db";
+import { user } from "../../../drizzle/schema";
 import { eq } from "drizzle-orm";
 
-export default async function usersRoutes(fastify: FastifyInstance) {
-  fastify.get("/", async (request, reply) => {
-    try {
-      const users = await db.select().from(user);
-      return { users };
-    } catch (error) {
-      fastify.log.error(`ユーザー一覧取得エラー: ${error}`);
-      return reply
-        .status(500)
-        .send({ error: "ユーザーの取得中にエラーが発生しました" });
-    }
-  });
-
+export default async function userRoutes(fastify: FastifyInstance) {
   fastify.get("/:id", async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
