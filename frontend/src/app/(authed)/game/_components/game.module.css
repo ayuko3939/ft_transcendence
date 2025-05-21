@@ -37,6 +37,94 @@
   text-shadow: 0 0 10px var(--cyber-primary);
 }
 
+/* 中断ボタンのスタイル */
+.surrenderButtonContainer {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.surrenderButton {
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 50, 50, 0.8);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.surrenderButton:hover {
+  background-color: rgba(255, 50, 50, 1);
+}
+
+/* 中断確認ダイアログのスタイル */
+.dialogOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.dialog {
+  background-color: rgba(0, 30, 60, 0.9);
+  border: 2px solid var(--cyber-primary);
+  border-radius: 8px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.dialogText {
+  color: white;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.dialogButtons {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.dialogButton {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirmButton {
+  background-color: rgba(255, 50, 50, 0.8);
+  color: white;
+}
+
+.confirmButton:hover {
+  background-color: rgba(255, 50, 50, 1);
+}
+
+.cancelButton {
+  background-color: rgba(80, 80, 80, 0.8);
+  color: white;
+}
+
+.cancelButton:hover {
+  background-color: rgba(100, 100, 100, 1);
+}
+
 /* チャット部分のスタイル */
 .chatContainer {
   width: 100%;
@@ -87,6 +175,150 @@
   transition: all 0.2s ease;
 }
 
-.sendButton:hover {
+/* ゲーム設定モーダルのスタイル */
+.settingsOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.settingsModal {
+  background-color: rgba(0, 30, 60, 0.9);
+  border: 2px solid var(--cyber-primary, #00ffff);
+  border-radius: 8px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.settingsTitle {
+  color: white;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.settingItem {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settingLabel {
+  color: var(--cyber-primary, #00ffff);
+  font-size: 1.1rem;
+  margin-right: 1rem;
+}
+
+.settingSelect {
+  background-color: rgba(0, 10, 30, 0.8);
+  border: 1px solid var(--cyber-primary, #00ffff);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 4px;
+  min-width: 100px;
+}
+
+.settingSelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.4);
+}
+
+.settingsButton {
+  background-color: var(--cyber-primary, #00ffff);
+  color: #000;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 1rem auto 0;
+  display: block;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settingsButton:hover {
   background-color: rgba(0, 255, 255, 0.8);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* ゲーム終了オーバーレイのスタイル */
+.gameOverOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 100;
+}
+
+.gameOverContent {
+  background-color: rgba(0, 30, 60, 0.9);
+  border: 2px solid var(--cyber-primary, #00ffff);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+  width: 90%;
+  max-width: 500px;
+}
+
+.resultTitle {
+  font-size: 4rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: var(--cyber-primary, #00ffff);
+  text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+}
+
+.finalScore {
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scoreSeparator {
+  margin: 0 1rem;
+  color: #888;
+}
+
+.resultMessage {
+  color: white;
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+}
+
+.backButton {
+  background-color: var(--cyber-primary, #00ffff);
+  color: #000;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backButton:hover {
+  background-color: rgba(0, 255, 255, 0.8);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }

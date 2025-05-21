@@ -1,8 +1,10 @@
 import type {
   ChatMessage,
-  GameState,
+  GameState, 
   PlayerSide,
   WebSocketMessage,
+  GameSettings,
+  GameResult
 } from "src/types/game";
 
 export interface WebSocketHandlers {
@@ -11,6 +13,7 @@ export interface WebSocketHandlers {
   onChatMessages: (messages: ChatMessage[]) => void;
   onCountdown: (count: number) => void;
   onGameStart: (gameState: GameState) => void;
+  onGameOver: (result: GameResult) => void;
 }
 
 export class PongSocketClient {
@@ -67,6 +70,14 @@ export class PongSocketClient {
     }
   }
 
+  // ゲーム設定送信メソッドの追加・宣言
+  public sendGameSettings(settings: GameSettings): void {
+    this.sendMessage({
+      type: "gameSettings",
+      settings
+    });
+  }
+
   public sendPaddleMove(y: number): void {
     this.sendMessage({
       type: "paddleMove",
@@ -79,6 +90,13 @@ export class PongSocketClient {
       type: "chat",
       name,
       message,
+    });
+  }
+
+  // webSocketClient.ts に追加
+  public sendSurrenderMessage(): void {
+    this.sendMessage({
+      type: "surrender"
     });
   }
 
@@ -112,6 +130,15 @@ export class PongSocketClient {
     } else if (data.type === "gameStart") {
       // ゲーム開始
       this.handlers.onGameStart(this.normalizeGameState(data.gameState));
+    } else if (data.type === "gameOver") {
+      // ゲーム終了 - 追加
+      this.handlers.onGameOver({
+        winner: data.winner,
+        leftScore: data.leftScore,
+        rightScore: data.rightScore,
+        reason: data.reason,
+        message: data.message
+      });
     } else if (data.type === "gameState" || data.ball) {
       // ゲーム状態の更新
       // data.typeがgameStateの場合と、直接ゲーム状態が送られてくる場合の両方に対応
