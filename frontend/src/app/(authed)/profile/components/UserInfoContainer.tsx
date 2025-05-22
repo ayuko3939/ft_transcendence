@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 
+import PasswordChangeModal from "./PasswordChangeModal";
 import styles from "../profile.module.css";
 
 export default function UserInfoContainer() {
@@ -92,9 +93,14 @@ export default function UserInfoContainer() {
     }
   };
 
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
   const handlePasswordChange = () => {
-    // 実装予定: パスワード変更機能
-    console.log("パスワード変更リンクがクリックされました");
+    setIsPasswordModalOpen(true);
+  };
+
+  const handleClosePasswordModal = () => {
+    setIsPasswordModalOpen(false);
   };
 
   return (
@@ -168,6 +174,12 @@ export default function UserInfoContainer() {
           パスワードを変更する
         </p>
       </div>
+
+      {/* パスワード変更モーダル */}
+      <PasswordChangeModal 
+        isOpen={isPasswordModalOpen} 
+        onClose={handleClosePasswordModal} 
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-DOCKER_COMPOSE_FILE := docker-compose.yml
+COMMIT_HASH := $(shell git rev-parse --short HEAD)DOCKER_COMPOSE_FILE := docker-compose.yml
 DOCKER_COMPOSE_FILE_MINIMUM := docker-compose.min.yml
 DOCKER_COMPOSE_FILE_MINIO := docker-compose.minio.yml
 

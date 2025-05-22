@@ -7,7 +7,7 @@ import styles from "../dashboard.module.css";
 import DefaultAvator from "./DefaultAvator.svg";
 
 export default function AvatorCard() {
-  const { data: session } = useSession();
+s
   return (
     <div className={styles.userInfoContainer}>
       <div className={styles.avatarWrapper}>

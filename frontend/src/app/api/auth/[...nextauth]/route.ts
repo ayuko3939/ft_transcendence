@@ -53,12 +53,18 @@ export const authOptions: NextAuthOptions = {
       return baseUrl;
     },
 
-    async session({ session, user }) {
+    async session({ session, user, token }) {
       if (session.user) {
         session.user.id = user.id;
+        session.user.provider = token.provider
       }
       return session;
     },
+
+    async jwt({token, account}) {
+      token.provider = account?.provider
+      return token
+    }
   },
   jwt: {
     encode: async ({ token, secret, maxAge }) => {
@@ -73,37 +79,6 @@ export const authOptions: NextAuthOptions = {
       console.log("sessionToken", session.sessionToken);
       return session.sessionToken;
     },
-
-    // encode: async ({ token, secret, maxAge }) => {
-    //   const { cookies, headers } = require("next/headers");
-
-    //   const path = headers().get("x-pathname") || "";
-    //   const method = headers().get("x-method") || "";
-    //   if (
-    //     path.includes("/api/auth/callback/credentials") &&
-    //     method === "POST"
-    //   ) {
-    //     const sessionToken = cookies().get("next-auth.session-token");
-    //     if (sessionToken) return sessionToken.value;
-    //     return "";
-    //   }
-
-    //   return jwt.encode({ token, secret, maxAge });
-    // },
-
-    // decode: async ({ token, secret }) => {
-    //   const { headers } = require("next/headers");
-    //   const path = headers().get("x-pathname") || "";
-    //   const method = headers().get("x-method") || "";
-
-    //   if (
-    //     path.includes("/api/auth/callback/credentials") &&
-    //     method === "POST"
-    //   ) {
-    //     return null;
-    //   }
-    //   return jwt.decode({ token, secret });
-    // },
   },
 };
 
