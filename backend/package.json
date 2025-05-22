@@ -25,8 +25,10 @@
     "@fastify/cors": "^10.0.2",
     "@fastify/websocket": "^11.0.2",
     "@libsql/client": "^0.15.4",
+    "@types/uuid": "^10.0.0",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",
-    "fastify": "^5.2.1"
+    "fastify": "^5.2.1",
+    "uuid": "^11.1.0"
   }
 }

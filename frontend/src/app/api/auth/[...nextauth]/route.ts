@@ -1,8 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import { authenticateUser, updateSession } from "@/api/auth/users";
-import { client } from "@/api/db";
+import { db } from "@/api/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { drizzle } from "drizzle-orm/libsql";
 import * as jwt from "next-auth/jwt";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -10,7 +9,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions: NextAuthOptions = {
   debug: true,
-  adapter: DrizzleAdapter(drizzle(client, { logger: true }) as any),
+  adapter: DrizzleAdapter(db),
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -73,37 +72,6 @@ export const authOptions: NextAuthOptions = {
       console.log("sessionToken", session.sessionToken);
       return session.sessionToken;
     },
-
-    // encode: async ({ token, secret, maxAge }) => {
-    //   const { cookies, headers } = require("next/headers");
-
-    //   const path = headers().get("x-pathname") || "";
-    //   const method = headers().get("x-method") || "";
-    //   if (
-    //     path.includes("/api/auth/callback/credentials") &&
-    //     method === "POST"
-    //   ) {
-    //     const sessionToken = cookies().get("next-auth.session-token");
-    //     if (sessionToken) return sessionToken.value;
-    //     return "";
-    //   }
-
-    //   return jwt.encode({ token, secret, maxAge });
-    // },
-
-    // decode: async ({ token, secret }) => {
-    //   const { headers } = require("next/headers");
-    //   const path = headers().get("x-pathname") || "";
-    //   const method = headers().get("x-method") || "";
-
-    //   if (
-    //     path.includes("/api/auth/callback/credentials") &&
-    //     method === "POST"
-    //   ) {
-    //     return null;
-    //   }
-    //   return jwt.decode({ token, secret });
-    // },
   },
 };
 

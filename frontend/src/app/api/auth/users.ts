@@ -1,7 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
-import { client } from "@/api/db";
+import { db } from "@/api/db";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/libsql";
 import { account, session, user, userPassword } from "drizzle/schema";
 
 import { hashPassword, verifyPassword } from "./utils";
@@ -14,7 +13,6 @@ export async function getUserByEmail(email?: string): Promise<UserData | null> {
   if (!email) {
     return null;
   }
-  const db = drizzle(client, { logger: true });
   const result = await db
     .select()
     .from(user)
@@ -29,7 +27,6 @@ export async function createUser(
   password: string,
   image?: string,
 ): Promise<UserData> {
-  const db = drizzle(client, { logger: true });
   const passwordHash = await hashPassword(password);
 
   const newUserID = await db.transaction(async (tx) => {
@@ -62,8 +59,6 @@ export async function createUser(
 }
 
 export async function createAccount(userId: string): Promise<AccountData> {
-  const db = drizzle(client, { logger: true });
-
   const getExistAccounts = await db
     .select()
     .from(account)
@@ -91,7 +86,6 @@ export async function createAccount(userId: string): Promise<AccountData> {
 }
 
 export async function updateSession(userID: string): Promise<SessionData> {
-  const db = drizzle(client, { logger: true });
   const newSession = {
     sessionToken: crypto.randomUUID(),
     userId: userID,
@@ -115,8 +109,6 @@ export async function authenticateUser(
   email: string,
   password: string,
 ): Promise<UserData | null> {
-  const db = drizzle(client, { logger: true });
-
   const hitusers = await db
     .select()
     .from(user)

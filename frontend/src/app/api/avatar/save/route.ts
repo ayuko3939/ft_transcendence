@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
-import { client } from "@/api/db";
+import { db } from "@/api/db";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/libsql";
 import { user } from "drizzle/schema";
 import { getServerSession } from "next-auth";
 
@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = drizzle(client, { logger: true });
     try {
       await db.transaction(async (tx) => {
         await tx

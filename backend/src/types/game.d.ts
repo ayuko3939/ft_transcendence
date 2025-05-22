@@ -1,4 +1,12 @@
-import { WebSocket } from "ws";
+import type { WebSocket } from "ws";
+
+// ===== ゲームの基本的なデータ構造 =====
+
+// ゲームの設定用の型を追加
+export interface GameSettings {
+  ballSpeed: number;
+  winningScore: number;
+}
 
 // ゲームの状態
 export interface GameState {
@@ -28,8 +36,10 @@ export interface GameState {
   gameOver: boolean;
   winner: "left" | "right" | null;
   winningScore: number;
+  ballSpeed: number;
 }
 
+// ゲームルーム
 export interface GameRoom {
   players: {
     left?: WebSocket;
@@ -41,4 +51,13 @@ export interface GameRoom {
     message: string;
   }[];
   gameStarted: boolean;
+  // インターバルタイマーの参照を管理
+  gameIntervals: {
+    countdownInterval?: NodeJS.Timeout;
+    gameInterval?: NodeJS.Timeout;
+    [key: string]: NodeJS.Timeout | undefined;
+  };
+  // ゲーム設定状態を追加
+  settings: GameSettings;
+  leftPlayerReady: boolean;
 }

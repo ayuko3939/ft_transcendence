@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { BUCKET_NAME, s3Client } from "@/api/storage";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
