@@ -98,3 +98,83 @@ export const authenticators = sqliteTable(
     }),
   ]
 );
+
+export const tournaments = sqliteTable("tournament", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  hostId: text("host_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("waiting"), // waiting, in_progress, completed
+  maxPlayers: integer("max_players").notNull().default(8),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  startedAt: integer("started_at", { mode: "timestamp_ms" }),
+  completedAt: integer("completed_at", { mode: "timestamp_ms" }),
+});
+
+export const tournamentParticipants = sqliteTable(
+  "tournament_participant",
+  {
+    tournamentId: text("tournament_id")
+      .notNull()
+      .references(() => tournaments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: text("status").notNull().default("waiting"), // waiting, playing, won, lost
+    finalRank: integer("final_rank"),
+    joinedAt: integer("joined_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.tournamentId, table.userId],
+    }),
+  ]
+);
+
+export const matches = sqliteTable("match", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  player1Id: text("player1_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  player2Id: text("player2_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  player1Score: integer("player1_score").notNull(),
+  player2Score: integer("player2_score").notNull(),
+  winnerId: text("winner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  matchType: text("match_type").notNull().default("normal"), // normal, tournament
+  gameRoomId: text("game_room_id"),
+  playedAt: integer("played_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const tournamentMatches = sqliteTable("tournament_match", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  tournamentId: text("tournament_id")
+    .notNull()
+    .references(() => tournaments.id, { onDelete: "cascade" }),
+  matchId: text("match_id")
+    .references(() => matches.id, { onDelete: "cascade" }), // 実際の試合データへの参照
+  round: integer("round").notNull(),
+  matchNumber: integer("match_number").notNull(),
+  player1Id: text("player1_id").references(() => users.id, { onDelete: "set null" }),
+  player2Id: text("player2_id").references(() => users.id, { onDelete: "set null" }),
+  status: text("status").notNull().default("pending"), // pending, in_progress, completed
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
