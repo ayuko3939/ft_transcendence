@@ -1,31 +1,24 @@
-import type { GameState } from "../../types/game";
+import type { GameState, GameSettings, PlayerSide } from "../../types/shared/types";
+import { CANVAS, PADDLE, BALL } from "../../types/shared/constants";
 
 export class GameEngine {
-  // ゲーム定数の設定
-  private readonly CANVAS_WIDTH = 800;
-  private readonly CANVAS_HEIGHT = 600;
-  private readonly PADDLE_HEIGHT = 100;
-  private readonly PADDLE_WIDTH = 10;
-  private readonly BALL_RADIUS = 10;
-
   /**
    * ゲームエンジンを初期化
-   * - ゲーム終了フラグ、勝者、勝利点数の初期設定
+   * - ゲーム状態とゲーム設定を受け取る
    */
-  constructor(private gameState: GameState) {
+  constructor(
+    private gameState: GameState,
+    private settings: GameSettings
+  ) {
     // ゲーム状態の初期化
-    if (this.gameState.gameOver === undefined) {
-      this.gameState.gameOver = false;
+    if (this.gameState.status === undefined) {
+      this.gameState.status = 'playing';
     }
     if (this.gameState.winner === undefined) {
       this.gameState.winner = null;
     }
     if (this.gameState.winningScore === undefined) {
-      this.gameState.winningScore = 10;
-    }
-    if (this.gameState.ballSpeed === undefined) {
-      // 既存のdx値からスピードを推測
-      this.gameState.ballSpeed = Math.abs(this.gameState.ball.dx);
+      this.gameState.winningScore = this.settings.winningScore;
     }
   }
 
@@ -40,7 +33,7 @@ export class GameEngine {
    */
   update(): void {
     // 0.ゲームが終了している場合は更新しない
-    if (!this.gameState || this.gameState.gameOver) return;
+    if (!this.gameState || this.gameState.status === 'finished') return;
 
     // 1.ボールの移動
     this.gameState.ball.x += this.gameState.ball.dx;
@@ -85,9 +78,9 @@ export class GameEngine {
         this.gameState.paddleLeft.y + this.gameState.paddleLeft.height
     ) {
       // 壁との交差点かどうかをチェック
-      const nearTopWall = this.gameState.ball.y <= this.BALL_RADIUS;
+      const nearTopWall = this.gameState.ball.y <= BALL.RADIUS;
       const nearBottomWall =
-        this.gameState.ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS;
+        this.gameState.ball.y >= CANVAS.HEIGHT - BALL.RADIUS;
 
       // パドルと壁の交差点にいる場合、両方向に反転
       if (nearTopWall || nearBottomWall) {
@@ -113,9 +106,9 @@ export class GameEngine {
         this.gameState.paddleRight.y + this.gameState.paddleRight.height
     ) {
       // 壁との交差点かどうかをチェック
-      const nearTopWall = this.gameState.ball.y <= this.BALL_RADIUS;
+      const nearTopWall = this.gameState.ball.y <= BALL.RADIUS;
       const nearBottomWall =
-        this.gameState.ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS;
+        this.gameState.ball.y >= CANVAS.HEIGHT - BALL.RADIUS;
 
       // パドルと壁の交差点にいる場合、両方向に反転
       if (nearTopWall || nearBottomWall) {
@@ -140,7 +133,7 @@ export class GameEngine {
   private checkWallCollision(): void {
     if (
       this.gameState.ball.y <= 0 ||
-      this.gameState.ball.y >= this.CANVAS_HEIGHT
+      this.gameState.ball.y >= CANVAS.HEIGHT
     ) {
       this.gameState.ball.dy *= -1;
     }
@@ -155,7 +148,7 @@ export class GameEngine {
    */
   private checkScore(): boolean {
     // 右側の壁に到達：左側のプレイヤーが得点
-    if (this.gameState.ball.x >= this.CANVAS_WIDTH) {
+    if (this.gameState.ball.x >= CANVAS.WIDTH) {
       this.gameState.score.left++;
       this.resetBall();
       return true;
@@ -175,14 +168,14 @@ export class GameEngine {
    * - 達した場合はゲーム終了フラグを立て、勝者を記録
    */
   private checkWinner(): void {
-    const winningScore = this.gameState.winningScore || 10;
+    const winningScore = this.gameState.winningScore;
 
     if (this.gameState.score.left >= winningScore) {
-      this.gameState.gameOver = true;
-      this.gameState.winner = "left";
+      this.gameState.status = 'finished';
+      this.gameState.winner = 'left';
     } else if (this.gameState.score.right >= winningScore) {
-      this.gameState.gameOver = true;
-      this.gameState.winner = "right";
+      this.gameState.status = 'finished';
+      this.gameState.winner = 'right';
     }
   }
 
@@ -192,14 +185,14 @@ export class GameEngine {
    * - ランダムな方向（左右・上下）に初期速度を設定
    */
   private resetBall(): void {
-    const ballSpeed = this.gameState.ballSpeed; // GameStateから速度を取得
+    const ballSpeed = this.settings.ballSpeed; // GameSettingsから速度を取得
 
     this.gameState.ball = {
-      x: this.CANVAS_WIDTH / 2,
-      y: this.CANVAS_HEIGHT / 2,
+      x: CANVAS.WIDTH / 2,
+      y: CANVAS.HEIGHT / 2,
       dx: ballSpeed * (Math.random() > 0.5 ? 1 : -1),
       dy: ballSpeed * (Math.random() > 0.5 ? 1 : -1),
-      radius: this.BALL_RADIUS,
+      radius: BALL.RADIUS,
     };
   }
 }

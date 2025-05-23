@@ -1,107 +1,52 @@
 import { GameEngine } from "../../services/game/GameEngine";
 import { v4 as uuidv4 } from "uuid";
 import type { GameRoom } from "../../types/game";
-
-/**
- * ゲーム関連のデフォルト設定
- */
-const DEFAULT_GAME_SETTINGS = {
-  // ボール設定
-  BALL_SPEED: 3, // 初期値を3に変更
-
-  // ゲーム設定
-  WINNING_SCORE: 10,
-};
-
-/**
- * ゲーム関連の固定定数定義
- */
-const GAME_CONSTANTS = {
-  // キャンバスサイズ
-  CANVAS_WIDTH: 800,
-  CANVAS_HEIGHT: 600,
-
-  // ボール設定
-  BALL_RADIUS: 10,
-
-  // パドル設定
-  PADDLE_WIDTH: 10,
-  PADDLE_HEIGHT: 100,
-  PADDLE_LEFT_X: 50,
-  PADDLE_RIGHT_X: 740,
-
-  // ゲーム設定
-  COUNTDOWN_SECONDS: 5,
-  FPS: 60,
-};
-
-/**
- * WebSocketメッセージの種類
- */
-export enum MessageType { // Not Used yet
-  // ゲーム初期化・進行関連
-  INIT = "init",
-  COUNTDOWN = "countdown",
-  GAME_START = "gameStart",
-  GAME_STATE = "gameState",
-  GAME_OVER = "gameOver",
-
-  // プレイヤー操作関連
-  PADDLE_MOVE = "paddleMove",
-  PADDLE_STATE = "paddleState",
-  SURRENDER = "surrender",
-
-  // 設定関連
-  GAME_SETTINGS = "gameSettings",
-
-  // コミュニケーション関連
-  CHAT = "chat",
-}
+import type { GameState, GameSettings } from "../../types/shared/types";
+import { CANVAS, BALL, PADDLE, GAME } from "../../types/shared/constants";
 
 /**
  * 新しいゲームルームを作成する関数
  */
 export function createGameRoom(): GameRoom {
   // デフォルト設定値を取得
-  const defaultBallSpeed = DEFAULT_GAME_SETTINGS.BALL_SPEED;
-  const defaultWinningScore = DEFAULT_GAME_SETTINGS.WINNING_SCORE;
+  const defaultBallSpeed = BALL.DEFAULT_SPEED;
+  const defaultWinningScore = GAME.DEFAULT_WINNING_SCORE;
 
   return {
+    id: uuidv4(),
     players: {},
-    gameState: {
+    state: {
       ball: {
-        x: GAME_CONSTANTS.CANVAS_WIDTH / 2,
-        y: GAME_CONSTANTS.CANVAS_HEIGHT / 2,
+        x: CANVAS.WIDTH / 2,
+        y: CANVAS.HEIGHT / 2,
         dx: defaultBallSpeed * (Math.random() > 0.5 ? 1 : -1),
         dy: defaultBallSpeed * (Math.random() > 0.5 ? 1 : -1),
-        radius: GAME_CONSTANTS.BALL_RADIUS,
+        radius: BALL.RADIUS,
       },
       paddleLeft: {
-        x: GAME_CONSTANTS.PADDLE_LEFT_X,
-        y: GAME_CONSTANTS.CANVAS_HEIGHT / 2 - GAME_CONSTANTS.PADDLE_HEIGHT / 2,
-        width: GAME_CONSTANTS.PADDLE_WIDTH,
-        height: GAME_CONSTANTS.PADDLE_HEIGHT,
+        x: PADDLE.LEFT_X,
+        y: CANVAS.HEIGHT / 2 - PADDLE.HEIGHT / 2,
+        width: PADDLE.WIDTH,
+        height: PADDLE.HEIGHT,
       },
       paddleRight: {
-        x: GAME_CONSTANTS.PADDLE_RIGHT_X,
-        y: GAME_CONSTANTS.CANVAS_HEIGHT / 2 - GAME_CONSTANTS.PADDLE_HEIGHT / 2,
-        width: GAME_CONSTANTS.PADDLE_WIDTH,
-        height: GAME_CONSTANTS.PADDLE_HEIGHT,
+        x: PADDLE.RIGHT_X,
+        y: CANVAS.HEIGHT / 2 - PADDLE.HEIGHT / 2,
+        width: PADDLE.WIDTH,
+        height: PADDLE.HEIGHT,
       },
       score: { left: 0, right: 0 },
-      gameOver: false,
+      status: 'waiting',
       winner: null,
       winningScore: defaultWinningScore,
-      ballSpeed: defaultBallSpeed, // ここで明示的にballSpeedを初期化
     },
     chats: [],
-    gameStarted: false,
-    gameIntervals: {}, // タイマー参照を保持するためのオブジェクト
     settings: {
       ballSpeed: defaultBallSpeed,
       winningScore: defaultWinningScore,
     },
-    leftPlayerReady: false, // 左側プレイヤーの準備状態
+    timers: {},
+    leftPlayerReady: false,
   };
 }
 
@@ -109,7 +54,10 @@ export function createGameRoom(): GameRoom {
  * ゲームカウントダウンを開始する関数
  */
 export function startGameCountdown(room: GameRoom) {
-  let countdown = GAME_CONSTANTS.COUNTDOWN_SECONDS;
+  let countdown = GAME.COUNTDOWN_SECONDS;
+
+  // ゲーム状態を'countdown'に変更
+  room.state.status = 'countdown';
 
   // カウントダウンタイマーを設定
   const countdownInterval = setInterval(() => {
@@ -135,65 +83,63 @@ export function startGameCountdown(room: GameRoom) {
   }, 1000);
 
   // タイマー参照を保存
-  room.gameIntervals.countdownInterval = countdownInterval;
+  room.timers.countdown = countdownInterval;
 }
 
 /**
  * ゲームを開始する関数
  */
 export function startGame(room: GameRoom) {
-  room.gameStarted = true;
-
   // カスタム設定を適用したボール初期化
   const speed = room.settings.ballSpeed;
 
-  // ゲーム状態にボールスピードを保存
-  room.gameState.ballSpeed = speed;
-
-  // 初期ボール状態も設定
-  room.gameState.ball = {
-    x: GAME_CONSTANTS.CANVAS_WIDTH / 2,
-    y: GAME_CONSTANTS.CANVAS_HEIGHT / 2,
+  // 初期ボール状態を設定
+  room.state.ball = {
+    x: CANVAS.WIDTH / 2,
+    y: CANVAS.HEIGHT / 2,
     dx: speed * (Math.random() > 0.5 ? 1 : -1),
     dy: speed * (Math.random() > 0.5 ? 1 : -1),
-    radius: GAME_CONSTANTS.BALL_RADIUS,
+    radius: BALL.RADIUS,
   };
+
+  // ゲーム状態を'playing'に変更
+  room.state.status = 'playing';
 
   // ゲーム開始メッセージを送信
   const gameStartMessage = JSON.stringify({
     type: "gameStart",
-    gameState: room.gameState,
+    state: room.state,
   });
 
   room.players.left?.send(gameStartMessage);
   room.players.right?.send(gameStartMessage);
 
   // ゲームループを開始
-  const gameEngine = new GameEngine(room.gameState);
+  const gameEngine = new GameEngine(room.state, room.settings);
   const gameInterval = setInterval(() => {
-    if (room.gameStarted && room.players.left && room.players.right) {
+    if (room.state.status === 'playing' && room.players.left && room.players.right) {
       gameEngine.update();
 
       // 両プレイヤーに状態を送信
       const stateMessage = JSON.stringify({
         type: "gameState",
-        ...room.gameState,
+        state: room.state,
       });
 
       room.players.left.send(stateMessage);
       room.players.right.send(stateMessage);
 
       // ゲームが終了した場合
-      if (room.gameState.gameOver) {
+      if ((room.state.status as 'waiting' | 'countdown' | 'playing' | 'finished') === 'finished') {
         handleGameOver(room);
       }
     } else {
       clearInterval(gameInterval);
     }
-  }, 1000 / GAME_CONSTANTS.FPS);
+  }, 1000 / GAME.FPS);
 
   // タイマー参照を保存
-  room.gameIntervals.gameInterval = gameInterval;
+  room.timers.game = gameInterval;
 }
 
 export function checkAndStartGame(room: GameRoom): void {
@@ -207,7 +153,7 @@ export function checkAndStartGame(room: GameRoom): void {
     // 両プレイヤーにゲーム開始を通知
     const startMessage = JSON.stringify({
       type: "gameStart",
-      gameState: room.gameState,
+      state: room.state,
     });
     room.players.left.send(startMessage);
     room.players.right.send(startMessage);
@@ -222,22 +168,26 @@ function handleGameOver(room: GameRoom) {
   // ゲーム終了メッセージを送信
   const gameOverMessage = JSON.stringify({
     type: "gameOver",
-    winner: room.gameState.winner,
-    leftScore: room.gameState.score.left,
-    rightScore: room.gameState.score.right,
+    result: {
+      winner: room.state.winner,
+      finalScore: {
+        left: room.state.score.left,
+        right: room.state.score.right,
+      },
+    },
   });
 
   room.players.left?.send(gameOverMessage);
   room.players.right?.send(gameOverMessage);
 
   // ゲームループを停止
-  if (room.gameIntervals.gameInterval) {
-    clearInterval(room.gameIntervals.gameInterval);
-    room.gameIntervals.gameInterval = undefined;
+  if (room.timers.game) {
+    clearInterval(room.timers.game);
+    room.timers.game = undefined;
   }
 
-  // ゲーム状態をリセット
-  room.gameStarted = false;
+  // ゲーム状態を待機状態にリセット
+  room.state.status = 'waiting';
 }
 
 /**

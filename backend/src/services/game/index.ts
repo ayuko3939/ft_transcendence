@@ -1,4 +1,5 @@
 import type { GameRoom } from "../../types/game";
+import type { PlayerSide } from "../../types/shared/types";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { WebSocket } from "@fastify/websocket";
 
@@ -73,7 +74,7 @@ function assignPlayerToRoom(
   room: GameRoom,
   roomId: string
 ) {
-  let playerSide: "left" | "right";
+  let playerSide: PlayerSide;
 
   if (!room.players.left) {
     room.players.left = connection;
@@ -106,7 +107,7 @@ function assignPlayerToRoom(
     JSON.stringify({
       type: "init",
       side: playerSide,
-      gameState: room.gameState,
+      state: room.state,
       roomId: roomId, // ルームIDも送信
     })
   );

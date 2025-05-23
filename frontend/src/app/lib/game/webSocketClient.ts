@@ -4,8 +4,9 @@ import type {
   GameSettings,
   GameState,
   PlayerSide,
-  WebSocketMessage,
-} from "src/types/game";
+  ClientMessage,
+  ServerMessage,
+} from "../../../types/shared/types";
 
 export interface WebSocketHandlers {
   onInit: (side: PlayerSide, gameState: GameState) => void;
@@ -70,11 +71,11 @@ export class PongSocketClient {
     }
   }
 
-  // ゲーム設定送信メソッドの追加・宣言
   public sendGameSettings(settings: GameSettings): void {
     this.sendMessage({
       type: "gameSettings",
-      settings,
+      ballSpeed: settings.ballSpeed,
+      winningScore: settings.winningScore,
     });
   }
 
@@ -93,14 +94,13 @@ export class PongSocketClient {
     });
   }
 
-  // webSocketClient.ts に追加
   public sendSurrenderMessage(): void {
     this.sendMessage({
       type: "surrender",
     });
   }
 
-  private sendMessage(message: WebSocketMessage): void {
+  private sendMessage(message: ClientMessage): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       try {
         this.ws.send(JSON.stringify(message));
@@ -114,45 +114,37 @@ export class PongSocketClient {
     }
   }
 
-  private handleMessage(data: any): void {
+  private handleMessage(data: ServerMessage): void {
     // デバッグ: 受信したデータの表示
     console.log("WebSocketデータ受信:", data);
 
-    if (data.type === "init") {
-      // 初期化メッセージ
-      this.handlers.onInit(data.side, this.normalizeGameState(data.gameState));
-    } else if (Array.isArray(data)) {
-      // チャットメッセージ
-      this.handlers.onChatMessages(data);
-    } else if (data.type === "countdown") {
-      // カウントダウン
-      this.handlers.onCountdown(data.count);
-    } else if (data.type === "gameStart") {
-      // ゲーム開始
-      this.handlers.onGameStart(this.normalizeGameState(data.gameState));
-    } else if (data.type === "gameOver") {
-      // ゲーム終了 - 追加
-      this.handlers.onGameOver({
-        winner: data.winner,
-        leftScore: data.leftScore,
-        rightScore: data.rightScore,
-        reason: data.reason,
-        message: data.message,
-      });
-    } else if (data.type === "gameState" || data.ball) {
-      // ゲーム状態の更新
-      // data.typeがgameStateの場合と、直接ゲーム状態が送られてくる場合の両方に対応
-      const gameState = data.type === "gameState" ? data : data;
-      this.handlers.onGameState(this.normalizeGameState(gameState));
-    } else {
-      // 不明なメッセージタイプ
-      console.warn("不明なWebSocketメッセージタイプ:", data);
+    // ServerMessageの場合
+    switch (data.type) {
+      case "init":
+        this.handlers.onInit(data.side, this.normalizeGameState(data.state));
+        break;
+      case "countdown":
+        this.handlers.onCountdown(data.count);
+        break;
+      case "gameStart":
+        this.handlers.onGameStart(this.normalizeGameState(data.state));
+        break;
+      case "gameOver":
+        this.handlers.onGameOver(data.result);
+        break;
+      case "gameState":
+        this.handlers.onGameState(this.normalizeGameState(data.state));
+        break;
+      case "chatUpdate":
+        this.handlers.onChatMessages(data.messages);
+        break;
+      default:
+        console.warn("不明なWebSocketメッセージタイプ:", data);
     }
   }
 
-  // バックエンドから受信したデータをフロントエンドの型に合わせて正規化
-  private normalizeGameState(data: any): GameState {
-    // データが既に期待する形式なら修正せずに返す
+  private normalizeGameState(data: GameState): GameState {
+    // 新定義では基本的に正規化不要だが、念のため型チェック
     if (
       data &&
       data.ball &&
@@ -162,9 +154,10 @@ export class PongSocketClient {
       data.paddleRight &&
       data.paddleRight.width !== undefined
     ) {
-      return data as GameState;
+      return data;
     }
 
+    // デフォルト値で補完（エラー時のフォールバック）
     const defaultPaddleWidth = 10;
     const defaultPaddleHeight = 100;
     const defaultBallRadius = 10;
@@ -195,6 +188,9 @@ export class PongSocketClient {
         left: data.score?.left ?? 0,
         right: data.score?.right ?? 0,
       },
+      status: data.status ?? 'waiting',
+      winner: data.winner ?? null,
+      winningScore: data.winningScore ?? 10,
     };
 
     return normalized;
