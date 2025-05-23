@@ -60,4 +60,11 @@ export interface GameRoom {
   // ゲーム設定状態を追加
   settings: GameSettings;
   leftPlayerReady: boolean;
+  // トーナメント情報（トーナメントの試合の場合のみ）
+  tournamentInfo?: {
+    tournamentId: string;
+    matchId: string;
+    player1Id: string;
+    player2Id: string;
+  };
 }

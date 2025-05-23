@@ -108,7 +108,7 @@ export function createGameRoom(): GameRoom {
 /**
  * ゲームカウントダウンを開始する関数
  */
-export function startGameCountdown(room: GameRoom) {
+export function startGameCountdown(room: GameRoom, roomId?: string) {
   let countdown = GAME_CONSTANTS.COUNTDOWN_SECONDS;
 
   // カウントダウンタイマーを設定
@@ -127,7 +127,7 @@ export function startGameCountdown(room: GameRoom) {
 
       if (countdown < 0) {
         clearInterval(countdownInterval);
-        startGame(room);
+        startGame(room, roomId);
       }
     } else {
       clearInterval(countdownInterval);
@@ -141,7 +141,7 @@ export function startGameCountdown(room: GameRoom) {
 /**
  * ゲームを開始する関数
  */
-export function startGame(room: GameRoom) {
+export function startGame(room: GameRoom, roomId?: string) {
   room.gameStarted = true;
 
   // カスタム設定を適用したボール初期化
@@ -185,7 +185,7 @@ export function startGame(room: GameRoom) {
 
       // ゲームが終了した場合
       if (room.gameState.gameOver) {
-        handleGameOver(room);
+        handleGameOver(room, roomId);
       }
     } else {
       clearInterval(gameInterval);
@@ -196,7 +196,7 @@ export function startGame(room: GameRoom) {
   room.gameIntervals.gameInterval = gameInterval;
 }
 
-export function checkAndStartGame(room: GameRoom): void {
+export function checkAndStartGame(room: GameRoom, roomId?: string): void {
   // 両方のプレイヤーが接続済みで左側プレイヤーの準備が完了していれば開始
   console.log("Game is ready...");
 
@@ -211,14 +211,14 @@ export function checkAndStartGame(room: GameRoom): void {
     });
     room.players.left.send(startMessage);
     room.players.right.send(startMessage);
-    startGameCountdown(room);
+    startGameCountdown(room, roomId);
   }
 }
 
 /**
  * ゲーム終了時の処理
  */
-function handleGameOver(room: GameRoom) {
+function handleGameOver(room: GameRoom, roomId?: string) {
   // ゲーム終了メッセージを送信
   const gameOverMessage = JSON.stringify({
     type: "gameOver",
@@ -229,6 +229,14 @@ function handleGameOver(room: GameRoom) {
 
   room.players.left?.send(gameOverMessage);
   room.players.right?.send(gameOverMessage);
+
+  // トーナメント統合処理
+  if (room.tournamentInfo && roomId) {
+    const { gameTournamentIntegration } = require("./GameTournamentIntegrationService");
+    gameTournamentIntegration.handleGameOver(room, roomId).catch((error: Error) => {
+      console.error("トーナメント統合処理でエラーが発生しました:", error);
+    });
+  }
 
   // ゲームループを停止
   if (room.gameIntervals.gameInterval) {

@@ -64,6 +64,41 @@ export function handleGameConnectionWithRoomId(
 }
 
 /**
+ * トーナメント専用のゲームルームを作成
+ */
+export function createTournamentGameRoom(
+  roomId: string,
+  tournamentId: string,
+  matchId: string,
+  player1Id: string,
+  player2Id: string
+): void {
+  const { gameTournamentIntegration } = require("./GameTournamentIntegrationService");
+  const room = gameTournamentIntegration.createTournamentGameRoom(
+    tournamentId,
+    matchId,
+    player1Id,
+    player2Id
+  );
+  gameRooms.set(roomId, room);
+  console.log(`Tournament game room created: ${roomId} for match ${matchId}`);
+}
+
+/**
+ * 指定されたルームIDのゲームルームを取得
+ */
+export function getGameRoom(roomId: string): GameRoom | undefined {
+  return gameRooms.get(roomId);
+}
+
+/**
+ * ゲームルームが存在するかチェック
+ */
+export function hasGameRoom(roomId: string): boolean {
+  return gameRooms.has(roomId);
+}
+
+/**
  * プレイヤーをルームに割り当てる共通関数
  */
 function assignPlayerToRoom(
@@ -83,13 +118,13 @@ function assignPlayerToRoom(
     room.players.right = connection;
     playerSide = "right";
     console.log(`Room ${roomId}: right player connected`);
-    checkAndStartGame(room);
+    checkAndStartGame(room, roomId);
   } else {
     // このケースは handleGameConnectionWithRoomId で既にチェックされているはずだが念のため
     connection.close(1008, "Room is full");
     return;
   }
-  const gameHandlerService = new GameHandlerService(room);
+  const gameHandlerService = new GameHandlerService(room, roomId);
 
   // メッセージ処理のイベントリスナーを設定
   connection.on("message", (message: Buffer) => {

@@ -12,9 +12,11 @@ import type {
 
 export class GameHandlerService {
   private room: GameRoom;
+  private roomId?: string;
 
-  constructor(room: GameRoom) {
+  constructor(room: GameRoom, roomId?: string) {
     this.room = room;
+    this.roomId = roomId;
   }
 
   public handlePlayerMessage(message: Buffer, playerSide: "left" | "right") {
@@ -113,6 +115,14 @@ export class GameHandlerService {
       this.room.gameState.score.right = this.room.gameState.winningScore;
     }
 
+    // トーナメント統合処理
+    if (this.room.tournamentInfo) {
+      const { gameTournamentIntegration } = require("./GameTournamentIntegrationService");
+      gameTournamentIntegration.handleSurrender(this.room, playerSide).catch((error: Error) => {
+        console.error("降参時のトーナメント処理でエラーが発生しました:", error);
+      });
+    }
+
     // 降参したプレイヤーに敗北通知を送信
     const surrenderingPlayer = this.room.players[playerSide];
     if (surrenderingPlayer) {
@@ -179,7 +189,7 @@ export class GameHandlerService {
     this.room.leftPlayerReady = true;
 
     // 右側プレイヤーが既に接続している場合はゲーム開始準備をチェック
-    checkAndStartGame(this.room);
+    checkAndStartGame(this.room, this.roomId);
   }
 
   public handlePlayerDisconnect(
@@ -217,6 +227,14 @@ export class GameHandlerService {
         });
 
         opponent.send(victoryMessage);
+      }
+
+      // トーナメント統合処理
+      if (this.room.tournamentInfo) {
+        const { gameTournamentIntegration } = require("./GameTournamentIntegrationService");
+        gameTournamentIntegration.handlePlayerDisconnect(this.room, playerSide).catch((error: Error) => {
+          console.error("プレイヤー切断時のトーナメント処理でエラーが発生しました:", error);
+        });
       }
 
       // ゲームを停止
