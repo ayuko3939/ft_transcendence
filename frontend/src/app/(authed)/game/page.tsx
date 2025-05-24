@@ -64,7 +64,7 @@ export default function Game() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center">
+    <div className="grid min-h-screen place-items-center pt-18 pb-13">
       <main>
         <CanvasComponent />
       </main>
