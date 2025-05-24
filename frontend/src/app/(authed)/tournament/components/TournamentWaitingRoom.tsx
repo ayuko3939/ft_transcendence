@@ -13,12 +13,17 @@ const dummyParticipants = [
 
 export const TournamentWaitingRoom = () => {
   const [participants, setParticipants] = useState(dummyParticipants);
-  const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string }>>([]);
+  const [chatMessages, setChatMessages] = useState<
+    Array<{ id: string; text: string }>
+  >([]);
   const [newMessage, setNewMessage] = useState("");
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
-      setChatMessages([...chatMessages, { id: crypto.randomUUID(), text: newMessage }]);
+      setChatMessages([
+        ...chatMessages,
+        { id: crypto.randomUUID(), text: newMessage },
+      ]);
       setNewMessage("");
     }
   };

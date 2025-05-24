@@ -42,7 +42,6 @@ function TournamentContent() {
 
   return (
     <div className="container mx-auto min-h-screen pt-18 pb-13">
-
       <div className={styles.tournamentContainer}>
         {/* 仮の切り替えコンポーネント - デバッグ用 */}
         <div className="mb-4 flex space-x-3">
