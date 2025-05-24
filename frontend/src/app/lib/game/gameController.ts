@@ -1,5 +1,6 @@
 import type { PongSocketClient } from "@/lib/game/webSocketClient";
-import type { GameState, PlayerSide } from "src/types/game";
+import type { GameState, PlayerSide } from "../../../types/shared/types";
+import { PADDLE } from "../../../types/shared/constants";
 
 import { PongRenderer } from "./gameRenderer";
 
@@ -49,7 +50,7 @@ export class PongController {
   private handleKeyPress = (e: KeyboardEvent): void => {
     if (!this.playerSide) return;
 
-    const speed = 10;
+    const speed = PADDLE.MOVE_SPEED;
     let paddleMove = false;
     let newY = 0;
 

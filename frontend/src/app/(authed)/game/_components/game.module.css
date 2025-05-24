@@ -1,4 +1,48 @@
-/* ゲーム画面特有のスタイル */
+/* ========================================
+   共通スタイル（重複削除）
+   ======================================== */
+
+/* 共通オーバーレイスタイル */
+.dialogOverlay,
+.settingsOverlay,
+.gameOverOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 共通モーダルボックススタイル */
+.dialog,
+.settingsModal,
+.gameOverContent {
+  background-color: rgba(0, 30, 60, 0.9);
+  border: 2px solid var(--cyber-primary, #00ffff);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+/* 共通ボタンスタイル */
+.dialogButton,
+.settingsButton,
+.backButton {
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.75rem 2rem;
+}
+
+/* ========================================
+   ゲーム画面特有のスタイル
+   ======================================== */
+
 .container {
   display: flex;
   flex-direction: column;
@@ -61,28 +105,19 @@
   background-color: rgba(255, 50, 50, 1);
 }
 
-/* 中断確認ダイアログのスタイル */
+/* ========================================
+   中断確認ダイアログの個別スタイル
+   ======================================== */
+
 .dialogOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 100;
 }
 
 .dialog {
-  background-color: rgba(0, 30, 60, 0.9);
-  border: 2px solid var(--cyber-primary);
-  border-radius: 8px;
-  padding: 2rem;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
 }
 
 .dialogText {
@@ -96,15 +131,6 @@
   display: flex;
   justify-content: center;
   gap: 2rem;
-}
-
-.dialogButton {
-  padding: 0.75rem 2rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .confirmButton {
@@ -125,7 +151,10 @@
   background-color: rgba(100, 100, 100, 1);
 }
 
-/* チャット部分のスタイル */
+/* ========================================
+   チャット部分のスタイル
+   ======================================== */
+
 .chatContainer {
   width: 100%;
   max-width: 800px;
@@ -175,28 +204,18 @@
   transition: all 0.2s ease;
 }
 
-/* ゲーム設定モーダルのスタイル */
+/* ========================================
+   ゲーム設定モーダルの個別スタイル
+   ======================================== */
+
 .settingsOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 50;
 }
 
 .settingsModal {
-  background-color: rgba(0, 30, 60, 0.9);
-  border: 2px solid var(--cyber-primary, #00ffff);
-  border-radius: 8px;
-  padding: 2rem;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
 }
 
 .settingsTitle {
@@ -236,15 +255,9 @@
 .settingsButton {
   background-color: var(--cyber-primary, #00ffff);
   color: #000;
-  border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 4px;
   font-size: 1rem;
-  font-weight: bold;
   margin: 1rem auto 0;
   display: block;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .settingsButton:hover {
@@ -252,27 +265,17 @@
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
-/* ゲーム終了オーバーレイのスタイル */
+/* ========================================
+   ゲーム終了オーバーレイの個別スタイル
+   ======================================== */
+
 .gameOverOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background-color: rgba(0, 0, 0, 0.8);
   z-index: 100;
 }
 
 .gameOverContent {
-  background-color: rgba(0, 30, 60, 0.9);
-  border: 2px solid var(--cyber-primary, #00ffff);
-  border-radius: 8px;
-  padding: 2rem;
   text-align: center;
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
   width: 90%;
   max-width: 500px;
 }
@@ -309,16 +312,24 @@
 .backButton {
   background-color: var(--cyber-primary, #00ffff);
   color: #000;
-  border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 4px;
   font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .backButton:hover {
   background-color: rgba(0, 255, 255, 0.8);
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* ========================================
+   薄い暗さの背景オーバーレイ
+   ======================================== */
+
+.backgroundOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 45;
 }

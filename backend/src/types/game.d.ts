@@ -1,63 +1,58 @@
-import type { WebSocket } from "ws";
+// ===========================================
+// バックエンド専用型定義（サーバー・WebSocket用）
+// ===========================================
 
-// ===== ゲームの基本的なデータ構造 =====
+import type { WebSocket } from 'ws';
+import type { 
+  GameState, 
+  GameSettings, 
+  ChatMessage,
+  ClientMessage,
+  PlayerSide
+} from "shared/types";
 
-// ゲームの設定用の型を追加
-export interface GameSettings {
-  ballSpeed: number;
-  winningScore: number;
-}
+// ===========================================
+// ゲームルーム管理
+// ===========================================
 
-// ゲームの状態
-export interface GameState {
-  ball: {
-    x: number;
-    y: number;
-    dx: number;
-    dy: number;
-    radius: number;
-  };
-  paddleLeft: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  paddleRight: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  score: {
-    left: number;
-    right: number;
-  };
-  gameOver: boolean;
-  winner: "left" | "right" | null;
-  winningScore: number;
-  ballSpeed: number;
-}
-
-// ゲームルーム
+// ゲームルーム（サーバー上でのゲーム管理単位）
 export interface GameRoom {
+  id: string;                    // ルームID
   players: {
-    left?: WebSocket;
-    right?: WebSocket;
+    left?: WebSocket;            // 左プレイヤーのWebSocket接続
+    right?: WebSocket;           // 右プレイヤーのWebSocket接続
   };
-  gameState: GameState;
-  chats: {
-    name: string;
-    message: string;
-  }[];
-  gameStarted: boolean;
-  // インターバルタイマーの参照を管理
-  gameIntervals: {
-    countdownInterval?: NodeJS.Timeout;
-    gameInterval?: NodeJS.Timeout;
-    [key: string]: NodeJS.Timeout | undefined;
+  userIds: {
+    left?: string;               // 左プレイヤーのユーザーID
+    right?: string;              // 右プレイヤーのユーザーID
   };
-  // ゲーム設定状態を追加
-  settings: GameSettings;
-  leftPlayerReady: boolean;
+  state: GameState;              // 現在のゲーム状態
+  chats: ChatMessage[];          // チャット履歴
+  settings: GameSettings;        // ゲーム設定
+  timers: {
+    countdown?: NodeJS.Timeout;  // カウントダウンタイマー
+    game?: NodeJS.Timeout;       // ゲームループタイマー
+  };
+  leftPlayerReady: boolean;      // 左プレイヤー(host)の準備完了フラグ
 }
+
+// ===========================================
+// メッセージ処理
+// ===========================================
+
+// メッセージハンドラーに渡すコンテキスト情報
+export interface MessageContext {
+  room: GameRoom;               // 対象のゲームルーム
+  playerSide: PlayerSide;       // メッセージ送信者のプレイヤー位置
+  roomId: string;               // ルームID
+}
+
+// メッセージハンドラー関数の型
+export type MessageHandler = (message: ClientMessage, context: MessageContext) => void;
+
+// ===========================================
+// ユーティリティ型
+// ===========================================
+
+// ゲームルームのマップ
+export type GameRoomsMap = Map<string, GameRoom>;

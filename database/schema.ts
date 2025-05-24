@@ -5,6 +5,7 @@ import {
   primaryKey,
   sqliteTable,
   text,
+  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("user", {
@@ -96,5 +97,45 @@ export const authenticators = sqliteTable(
     primaryKey({
       columns: [authenticator.userId, authenticator.credentialID],
     }),
+  ]
+);
+
+// ===== ゲーム関連テーブル =====
+
+export const games = sqliteTable("games", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  startedAt: integer("started_at", { mode: "timestamp_ms" }).notNull(),
+  endedAt: integer("ended_at", { mode: "timestamp_ms" }),
+  ballSpeed: integer("ball_speed").notNull(),
+  winningScore: integer("winning_score").notNull(),
+  endReason: text("end_reason"),
+  status: text("status").notNull().default("in_progress"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const players = sqliteTable(
+  "players",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    gameId: text("game_id")
+      .notNull()
+      .references(() => games.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    side: text("side").notNull(),
+    score: integer("score").notNull().default(0),
+    result: text("result").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    // ゲーム内でのside（left/right）の重複を防ぐ
+    uniqueIndex("players_game_side_unique").on(table.gameId, table.side),
   ]
 );

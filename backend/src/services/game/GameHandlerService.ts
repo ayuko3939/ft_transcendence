@@ -1,14 +1,8 @@
-import { TypeGuardService } from "./TypeGuardService";
 import { checkAndStartGame } from "./roomUtils";
+import { saveGameResult } from "./saveGameResult";
 
-import type { GameRoom } from "src/types/game";
-
-import type {
-  ChatMessage,
-  PaddleMoveMessage,
-  GameSettingsMessage,
-  GameMessage,
-} from "src/types/message";
+import type { GameRoom } from "../../types/game";
+import type { ClientMessage } from "../../types/shared/types";
 
 export class GameHandlerService {
   private room: GameRoom;
@@ -17,236 +11,225 @@ export class GameHandlerService {
     this.room = room;
   }
 
-  public handlePlayerMessage(message: Buffer, playerSide: "left" | "right") {
-    const typeGuardService = new TypeGuardService();
+  // ヘルパー関数群
+  private isGamePlaying(): boolean {
+    return this.room.state.status === 'playing';
+  }
 
+  private getOpponent(playerSide: "left" | "right") {
+    return playerSide === "left" ? this.room.players.right : this.room.players.left;
+  }
+
+  private sendGameOver(winner: "left" | "right", reason: string, message: string): void {
+    const victorPlayer = this.room.players[winner];
+    if (!victorPlayer) return;
+
+    // 勝者のスコアを勝利点数にする
+    if (winner === "left") {
+      this.room.state.score.left = this.room.state.winningScore;
+    } else {
+      this.room.state.score.right = this.room.state.winningScore;
+    }
+
+    const victoryMessage = JSON.stringify({
+      type: "gameOver",
+      result: {
+        winner: winner,
+        finalScore: {
+          left: this.room.state.score.left,
+          right: this.room.state.score.right,
+        },
+        reason: reason,
+        message: message,
+      }
+    });
+    
+    victorPlayer.send(victoryMessage);
+  }
+
+  private stopGame(): void {
+    if (this.room.timers.game) {
+      clearInterval(this.room.timers.game);
+      this.room.timers.game = undefined;
+    }
+    this.room.state.status = 'finished';
+  }
+
+  public handlePlayerMessage(message: Buffer, playerSide: "left" | "right") {
     try {
-      const data = JSON.parse(message.toString()) as Partial<GameMessage>;
+      const data = JSON.parse(message.toString()) as ClientMessage;
+      
       switch (data.type) {
+        case "auth":
+          this.handleAuthMessage(data, playerSide);
+          break;
         case "chat":
-          if (typeGuardService.isChatMessage(data)) {
-            this.handleChatMessage(data as ChatMessage, playerSide);
-          }
+          this.handleChatMessage(data, playerSide);
           break;
         case "paddleMove":
-          if (typeGuardService.isPaddleMoveMessage(data)) {
-            this.handlePaddleMove(data as PaddleMoveMessage, playerSide);
-          }
+          this.handlePaddleMove(data, playerSide);
           break;
         case "surrender":
-          if (typeGuardService.isSurrenderMessage(data)) {
-            this.handleSurrender(playerSide);
-          }
+          this.handleSurrender(playerSide).catch(console.error);
           break;
         case "gameSettings":
-          if (typeGuardService.isGameSettingsMessage(data)) {
-            this.handleGameSettings(data as GameSettingsMessage, playerSide);
-          }
+          this.handleGameSettings(data, playerSide);
           break;
         default:
-          console.error(`Unknown message type: ${data.type}`);
+          console.error(`Unknown message type: ${(data as any).type}`);
       }
     } catch (error) {
-      console.error("Error handling message:", error);
+      console.error("メッセージ処理エラー:", error);
+    }
+  }
+
+  private handleAuthMessage(
+    data: Extract<ClientMessage, { type: 'auth' }>,
+    playerSide: "left" | "right"
+  ): void {
+    // ユーザーIDをGameRoomに保存
+    this.room.userIds[playerSide] = data.sessionToken;
+    
+    console.log(`プレイヤー ${playerSide} の認証完了:`, data.sessionToken);
+
+    // 認証完了後に初期化メッセージを送信
+    const player = this.room.players[playerSide];
+    if (player) {
+      player.send(JSON.stringify({
+        type: "init",
+        side: playerSide,
+        state: this.room.state,
+        roomId: this.room.id,
+      }));
+
+      // 左プレイヤーの場合、設定画面を表示するため何もしない
+      // 右プレイヤーが認証完了したらゲーム開始チェック
+      if (playerSide === "right") {
+        checkAndStartGame(this.room);
+      }
     }
   }
 
   private handleChatMessage(
-    data: ChatMessage,
+    data: Extract<ClientMessage, { type: 'chat' }>,
     playerSide: "left" | "right"
   ): void {
-    // チャットメッセージを追加
     this.room.chats.push({
       name: data.name,
       message: data.message,
     });
 
-    // 自分自身に送信
-    const player = this.room.players[playerSide];
-    if (player) {
-      // 元の実装と同じ形式でチャットデータを送信
-      player.send(JSON.stringify(this.room.chats));
-    }
+    const chatUpdate = JSON.stringify({
+      type: "chatUpdate",
+      messages: this.room.chats,
+    });
 
-    // 相手プレイヤーに送信
-    const opponent =
-      playerSide === "left" ? this.room.players.right : this.room.players.left;
-    if (opponent) {
-      opponent.send(JSON.stringify(this.room.chats));
-    }
+    // 両プレイヤーに送信
+    const player = this.room.players[playerSide];
+    const opponent = this.getOpponent(playerSide);
+    
+    if (player) player.send(chatUpdate);
+    if (opponent) opponent.send(chatUpdate);
   }
 
   private handlePaddleMove(
-    data: PaddleMoveMessage,
+    data: Extract<ClientMessage, { type: 'paddleMove' }>,
     playerSide: "left" | "right"
   ): void {
     // パドル位置を更新
     if (playerSide === "left") {
-      this.room.gameState.paddleLeft.y = data.y;
+      this.room.state.paddleLeft.y = data.y;
     } else {
-      this.room.gameState.paddleRight.y = data.y;
+      this.room.state.paddleRight.y = data.y;
     }
 
     // 相手プレイヤーに状態を送信
-    const opponent =
-      playerSide === "left" ? this.room.players.right : this.room.players.left;
+    const opponent = this.getOpponent(playerSide);
     if (opponent) {
-      opponent.send(JSON.stringify(this.room.gameState));
+      opponent.send(JSON.stringify({
+        type: "gameState",
+        state: this.room.state,
+      }));
     }
   }
 
-  private handleSurrender(playerSide: "left" | "right") {
-    // ゲームが開始されていない場合は何もしない
-    if (!this.room.gameStarted) return;
+  private async handleSurrender(playerSide: "left" | "right"): Promise<void> {
+    // ゲーム中でない場合は何もしない
+    if (!this.isGamePlaying()) return;
 
-    console.log(`Player ${playerSide} surrendered the game`);
-
-    // 降参したプレイヤーの相手を勝者とする
     const winner = playerSide === "left" ? "right" : "left";
-    this.room.gameState.gameOver = true;
-    this.room.gameState.winner = winner;
+    this.sendGameOver(winner, "surrender", "相手プレイヤーが中断しました。あなたの勝利です！");
+    this.stopGame();
 
-    // 勝者のスコアを勝利点数にする
-    if (winner === "left") {
-      this.room.gameState.score.left = this.room.gameState.winningScore;
-    } else {
-      this.room.gameState.score.right = this.room.gameState.winningScore;
-    }
-
-    // 降参したプレイヤーに敗北通知を送信
-    const surrenderingPlayer = this.room.players[playerSide];
-    if (surrenderingPlayer) {
-      const surrenderMessage = JSON.stringify({
-        type: "gameOver",
-        winner: winner,
-        reason: "surrender",
-        message: "あなたは中断して敗北しました。",
-        leftScore: this.room.gameState.score.left,
-        rightScore: this.room.gameState.score.right,
-      });
-
-      surrenderingPlayer.send(surrenderMessage);
-    }
-
-    // 勝利したプレイヤーに勝利通知を送信
-    const victorPlayer = this.room.players[winner];
-    if (victorPlayer) {
-      const victoryMessage = JSON.stringify({
-        type: "gameOver",
-        winner: winner,
-        reason: "opponent_surrendered",
-        message: "相手プレイヤーが中断しました。あなたの勝利です！",
-        leftScore: this.room.gameState.score.left,
-        rightScore: this.room.gameState.score.right,
-      });
-      victorPlayer.send(victoryMessage);
-    }
-
-    // ゲームを停止
-    if (this.room.gameIntervals.gameInterval) {
-      clearInterval(this.room.gameIntervals.gameInterval);
-      this.room.gameIntervals.gameInterval = undefined;
-    }
-
-    this.room.gameStarted = false;
+    // ゲーム結果をデータベースに保存
+    await saveGameResult(this.room, 'surrender');
   }
 
   private handleGameSettings(
-    data: GameSettingsMessage,
+    data: Extract<ClientMessage, { type: 'gameSettings' }>,
     playerSide: "left" | "right"
   ): void {
-    // 左側プレイヤーからの設定のみを受け付ける
+    // 左側プレイヤー以外は設定変更不可
     if (playerSide !== "left") {
-      console.warn("Right player attempted to change game settings, ignored");
+      console.warn("右プレイヤーが設定変更を試行しました");
       return;
     }
 
-    const { ballSpeed, winningScore } = data.settings;
-    console.log(
-      `Game settings updated: ballSpeed=${ballSpeed}, winningScore=${winningScore}`
-    );
+    const { ballSpeed, winningScore } = data;
 
-    // 設定を保存
-    this.room.settings = {
-      ballSpeed,
-      winningScore,
-    };
-
-    // ゲーム状態に勝利点数を反映
-    this.room.gameState.winningScore = winningScore;
-
-    // 左側プレイヤーの準備完了フラグをセット
+    this.room.settings = { ballSpeed, winningScore };
+    this.room.state.winningScore = winningScore;
     this.room.leftPlayerReady = true;
 
-    // 右側プレイヤーが既に接続している場合はゲーム開始準備をチェック
     checkAndStartGame(this.room);
   }
 
-  public handlePlayerDisconnect(
+  public async handlePlayerDisconnect(
     playerSide: "left" | "right",
     roomId: string,
     gameRooms: Map<string, GameRoom>
-  ) {
+  ): Promise<void> {
     // プレイヤーの接続を削除
     if (this.room.players[playerSide]) {
       this.room.players[playerSide] = undefined;
     }
 
-    // ゲームが進行中の場合は、切断したプレイヤーを敗者とする
-    if (this.room.gameStarted) {
-      // 残っているプレイヤーを勝者にする
+    // ユーザーID情報も削除
+    if (this.room.userIds[playerSide]) {
+      this.room.userIds[playerSide] = undefined;
+    }
+
+    // ゲーム中の場合は相手を勝者にする
+    if (this.isGamePlaying()) {
       const winner = playerSide === "left" ? "right" : "left";
-      const opponent = this.room.players[winner];
+      this.sendGameOver(winner, "opponent_disconnected", "相手プレイヤーが切断しました。あなたの勝利です！");
+      this.stopGame();
 
-      if (opponent) {
-        // 勝者のスコアを勝利点数にする
-        if (winner === "left") {
-          this.room.gameState.score.left = this.room.gameState.winningScore;
-        } else {
-          this.room.gameState.score.right = this.room.gameState.winningScore;
-        }
-
-        // 勝利メッセージを送信
-        const victoryMessage = JSON.stringify({
-          type: "gameOver",
-          winner: winner,
-          reason: "opponent_disconnected",
-          message: "相手プレイヤーが切断しました。あなたの勝利です！",
-          leftScore: this.room.gameState.score.left,
-          rightScore: this.room.gameState.score.right,
-        });
-
-        opponent.send(victoryMessage);
-      }
-
-      // ゲームを停止
-      if (this.room.gameIntervals.gameInterval) {
-        clearInterval(this.room.gameIntervals.gameInterval);
-        this.room.gameIntervals.gameInterval = undefined;
-      }
-
-      this.room.gameStarted = false;
-      this.room.gameState.gameOver = true;
+      // ゲーム結果をデータベースに保存
+      await saveGameResult(this.room, 'disconnect');
     }
 
     // カウントダウン中の場合はカウントダウンを停止
-    if (this.room.gameIntervals.countdownInterval) {
-      clearInterval(this.room.gameIntervals.countdownInterval);
-      this.room.gameIntervals.countdownInterval = undefined;
+    if (this.room.timers.countdown) {
+      clearInterval(this.room.timers.countdown);
+      this.room.timers.countdown = undefined;
     }
 
     // ルームが空になったら削除
     if (!this.room.players.left && !this.room.players.right) {
-      // すべてのインターバルをクリア
-      for (const interval in this.room.gameIntervals) {
-        if (this.room.gameIntervals[interval]) {
-          clearInterval(this.room.gameIntervals[interval]);
-          this.room.gameIntervals[interval] = undefined;
-        }
-      }
+      this.cleanupRoom();
       gameRooms.delete(roomId);
     }
   }
 
-  
+  private cleanupRoom(): void {
+    if (this.room.timers.countdown) {
+      clearInterval(this.room.timers.countdown);
+      this.room.timers.countdown = undefined;
+    }
+    if (this.room.timers.game) {
+      clearInterval(this.room.timers.game);
+      this.room.timers.game = undefined;
+    }
+  }
 }
