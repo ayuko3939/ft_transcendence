@@ -58,7 +58,6 @@ function assignPlayerToRoom(
   } else if (!room.players.right) {
     room.players.right = connection;
     playerSide = "right";
-    checkAndStartGame(room);
   } else {
     connection.close(1008, "Room is full");
     return;
@@ -74,12 +73,7 @@ function assignPlayerToRoom(
     gameHandlerService.handlePlayerDisconnect(playerSide, roomId, gameRooms);
   });
 
-  connection.send(
-    JSON.stringify({
-      type: "init",
-      side: playerSide,
-      state: room.state,
-      roomId: roomId,
-    })
-  );
+  // 認証を待つため、ここではinitメッセージを送信しない
+  // 認証完了後にGameHandlerService.handleAuthMessage()で送信される
+  console.log(`プレイヤー ${playerSide} がルーム ${roomId} に接続しました（認証待ち）`);
 }

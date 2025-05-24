@@ -1,4 +1,5 @@
 import { GameEngine } from "../../services/game/GameEngine";
+import { saveGameResult } from "./saveGameResult";
 import { v4 as uuidv4 } from "uuid";
 import type { GameRoom } from "../../types/game";
 import type { GameState, GameSettings } from "../../types/shared/types";
@@ -11,6 +12,7 @@ export function createGameRoom(): GameRoom {
   return {
     id: uuidv4(),
     players: {},
+    userIds: {},
     state: {
       ball: {
         x: CANVAS.WIDTH / 2,
@@ -153,6 +155,9 @@ function handleGameOver(room: GameRoom) {
   }
 
   room.state.status = 'waiting';
+
+  // ゲーム結果をデータベースに保存
+  saveGameResult(room, 'completed');
 }
 
 export function findAvailableRoom(gameRooms: Map<string, GameRoom>): {

@@ -33,6 +33,32 @@ export const authenticator = sqliteTable("authenticator", {
 	primaryKey({ columns: [table.credentialId, table.userId], name: "authenticator_credentialID_userId_pk"})
 ]);
 
+export const games = sqliteTable("games", {
+	id: text().primaryKey().notNull(),
+	startedAt: integer("started_at").notNull(),
+	endedAt: integer("ended_at"),
+	ballSpeed: integer("ball_speed").notNull(),
+	winningScore: integer("winning_score").notNull(),
+	endReason: text("end_reason"),
+	status: text().default("in_progress").notNull(),
+	createdAt: integer("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	updatedAt: integer("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+});
+
+export const players = sqliteTable("players", {
+	id: text().primaryKey().notNull(),
+	gameId: text("game_id").notNull().references(() => games.id, { onDelete: "cascade" } ),
+	userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" } ),
+	side: text().notNull(),
+	score: integer().default(0).notNull(),
+	result: text().notNull(),
+	createdAt: integer("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	updatedAt: integer("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+},
+(table) => [
+	uniqueIndex("players_game_side_unique").on(table.gameId, table.side),
+]);
+
 export const session = sqliteTable("session", {
 	sessionToken: text().primaryKey().notNull(),
 	userId: text().notNull().references(() => user.id, { onDelete: "cascade" } ),

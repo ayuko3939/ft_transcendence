@@ -82,6 +82,7 @@ export interface GameResult {
 
 // クライアント → サーバー へのメッセージ
 export type ClientMessage = 
+  | { type: 'auth'; sessionToken: string }                            // 認証情報送信
   | { type: 'paddleMove'; y: number }                                  // パドル移動
   | { type: 'chat'; name: string; message: string }                   // チャット送信
   | { type: 'surrender' }                                              // ゲーム中断

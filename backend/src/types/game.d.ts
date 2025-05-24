@@ -22,6 +22,10 @@ export interface GameRoom {
     left?: WebSocket;            // 左プレイヤーのWebSocket接続
     right?: WebSocket;           // 右プレイヤーのWebSocket接続
   };
+  userIds: {
+    left?: string;               // 左プレイヤーのユーザーID
+    right?: string;              // 右プレイヤーのユーザーID
+  };
   state: GameState;              // 現在のゲーム状態
   chats: ChatMessage[];          // チャット履歴
   settings: GameSettings;        // ゲーム設定

@@ -17,8 +17,8 @@ const GameResultModal = ({ show, result, playerSide, onBackToHome }: GameResultM
   };
 
   return (
-    <div className={styles.dialogOverlay}>
-      <div className={styles.dialog}>
+    <div className={styles.gameOverOverlay}>
+      <div className={styles.gameOverContent}>
         <h2 className={styles.resultTitle}>
           {getResultText()}
         </h2>
@@ -33,7 +33,7 @@ const GameResultModal = ({ show, result, playerSide, onBackToHome }: GameResultM
           <p className={styles.resultMessage}>{result.message}</p>
         )}
         
-        <button onClick={onBackToHome} className={styles.dialogButton}>
+        <button onClick={onBackToHome} className={styles.backButton}>
           戻る
         </button>
       </div>

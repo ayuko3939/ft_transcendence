@@ -1,4 +1,5 @@
 import { checkAndStartGame } from "./roomUtils";
+import { saveGameResult } from "./saveGameResult";
 
 import type { GameRoom } from "../../types/game";
 import type { ClientMessage } from "../../types/shared/types";
@@ -59,6 +60,9 @@ export class GameHandlerService {
       const data = JSON.parse(message.toString()) as ClientMessage;
       
       switch (data.type) {
+        case "auth":
+          this.handleAuthMessage(data, playerSide);
+          break;
         case "chat":
           this.handleChatMessage(data, playerSide);
           break;
@@ -66,7 +70,7 @@ export class GameHandlerService {
           this.handlePaddleMove(data, playerSide);
           break;
         case "surrender":
-          this.handleSurrender(playerSide);
+          this.handleSurrender(playerSide).catch(console.error);
           break;
         case "gameSettings":
           this.handleGameSettings(data, playerSide);
@@ -76,6 +80,33 @@ export class GameHandlerService {
       }
     } catch (error) {
       console.error("メッセージ処理エラー:", error);
+    }
+  }
+
+  private handleAuthMessage(
+    data: Extract<ClientMessage, { type: 'auth' }>,
+    playerSide: "left" | "right"
+  ): void {
+    // ユーザーIDをGameRoomに保存
+    this.room.userIds[playerSide] = data.sessionToken;
+    
+    console.log(`プレイヤー ${playerSide} の認証完了:`, data.sessionToken);
+
+    // 認証完了後に初期化メッセージを送信
+    const player = this.room.players[playerSide];
+    if (player) {
+      player.send(JSON.stringify({
+        type: "init",
+        side: playerSide,
+        state: this.room.state,
+        roomId: this.room.id,
+      }));
+
+      // 左プレイヤーの場合、設定画面を表示するため何もしない
+      // 右プレイヤーが認証完了したらゲーム開始チェック
+      if (playerSide === "right") {
+        checkAndStartGame(this.room);
+      }
     }
   }
 
@@ -122,13 +153,16 @@ export class GameHandlerService {
     }
   }
 
-  private handleSurrender(playerSide: "left" | "right"): void {
+  private async handleSurrender(playerSide: "left" | "right"): Promise<void> {
     // ゲーム中でない場合は何もしない
     if (!this.isGamePlaying()) return;
 
     const winner = playerSide === "left" ? "right" : "left";
     this.sendGameOver(winner, "surrender", "相手プレイヤーが中断しました。あなたの勝利です！");
     this.stopGame();
+
+    // ゲーム結果をデータベースに保存
+    await saveGameResult(this.room, 'surrender');
   }
 
   private handleGameSettings(
@@ -150,14 +184,19 @@ export class GameHandlerService {
     checkAndStartGame(this.room);
   }
 
-  public handlePlayerDisconnect(
+  public async handlePlayerDisconnect(
     playerSide: "left" | "right",
     roomId: string,
     gameRooms: Map<string, GameRoom>
-  ): void {
+  ): Promise<void> {
     // プレイヤーの接続を削除
     if (this.room.players[playerSide]) {
       this.room.players[playerSide] = undefined;
+    }
+
+    // ユーザーID情報も削除
+    if (this.room.userIds[playerSide]) {
+      this.room.userIds[playerSide] = undefined;
     }
 
     // ゲーム中の場合は相手を勝者にする
@@ -165,6 +204,9 @@ export class GameHandlerService {
       const winner = playerSide === "left" ? "right" : "left";
       this.sendGameOver(winner, "opponent_disconnected", "相手プレイヤーが切断しました。あなたの勝利です！");
       this.stopGame();
+
+      // ゲーム結果をデータベースに保存
+      await saveGameResult(this.room, 'disconnect');
     }
 
     // カウントダウン中の場合はカウントダウンを停止

@@ -10,6 +10,7 @@ import type {
 import { BALL, GAME, CANVAS, PADDLE } from "../../../../types/shared/constants";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { PongController } from "@/lib/game/gameController";
 import { PongSocketClient } from "@/lib/game/webSocketClient";
 
@@ -47,6 +48,9 @@ const initialGameState: GameState = {
 };
 
 const PongGame = () => {
+  // セッション情報を取得
+  const { data: session } = useSession();
+  
   // 基本状態
   const [playerSide, setPlayerSide] = useState<PlayerSide>(null);
   const [gameState, setGameState] = useState<GameState>(initialGameState);
@@ -75,6 +79,11 @@ const PongGame = () => {
 
   // WebSocket接続の初期化
   useEffect(() => {
+    // セッション情報がない場合は接続しない
+    if (!session?.user?.id) {
+      return;
+    }
+
     const socketClient = new PongSocketClient({
       onInit: (side, state) => {
         setPlayerSide(side);
@@ -96,12 +105,13 @@ const PongGame = () => {
     });
 
     socketClientRef.current = socketClient;
-    socketClient.connect("/api/ws-proxy");
+    // ユーザーIDを認証情報として送信
+    socketClient.connect("/api/ws-proxy", session.user.id);
     
     return () => {
       socketClient.disconnect();
     };
-  }, []);
+  }, [session?.user?.id]);
 
   // ゲームコントローラーの初期化と状態同期
   useEffect(() => {
