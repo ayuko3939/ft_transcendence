@@ -1,5 +1,4 @@
-import { useRouter } from "next/navigation";
-
+import { useTournament } from "../context/TournamentContext";
 import { Button } from "./button";
 import { Card } from "./card";
 
@@ -16,7 +15,7 @@ export const TournamentResult = ({
   winner,
   isFinal,
 }: TournamentResultProps) => {
-  const router = useRouter();
+  const { setTournamentState } = useTournament();
 
   return (
     <div className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
@@ -33,7 +32,9 @@ export const TournamentResult = ({
         </div>
         {isFinal ? (
           <Button
-            onClick={() => router.push("/tournament")}
+            onClick={() => {
+              setTournamentState("lobby");
+            }}
             className="w-full bg-blue-500 hover:bg-blue-600"
           >
             Return to Tournament Lobby

@@ -13,12 +13,12 @@ const dummyParticipants = [
 
 export const TournamentWaitingRoom = () => {
   const [participants, setParticipants] = useState(dummyParticipants);
-  const [chatMessages, setChatMessages] = useState<string[]>([]);
+  const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string }>>([]);
   const [newMessage, setNewMessage] = useState("");
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
-      setChatMessages([...chatMessages, newMessage]);
+      setChatMessages([...chatMessages, { id: crypto.randomUUID(), text: newMessage }]);
       setNewMessage("");
     }
   };
@@ -46,9 +46,9 @@ export const TournamentWaitingRoom = () => {
         <Card className="bg-gray-800 p-4 text-white md:col-span-2">
           <h2 className="mb-4 text-xl font-semibold">Chat</h2>
           <div className="mb-4 h-64 space-y-2 overflow-y-auto">
-            {chatMessages.map((message, index) => (
-              <div key={index} className="rounded bg-gray-700 p-2">
-                {message}
+            {chatMessages.map((message) => (
+              <div key={message.id} className="rounded bg-gray-700 p-2">
+                {message.text}
               </div>
             ))}
           </div>

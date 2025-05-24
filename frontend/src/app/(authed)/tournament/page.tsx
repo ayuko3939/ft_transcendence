@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from "react";
-
 import { TournamentBracket } from "./components/TournamentBracket";
 import { TournamentLobby } from "./components/TournamentLobby";
 import { TournamentResult } from "./components/TournamentResult";
 import { TournamentWaitingRoom } from "./components/TournamentWaitingRoom";
+import { TournamentProvider, useTournament } from "./context/TournamentContext";
 import styles from "./tournament.module.css";
 
-// ダミーのトーナメント状態
-type TournamentState = "lobby" | "waiting" | "bracket" | "result";
-
 export default function TournamentPage() {
-  const [tournamentState, setTournamentState] =
-    useState<TournamentState>("lobby");
-  const [currentTournament, setCurrentTournament] = useState<number | null>(
-    null,
+  return (
+    <TournamentProvider>
+      <TournamentContent />
+    </TournamentProvider>
   );
+}
+
+function TournamentContent() {
+  const { tournamentState, setTournamentState } = useTournament();
 
   // ダミーの試合結果
   const dummyWinner = {
@@ -42,9 +42,9 @@ export default function TournamentPage() {
 
   return (
     <div className="container mx-auto min-h-screen pt-18 pb-13">
+
       <div className={styles.tournamentContainer}>
-        
-        {/* 仮の切り替えコンポーネント */}
+        {/* 仮の切り替えコンポーネント - デバッグ用 */}
         <div className="mb-4 flex space-x-3">
           <button
             type="button"
@@ -75,6 +75,7 @@ export default function TournamentPage() {
             Results
           </button>
         </div>
+
         {renderContent()}
       </div>
     </div>
