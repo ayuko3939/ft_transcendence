@@ -137,8 +137,17 @@
 }
 
 .error-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   color: #ff3e3e;
   font-size: 0.9rem;
   margin-top: 5px;
   text-align: center;
+}
+
+.error-message::before {
+  content: "⚠️";
+  font-size: 1rem;
 }
