@@ -20,7 +20,7 @@ const GameSettingsModal = ({ show, settings, onSettingsChange, onConfirm }: Game
   };
 
   return (
-    <div className={styles.settingsOverlay}>
+    <div className={styles.overlay}>
       <div className={styles.settingsModal}>
         <h2 className={styles.settingsTitle}>
           ゲーム内容を設定してください。

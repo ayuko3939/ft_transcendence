@@ -17,7 +17,7 @@ const GameResultModal = ({ show, result, playerSide, onBackToHome }: GameResultM
   };
 
   return (
-    <div className={styles.gameOverOverlay}>
+    <div className={styles.overlay}>
       <div className={styles.gameOverContent}>
         <h2 className={styles.resultTitle}>
           {getResultText()}

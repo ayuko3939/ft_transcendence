@@ -1,11 +1,9 @@
 /* ========================================
-   共通スタイル（重複削除）
+   共通スタイル
    ======================================== */
 
-/* 共通オーバーレイスタイル */
-.dialogOverlay,
-.settingsOverlay,
-.gameOverOverlay {
+/* コンテンツ配置用オーバーレイ */
+.overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -14,6 +12,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 100;
+}
+
+/* 画面全体暗化レイヤー */
+.darkBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 45;
 }
 
 /* 共通モーダルボックススタイル */
@@ -70,18 +80,6 @@
   text-align: center;
 }
 
-.countdownOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
 .countdownText {
   font-size: 6rem;
   font-weight: bold;
@@ -114,14 +112,8 @@
 }
 
 /* ========================================
-   中断確認ダイアログの個別スタイル
+   中断確認ダイアログのスタイル
    ======================================== */
-
-.dialogOverlay {
-  position: fixed;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 100;
-}
 
 .dialog {
   width: 90%;
@@ -213,13 +205,8 @@
 }
 
 /* ========================================
-   ゲーム設定モーダルの個別スタイル
+   ゲーム設定モーダルのスタイル
    ======================================== */
-
-.settingsOverlay {
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 50;
-}
 
 .settingsModal {
   width: 90%;
@@ -274,13 +261,8 @@
 }
 
 /* ========================================
-   ゲーム終了オーバーレイの個別スタイル
+   ゲーム終了オーバーレイのスタイル
    ======================================== */
-
-.gameOverOverlay {
-  background-color: rgba(0, 0, 0, 0.8);
-  z-index: 100;
-}
 
 .gameOverContent {
   text-align: center;
@@ -326,18 +308,4 @@
 .backButton:hover {
   background-color: rgba(0, 255, 255, 0.8);
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-}
-
-/* ========================================
-   薄い暗さの背景オーバーレイ
-   ======================================== */
-
-.backgroundOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4);
-  z-index: 45;
 }

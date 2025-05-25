@@ -56,7 +56,6 @@ const PongGame = () => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [isWaitingForPlayer, setIsWaitingForPlayer] = useState(false);
   
   // ゲーム設定
   const [showSettings, setShowSettings] = useState(false);
@@ -148,28 +147,27 @@ const PongGame = () => {
     };
   }, [playerSide, gameState]);
 
-  // ======== 背景制御ロジック（新規追加） ========
-  const isGameActive = gameState.status === 'playing' || gameState.status === 'countdown';
+  // ======== 背景制御ロジック ========
   const isGameFinished = gameState.status === 'finished' || isGameOver;
 
-  // 背景を暗くする条件：ゲーム中以外
+  // 暗化条件：ゲーム中以外は暗い
   const shouldDarkenBackground = 
-    (showSettings && !settingsConfirmed) || 
-    showSurrenderConfirm || 
-    isGameFinished;
+    gameState.status !== 'playing' || showSurrenderConfirm;
 
   return (
     <div className={styles.container}>
-      {/* ======== 背景暗化オーバーレイ（新規追加） ======== */}
+      {/* ======== 背景暗化レイヤー ======== */}
       {shouldDarkenBackground && (
-        <div className={styles.backgroundOverlay} />
+        <div className={styles.darkBackground} />
       )}
 
       <GameCanvas 
         canvasRef={canvasRef}
         countdown={countdown}
         isGameFinished={isGameFinished}
-        isWaitingForPlayer={isWaitingForPlayer}
+        gameState={gameState}
+        showSettings={showSettings && !settingsConfirmed}
+        playerSide={playerSide}
         onSurrender={() => setShowSurrenderConfirm(true)}
       />
 
