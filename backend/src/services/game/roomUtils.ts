@@ -131,6 +131,18 @@ export function checkAndStartGame(room: GameRoom): void {
     room.players.left.send(startMessage);
     room.players.right.send(startMessage);
     startGameCountdown(room);
+  } else {
+    // 条件が揃わない場合は待機メッセージを送信
+    const waitingMessage = JSON.stringify({
+      type: "waitingForPlayer",
+    });
+    
+    if (room.players.left) {
+      room.players.left.send(waitingMessage);
+    }
+    if (room.players.right) {
+      room.players.right.send(waitingMessage);
+    }
   }
 }
 

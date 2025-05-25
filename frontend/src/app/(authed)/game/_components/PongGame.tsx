@@ -56,6 +56,7 @@ const PongGame = () => {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [isWaitingForPlayer, setIsWaitingForPlayer] = useState(false);
   
   // ゲーム設定
   const [showSettings, setShowSettings] = useState(false);
@@ -92,15 +93,23 @@ const PongGame = () => {
       },
       onGameState: setGameState,
       onChatMessages: setChatMessages,
-      onCountdown: setCountdown,
+      onCountdown: (count) => {
+        setCountdown(count);
+        setIsWaitingForPlayer(false);
+      },
       onGameStart: (state) => {
         setCountdown(null);
         setGameState(state);
+        setIsWaitingForPlayer(false);
       },
       onGameOver: (result) => {
         setIsGameOver(true);
         setGameResult(result);
         setGameState(prev => ({ ...prev, status: 'finished', winner: result.winner }));
+        setIsWaitingForPlayer(false);
+      },
+      onWaitingForPlayer: () => {
+        setIsWaitingForPlayer(true);
       },
     });
 
@@ -160,6 +169,7 @@ const PongGame = () => {
         canvasRef={canvasRef}
         countdown={countdown}
         isGameFinished={isGameFinished}
+        isWaitingForPlayer={isWaitingForPlayer}
         onSurrender={() => setShowSurrenderConfirm(true)}
       />
 

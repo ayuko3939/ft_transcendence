@@ -5,16 +5,19 @@ interface GameCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   countdown: number | null;
   isGameFinished: boolean;
+  isWaitingForPlayer: boolean;
   onSurrender: () => void;
 }
 
 const GameCanvas = ({ 
   canvasRef, 
   countdown, 
-  isGameFinished, 
+  isGameFinished,
+  isWaitingForPlayer, 
   onSurrender 
 }: GameCanvasProps) => {
   const shouldShowCountdown = countdown !== null && !isGameFinished;
+  const shouldShowWaiting = isWaitingForPlayer && !isGameFinished && countdown === null;
 
   return (
     <>
@@ -37,6 +40,13 @@ const GameCanvas = ({
         {shouldShowCountdown && (
           <div className={styles.countdownOverlay}>
             <div className={styles.countdownText}>{countdown}</div>
+          </div>
+        )}
+
+        {/* 待機メッセージ表示 */}
+        {shouldShowWaiting && (
+          <div className={styles.countdownOverlay}>
+            <div className={styles.waitingText}>相手プレイヤーを待っています。</div>
           </div>
         )}
       </div>
