@@ -5,10 +5,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 
+import PasswordChangeModal from "./PasswordChangeModal";
+
 export default function Header() {
   const { data: session, status } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
+  const handlePasswordChange = () => {
+    setIsPasswordModalOpen(true);
+  };
+  const handleClosePasswordModal = () => {
+    setIsPasswordModalOpen(false);
+  };
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -85,6 +96,17 @@ export default function Header() {
                 aria-labelledby="user-menu-button"
                 tabIndex={-1}
               >
+                {session?.user?.provider === "credentials" && (
+                  <button
+                    type="button"
+                    onClick={handlePasswordChange}
+                    className="block w-full px-4 py-2 text-left text-sm text-white hover:bg-cyan-900/50 focus:bg-cyan-900/70 focus:outline-none"
+                    role="menuitem"
+                    tabIndex={-1}
+                  >
+                    Change Password
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -99,6 +121,10 @@ export default function Header() {
           </div>
         )}
       </nav>
+      <PasswordChangeModal
+        isOpen={isPasswordModalOpen}
+        onClose={handleClosePasswordModal}
+      />
     </header>
   );
 }

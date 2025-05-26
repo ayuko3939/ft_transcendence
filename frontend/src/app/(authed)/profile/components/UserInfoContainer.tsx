@@ -92,11 +92,6 @@ export default function UserInfoContainer() {
     }
   };
 
-  const handlePasswordChange = () => {
-    // 実装予定: パスワード変更機能
-    console.log("パスワード変更リンクがクリックされました");
-  };
-
   return (
     <div className={styles.userInfoContainer}>
       <input
@@ -161,10 +156,6 @@ export default function UserInfoContainer() {
         </div>
 
         <p className={styles.userEmail}>{session?.user?.email || null}</p>
-
-        <p className={styles.changePasswordLink} onClick={handlePasswordChange}>
-          パスワードを変更する
-        </p>
       </div>
     </div>
   );
