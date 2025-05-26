@@ -64,6 +64,7 @@ function LoginContent() {
       const result = await signIn("credentials", {
         username,
         password,
+        redirect: false,
       });
       if (result?.error) {
         setError("メールアドレスまたはパスワードが間違っています。");

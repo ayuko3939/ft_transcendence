@@ -12,7 +12,7 @@ const ConfirmDialog = ({ show, title, message, onConfirm, onCancel }: ConfirmDia
   if (!show) return null;
 
   return (
-    <div className={styles.dialogOverlay}>
+    <div className={styles.overlay}>
       <div className={styles.dialog}>
         <p className={styles.dialogText}>{message}</p>
         <div className={styles.dialogButtons}>

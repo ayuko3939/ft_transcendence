@@ -47,8 +47,14 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
+      if (!url || url.trim() === "") return `${baseUrl}/dashboard`;
       if (url.startsWith("/")) return `${baseUrl}${url}`;
-      if (new URL(url).origin === baseUrl) return "/dashboard";
+      try {
+        if (new URL(url).origin === baseUrl) return `${baseUrl}/dashboard`;
+      } catch (error) {
+        console.error("Invalid URL in redirect callback:", error);
+        return `${baseUrl}/dashboard`;
+      }
       return baseUrl;
     },
 
