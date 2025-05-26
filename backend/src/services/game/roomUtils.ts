@@ -34,7 +34,7 @@ export function createGameRoom(): GameRoom {
         height: PADDLE.HEIGHT,
       },
       score: { left: 0, right: 0 },
-      status: 'waiting',
+      status: 'connecting',
       winner: null,
       winningScore: defaultWinningScore,
     },
@@ -111,7 +111,7 @@ export function startGame(room: GameRoom) {
       room.players.left.send(stateMessage);
       room.players.right.send(stateMessage);
 
-      if ((room.state.status as 'waiting' | 'countdown' | 'playing' | 'finished') === 'finished') {
+      if (room.state.status === 'finished') {
         handleGameOver(room);
       }
     } else {
@@ -124,25 +124,24 @@ export function startGame(room: GameRoom) {
 
 export function checkAndStartGame(room: GameRoom): void {
   if (room.players.left && room.players.right && room.leftPlayerReady) {
-    const startMessage = JSON.stringify({
-      type: "gameStart",
-      state: room.state,
-    });
-    room.players.left.send(startMessage);
-    room.players.right.send(startMessage);
+    // 両プレイヤーがいて設定完了 → カウントダウン開始
     startGameCountdown(room);
-  } else {
-    // 条件が揃わない場合は待機メッセージを送信
+  } else if (room.leftPlayerReady && !room.players.right) {
+    // leftが設定完了したがrightがいない → leftを待機状態に
+    room.state.status = 'waiting';
     const waitingMessage = JSON.stringify({
       type: "waitingForPlayer",
     });
-    
     if (room.players.left) {
       room.players.left.send(waitingMessage);
     }
-    if (room.players.right) {
-      room.players.right.send(waitingMessage);
-    }
+  } else if (room.players.right && !room.leftPlayerReady) {
+    // rightがいるがleftが設定待ち → rightを待機状態に
+    room.state.status = 'waiting';
+    const waitingMessage = JSON.stringify({
+      type: "waitingForPlayer",
+    });
+    room.players.right.send(waitingMessage);
   }
 }
 

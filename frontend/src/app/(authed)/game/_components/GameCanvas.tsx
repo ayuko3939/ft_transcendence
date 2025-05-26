@@ -1,34 +1,20 @@
 import { CANVAS } from "../../../../types/shared/constants";
-import type { GameState, PlayerSide } from "../../../../types/shared/types";
+import type { GameState } from "../../../../types/shared/types";
 import styles from "./game.module.css";
 
 interface GameCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  countdown: number | null;
-  isGameFinished: boolean;
   gameState: GameState;
-  showSettings: boolean;
-  playerSide: PlayerSide;
+  countdown: number | null;
   onSurrender: () => void;
 }
 
 const GameCanvas = ({ 
   canvasRef, 
-  countdown, 
-  isGameFinished,
   gameState,
-  showSettings,
-  playerSide,
+  countdown,
   onSurrender 
 }: GameCanvasProps) => {
-  const shouldShowCountdown = countdown !== null && !isGameFinished;
-  const shouldShowWaiting = 
-    gameState.status === 'waiting' && 
-    !isGameFinished && 
-    countdown === null && 
-    !showSettings;
-    // playerSide === 'right';
-
   return (
     <>
       {/* 中断ボタン */}
@@ -47,14 +33,14 @@ const GameCanvas = ({
         />
 
         {/* カウントダウン表示 */}
-        {shouldShowCountdown && (
+        {gameState.status === 'countdown' && countdown !== null && (
           <div className={styles.overlay}>
             <div className={styles.countdownText}>{countdown}</div>
           </div>
         )}
 
         {/* 待機メッセージ表示 */}
-        {shouldShowWaiting && (
+        {gameState.status === 'waiting' && (
           <div className={styles.overlay}>
             <div className={styles.waitingText}>相手プレイヤーを待っています。</div>
           </div>
