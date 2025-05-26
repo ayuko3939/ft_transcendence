@@ -92,21 +92,30 @@ export class GameHandlerService {
     
     console.log(`プレイヤー ${playerSide} の認証完了:`, data.sessionToken);
 
-    // 認証完了後に初期化メッセージを送信
     const player = this.room.players[playerSide];
-    if (player) {
+    if (!player) return;
+
+    // leftプレイヤーはsetup状態で初期化
+    if (playerSide === "left") {
+      this.room.state.status = 'setup';
       player.send(JSON.stringify({
         type: "init",
         side: playerSide,
         state: this.room.state,
         roomId: this.room.id,
       }));
-
-      // 左プレイヤーの場合、設定画面を表示するため何もしない
-      // 右プレイヤーが認証完了したらゲーム開始チェック
-      if (playerSide === "right") {
-        checkAndStartGame(this.room);
-      }
+    } else {
+      // rightプレイヤーは待機状態で初期化
+      this.room.state.status = 'waiting';
+      
+      player.send(JSON.stringify({
+        type: "init",
+        side: playerSide,
+        state: this.room.state,
+        roomId: this.room.id,
+      }));
+      
+      checkAndStartGame(this.room);
     }
   }
 

@@ -48,7 +48,7 @@ export class PongController {
   };
 
   private handleKeyPress = (e: KeyboardEvent): void => {
-    if (!this.playerSide) return;
+    if (!this.playerSide || this.gameState.status === 'finished') return;
 
     const speed = PADDLE.MOVE_SPEED;
     let paddleMove = false;
