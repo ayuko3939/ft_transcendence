@@ -18,6 +18,12 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
+    if (session.user.provider !== "credentials") {
+      return NextResponse.json(
+        { error: "このエンドポイントはパスワード認証ユーザーのみ使用できます" },
+        { status: 403 },
+      );
+    }
 
     const { currentPassword, newPassword } = await req.json();
 
