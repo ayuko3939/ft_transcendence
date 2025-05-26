@@ -138,3 +138,15 @@ export async function authenticateUser(
   }
   return hituser;
 }
+
+export async function getProvider(userId: string): Promise<string | null> {
+  const accounts = await db
+    .select()
+    .from(account)
+    .where(eq(account.userId, userId))
+    .limit(1);
+  if (accounts.length === 0) {
+    return null;
+  }
+  return accounts[0].provider || null;
+}

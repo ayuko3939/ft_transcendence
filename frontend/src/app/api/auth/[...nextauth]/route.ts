@@ -1,5 +1,5 @@
 import type { NextAuthOptions } from "next-auth";
-import { authenticateUser, updateSession } from "@/api/auth/users";
+import { authenticateUser, updateSession, getProvider } from "@/api/auth/users";
 import { db } from "@/api/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import * as jwt from "next-auth/jwt";
@@ -61,6 +61,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
+        session.user.provider = await getProvider(user.id) ?? "credentials";
       }
       return session;
     },
