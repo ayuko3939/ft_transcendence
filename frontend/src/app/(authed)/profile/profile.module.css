@@ -89,19 +89,6 @@
   text-align: center;
 }
 
-.changePasswordLink {
-  color: var(--cyber-primary);
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.changePasswordLink:hover {
-  text-decoration: underline;
-  text-shadow: 0 0 8px rgba(0, 255, 255, 0.7);
-}
-
 .avatarImageContainer {
   position: relative;
   width: 100%;
