@@ -47,9 +47,6 @@ function SignupContent() {
     );
   }
 
-  // const searchParams = useSearchParams();
-  // const callbackUrl = searchParams.get("callbackUrl") || "/";
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
