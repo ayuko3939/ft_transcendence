@@ -65,6 +65,47 @@ export const session = sqliteTable("session", {
 	expires: integer().notNull(),
 });
 
+export const tournamentMatches = sqliteTable("tournament_matches", {
+	id: text().primaryKey().notNull(),
+	tournamentId: text("tournament_id").notNull().references(() => tournaments.id, { onDelete: "cascade" } ),
+	round: integer().notNull(),
+	matchNumber: integer("match_number").notNull(),
+	player1Id: text("player1_id").notNull().references(() => user.id, { onDelete: "cascade" } ),
+	player2Id: text("player2_id").notNull().references(() => user.id, { onDelete: "cascade" } ),
+	winnerId: text("winner_id").references(() => user.id),
+	gameId: text("game_id").references(() => games.id),
+	status: text().default("pending").notNull(),
+	scheduledAt: integer("scheduled_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+},
+(table) => [
+	uniqueIndex("tournament_round_match_unique").on(table.tournamentId, table.round, table.matchNumber),
+]);
+
+export const tournamentParticipants = sqliteTable("tournament_participants", {
+	id: text().primaryKey().notNull(),
+	tournamentId: text("tournament_id").notNull().references(() => tournaments.id, { onDelete: "cascade" } ),
+	userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" } ),
+	status: text().default("active").notNull(),
+	eliminatedRound: integer("eliminated_round"),
+	joinedAt: integer("joined_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+},
+(table) => [
+	uniqueIndex("tournament_user_unique").on(table.tournamentId, table.userId),
+]);
+
+export const tournaments = sqliteTable("tournaments", {
+	id: text().primaryKey().notNull(),
+	name: text().notNull(),
+	creatorId: text("creator_id").notNull().references(() => user.id, { onDelete: "cascade" } ),
+	status: text().default("waiting").notNull(),
+	maxParticipants: integer("max_participants").notNull(),
+	currentRound: integer("current_round").default(0).notNull(),
+	winnerId: text("winner_id").references(() => user.id),
+	createdAt: integer("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	startedAt: integer("started_at"),
+	endedAt: integer("ended_at"),
+});
+
 export const userPassword = sqliteTable("user_password", {
 	userId: text("user_id").primaryKey().notNull().references(() => user.id, { onDelete: "cascade" } ),
 	passwordHash: text("password_hash").notNull(),
