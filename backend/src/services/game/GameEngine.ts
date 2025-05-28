@@ -2,8 +2,8 @@ import type {
   GameState,
   GameSettings,
   PlayerSide,
-} from "../../types/shared/types";
-import { CANVAS, PADDLE, BALL } from "../../types/shared/constants";
+} from "@ft-transcendence/shared";
+import { CANVAS, PADDLE, BALL } from "@ft-transcendence/shared";
 
 export class GameEngine {
   /**
@@ -12,7 +12,7 @@ export class GameEngine {
    */
   constructor(
     private gameState: GameState,
-    private settings: GameSettings,
+    private settings: GameSettings
   ) {
     // ゲーム状態の初期化
     if (this.gameState.status === undefined) {

@@ -1,5 +1,6 @@
-import type { GameState } from "../../../../types/shared/types";
-import { CANVAS } from "../../../../types/shared/constants";
+import type { GameState } from "@ft-transcendence/shared";
+import { CANVAS } from "@ft-transcendence/shared";
+
 import styles from "./game.module.css";
 
 interface GameCanvasProps {

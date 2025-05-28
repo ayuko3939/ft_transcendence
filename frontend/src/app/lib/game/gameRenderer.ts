@@ -1,4 +1,4 @@
-import type { GameState } from "../../../types/shared/types";
+import type { GameState } from "@ft-transcendence/shared";
 
 export class PongRenderer {
   private ctx: CanvasRenderingContext2D;

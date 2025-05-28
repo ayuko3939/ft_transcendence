@@ -18,9 +18,9 @@ export const BALL = {
 export const PADDLE = {
   WIDTH: 10,
   HEIGHT: 100,
-  LEFT_X: 50,      // 左パドルのX座標
-  RIGHT_X: 740,    // 右パドルのX座標（800 - 50 - 10）
-  MOVE_SPEED: 10,  // キー押下時の移動量
+  LEFT_X: 50, // 左パドルのX座標
+  RIGHT_X: 740, // 右パドルのX座標（800 - 50 - 10）
+  MOVE_SPEED: 10, // キー押下時の移動量
 } as const;
 
 // ゲーム設定

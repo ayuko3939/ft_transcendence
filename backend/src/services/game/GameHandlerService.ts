@@ -2,7 +2,7 @@ import { checkAndStartGame } from "./roomUtils";
 import { saveGameResult } from "./saveGameResult";
 
 import type { GameRoom } from "../../types/game";
-import type { ClientMessage } from "../../types/shared/types";
+import type { ClientMessage } from "@ft-transcendence/shared";
 
 export class GameHandlerService {
   private room: GameRoom;
@@ -25,7 +25,7 @@ export class GameHandlerService {
   private sendGameOver(
     winner: "left" | "right",
     reason: string,
-    message: string,
+    message: string
   ): void {
     const victorPlayer = this.room.players[winner];
     if (!victorPlayer) return;
@@ -91,7 +91,7 @@ export class GameHandlerService {
 
   private handleAuthMessage(
     data: Extract<ClientMessage, { type: "auth" }>,
-    playerSide: "left" | "right",
+    playerSide: "left" | "right"
   ): void {
     // ユーザーIDをGameRoomに保存
     this.room.userIds[playerSide] = data.sessionToken;
@@ -110,7 +110,7 @@ export class GameHandlerService {
           side: playerSide,
           state: this.room.state,
           roomId: this.room.id,
-        }),
+        })
       );
     } else {
       // rightプレイヤーは待機状態で初期化
@@ -122,7 +122,7 @@ export class GameHandlerService {
           side: playerSide,
           state: this.room.state,
           roomId: this.room.id,
-        }),
+        })
       );
 
       checkAndStartGame(this.room);
@@ -131,7 +131,7 @@ export class GameHandlerService {
 
   private handleChatMessage(
     data: Extract<ClientMessage, { type: "chat" }>,
-    playerSide: "left" | "right",
+    playerSide: "left" | "right"
   ): void {
     this.room.chats.push({
       name: data.name,
@@ -153,7 +153,7 @@ export class GameHandlerService {
 
   private handlePaddleMove(
     data: Extract<ClientMessage, { type: "paddleMove" }>,
-    playerSide: "left" | "right",
+    playerSide: "left" | "right"
   ): void {
     // パドル位置を更新
     if (playerSide === "left") {
@@ -169,7 +169,7 @@ export class GameHandlerService {
         JSON.stringify({
           type: "gameState",
           state: this.room.state,
-        }),
+        })
       );
     }
   }
@@ -182,7 +182,7 @@ export class GameHandlerService {
     this.sendGameOver(
       winner,
       "surrender",
-      "相手プレイヤーが中断しました。あなたの勝利です！",
+      "相手プレイヤーが中断しました。あなたの勝利です！"
     );
     this.stopGame();
 
@@ -192,7 +192,7 @@ export class GameHandlerService {
 
   private handleGameSettings(
     data: Extract<ClientMessage, { type: "gameSettings" }>,
-    playerSide: "left" | "right",
+    playerSide: "left" | "right"
   ): void {
     // 左側プレイヤー以外は設定変更不可
     if (playerSide !== "left") {
@@ -212,7 +212,7 @@ export class GameHandlerService {
   public async handlePlayerDisconnect(
     playerSide: "left" | "right",
     roomId: string,
-    gameRooms: Map<string, GameRoom>,
+    gameRooms: Map<string, GameRoom>
   ): Promise<void> {
     // プレイヤーの接続を削除
     if (this.room.players[playerSide]) {
@@ -230,7 +230,7 @@ export class GameHandlerService {
       this.sendGameOver(
         winner,
         "opponent_disconnected",
-        "相手プレイヤーが切断しました。あなたの勝利です！",
+        "相手プレイヤーが切断しました。あなたの勝利です！"
       );
       this.stopGame();
 

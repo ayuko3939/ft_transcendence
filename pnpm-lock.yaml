@@ -16,6 +16,9 @@ importers:
       '@fastify/websocket':
         specifier: ^11.0.2
         version: 11.0.2
+      '@ft-transcendence/shared':
+        specifier: file:../shared
+        version: link:../shared
       '@libsql/client':
         specifier: ^0.15.4
         version: 0.15.4
@@ -76,7 +79,7 @@ importers:
         version: 0.43.1(@libsql/client@0.15.4)
       next-auth:
         specifier: ^4.24.11
-        version: 4.24.11(next@15.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 4.24.11(next@15.3.1(@babel/core@7.27.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   frontend:
     dependencies:
@@ -89,6 +92,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.812.0
         version: 3.812.0
+      '@ft-transcendence/shared':
+        specifier: file:../shared
+        version: link:../shared
       '@libsql/client':
         specifier: ^0.15.7
         version: 0.15.7
@@ -106,7 +112,7 @@ importers:
         version: 15.3.1(@babel/core@7.27.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       next-auth:
         specifier: ^4.24.11
-        version: 4.24.11(next@15.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 4.24.11(next@15.3.1(@babel/core@7.27.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -156,6 +162,12 @@ importers:
       tailwindcss:
         specifier: ^4.1.7
         version: 4.1.7
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  shared:
+    devDependencies:
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -3406,12 +3418,10 @@ packages:
 
   libsql@0.5.11:
     resolution: {integrity: sha512-P2xY1nL2Jl7oM75LcguAEYqouVcevWhLWT8RU/p9ldaqQx5s/chF9t5ZFXPWP0x9myQQ4SguRqPO+FqdnCzKQg==}
-    cpu: [x64, arm64, wasm32, arm]
     os: [darwin, linux, win32]
 
   libsql@0.5.8:
     resolution: {integrity: sha512-+OopMI1wM/NvAJTHf3O3+beHd1YfKLnSVsOGBl3/7UBDZ4ydVadkbBk5Hjjs9d3ALC5rBaftMY59AvwyC8MzPw==}
-    cpu: [x64, arm64, wasm32]
     os: [darwin, linux, win32]
 
   light-my-request@6.5.1:
@@ -8260,7 +8270,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next-auth@4.24.11(next@15.3.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  next-auth@4.24.11(next@15.3.1(@babel/core@7.27.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       '@babel/runtime': 7.27.0
       '@panva/hkdf': 1.2.1

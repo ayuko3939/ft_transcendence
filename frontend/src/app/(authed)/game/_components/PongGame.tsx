@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { PongController } from "@/lib/game/gameController";
-import { PongSocketClient } from "@/lib/game/webSocketClient";
-import { useSession } from "next-auth/react";
-
 import type {
   ChatMessage,
   GameResult,
   GameSettings,
   GameState,
   PlayerSide,
-} from "../../../../types/shared/types";
-import { BALL, CANVAS, GAME, PADDLE } from "../../../../types/shared/constants";
+} from "@ft-transcendence/shared";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { PongController } from "@/lib/game/gameController";
+import { PongSocketClient } from "@/lib/game/webSocketClient";
+import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
+import { useSession } from "next-auth/react";
+
 import ConfirmDialog from "./ConfirmDialog";
 import styles from "./game.module.css";
 import GameCanvas from "./GameCanvas";

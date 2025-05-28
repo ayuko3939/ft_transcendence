@@ -1,7 +1,7 @@
 import type { PongSocketClient } from "@/lib/game/webSocketClient";
+import type { ChatMessage, PlayerSide } from "@ft-transcendence/shared";
 import { useState } from "react";
 
-import type { ChatMessage, PlayerSide } from "../../../../types/shared/types";
 import styles from "./game.module.css";
 
 interface GameChatProps {
