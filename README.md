@@ -71,7 +71,6 @@ cp .example.env .env
 
 # データベースの初期化
 pnpm db push
-pnpm frontend introspect
 ```
 
 #### 開発サーバーの起動
@@ -336,9 +335,6 @@ pnpm frontend lint
 
 # コードのフォーマット
 pnpm frontend fmt
-
-# データベーススキーマの検査
-pnpm frontend introspect
 ```
 
 ### バックエンドスクリプト
@@ -355,9 +351,6 @@ pnpm backend start
 
 # コードのフォーマット
 pnpm backend fmt
-
-# データベーススキーマの検査
-pnpm backend introspect
 ```
 
 ### データベーススクリプト
