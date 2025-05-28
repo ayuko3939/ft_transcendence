@@ -61,7 +61,7 @@ services:
       - app-network
 
   nginx:
-    image: ft_transcendence_nginx:${COMMIT_HASH}
+    image: ft_transcendence_nginx:${COMMIT_HASH:-latest}
     build:
       context: ./
       dockerfile: ./nginx/Dockerfile
