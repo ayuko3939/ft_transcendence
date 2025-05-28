@@ -8,6 +8,7 @@ WORKDIR /app
 COPY ./frontend/package.json .
 RUN pnpm install
 COPY ./frontend /app
+COPY ./shared/ ./src/types/shared/
 
 RUN NEXT_BUILD=true pnpm build
 
