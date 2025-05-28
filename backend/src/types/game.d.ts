@@ -34,6 +34,9 @@ export interface GameRoom {
     game?: NodeJS.Timeout; // ゲームループタイマー
   };
   leftPlayerReady: boolean; // 左プレイヤー(host)の準備完了フラグ
+  // トーナメント関連（オプション）
+  tournamentId?: string; // トーナメントID
+  tournamentMatchId?: string; // トーナメント試合ID
 }
 
 // ===========================================

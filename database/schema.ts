@@ -139,3 +139,70 @@ export const players = sqliteTable(
     uniqueIndex("players_game_side_unique").on(table.gameId, table.side),
   ]
 );
+
+// ===== トーナメント関連テーブル =====
+
+export const tournaments = sqliteTable("tournaments", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  creatorId: text("creator_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("waiting"), // waiting, in_progress, completed, cancelled
+  maxParticipants: integer("max_participants").notNull(),
+  currentRound: integer("current_round").notNull().default(0),
+  winnerId: text("winner_id").references(() => users.id),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  startedAt: integer("started_at", { mode: "timestamp_ms" }),
+  endedAt: integer("ended_at", { mode: "timestamp_ms" }),
+});
+
+export const tournamentParticipants = sqliteTable(
+  "tournament_participants",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    tournamentId: text("tournament_id")
+      .notNull()
+      .references(() => tournaments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: text("status").notNull().default("active"), // active, eliminated, winner
+    eliminatedRound: integer("eliminated_round"),
+    joinedAt: integer("joined_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("tournament_user_unique").on(table.tournamentId, table.userId),
+  ]
+);
+
+export const tournamentMatches = sqliteTable(
+  "tournament_matches",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    tournamentId: text("tournament_id")
+      .notNull()
+      .references(() => tournaments.id, { onDelete: "cascade" }),
+    round: integer("round").notNull(),
+    matchNumber: integer("match_number").notNull(),
+    player1Id: text("player1_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    player2Id: text("player2_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    winnerId: text("winner_id").references(() => users.id),
+    gameId: text("game_id").references(() => games.id),
+    status: text("status").notNull().default("pending"), // pending, in_progress, completed
+    scheduledAt: integer("scheduled_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    uniqueIndex("tournament_round_match_unique").on(table.tournamentId, table.round, table.matchNumber),
+  ]
+);
