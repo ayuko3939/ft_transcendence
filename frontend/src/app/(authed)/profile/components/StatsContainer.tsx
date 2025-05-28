@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import styles from "../profile.module.css";
 
@@ -44,7 +44,7 @@ export default function StatsContainer() {
     return (
       <div className={styles.statsContainer}>
         <h2 className={styles.statsTitle}>統計</h2>
-        <div style={{ color: 'white', textAlign: 'center', padding: '2rem' }}>
+        <div style={{ color: "white", textAlign: "center", padding: "2rem" }}>
           読み込み中...
         </div>
       </div>
@@ -55,7 +55,7 @@ export default function StatsContainer() {
     return (
       <div className={styles.statsContainer}>
         <h2 className={styles.statsTitle}>統計</h2>
-        <div style={{ color: 'red', textAlign: 'center', padding: '2rem' }}>
+        <div style={{ color: "red", textAlign: "center", padding: "2rem" }}>
           {error || "統計情報を取得できませんでした"}
         </div>
       </div>

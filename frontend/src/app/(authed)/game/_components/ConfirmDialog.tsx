@@ -8,7 +8,13 @@ interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
-const ConfirmDialog = ({ show, title, message, onConfirm, onCancel }: ConfirmDialogProps) => {
+const ConfirmDialog = ({
+  show,
+  title,
+  message,
+  onConfirm,
+  onCancel,
+}: ConfirmDialogProps) => {
   if (!show) return null;
 
   return (

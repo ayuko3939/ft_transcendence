@@ -2,8 +2,8 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { db } from "@/api/db";
+import { count, eq, sql } from "drizzle-orm";
 import { players } from "drizzle/schema";
-import { eq, sql, count } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 
 export async function GET(request: NextRequest) {
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json(
         { error: "認証されていません" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
     const totalGames = stats.totalGames || 0;
     const wins = stats.wins || 0;
     const losses = stats.losses || 0;
-    const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100 * 10) / 10 : 0;
+    const winRate =
+      totalGames > 0 ? Math.round((wins / totalGames) * 100 * 10) / 10 : 0;
 
     // 連勝記録を計算（簡易版）
     const recentGames = await db
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
     // 現在の連勝数を計算
     let currentStreak = 0;
     for (const game of recentGames) {
-      if (game.result === 'win') {
+      if (game.result === "win") {
         currentStreak++;
       } else {
         break;
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
     let longestStreak = 0;
     let streak = 0;
     for (const game of recentGames.reverse()) {
-      if (game.result === 'win') {
+      if (game.result === "win") {
         streak++;
         longestStreak = Math.max(longestStreak, streak);
       } else {
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
     console.error("統計情報取得エラー:", error);
     return NextResponse.json(
       { error: "統計情報の取得中にエラーが発生しました" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

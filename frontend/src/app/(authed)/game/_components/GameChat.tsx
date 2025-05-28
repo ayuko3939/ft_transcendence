@@ -1,6 +1,7 @@
-import { useState } from "react";
-import type { ChatMessage, PlayerSide } from "../../../../types/shared/types";
 import type { PongSocketClient } from "@/lib/game/webSocketClient";
+import { useState } from "react";
+
+import type { ChatMessage, PlayerSide } from "../../../../types/shared/types";
 import styles from "./game.module.css";
 
 interface GameChatProps {
@@ -10,7 +11,12 @@ interface GameChatProps {
   socketClient: PongSocketClient | null;
 }
 
-const GameChat = ({ show, messages, playerSide, socketClient }: GameChatProps) => {
+const GameChat = ({
+  show,
+  messages,
+  playerSide,
+  socketClient,
+}: GameChatProps) => {
   const [chatInput, setChatInput] = useState("");
 
   if (!show) return null;

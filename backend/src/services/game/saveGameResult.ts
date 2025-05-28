@@ -9,7 +9,7 @@ import type { GameRoom } from "../../types/game";
  */
 export async function saveGameResult(
   room: GameRoom,
-  endReason: 'completed' | 'surrender' | 'disconnect'
+  endReason: "completed" | "surrender" | "disconnect",
 ): Promise<void> {
   // 両プレイヤーのユーザーIDが存在することを確認
   const leftUserId = room.userIds.left;
@@ -36,23 +36,23 @@ export async function saveGameResult(
     });
 
     // 左プレイヤーの結果を保存
-    const leftResult = room.state.winner === 'left' ? 'win' : 'lose';
+    const leftResult = room.state.winner === "left" ? "win" : "lose";
     await tx.insert(players).values({
       id: crypto.randomUUID(),
       gameId: gameId,
       userId: leftUserId,
-      side: 'left',
+      side: "left",
       score: room.state.score.left,
       result: leftResult,
     });
 
     // 右プレイヤーの結果を保存
-    const rightResult = room.state.winner === 'right' ? 'win' : 'lose';
+    const rightResult = room.state.winner === "right" ? "win" : "lose";
     await tx.insert(players).values({
       id: crypto.randomUUID(),
       gameId: gameId,
       userId: rightUserId,
-      side: 'right',
+      side: "right",
       score: room.state.score.right,
       result: rightResult,
     });
