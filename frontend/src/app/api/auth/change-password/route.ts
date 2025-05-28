@@ -1,8 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
-import { client } from "@/api/db";
 import { hashPassword, verifyPassword } from "@/api/auth/utils";
+import { client } from "@/api/db";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 import { userPassword } from "drizzle/schema";
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     // 起こりえないはず
     if (!currentUserPassword) {
       return NextResponse.json(
-        { error: "パスワード情報が見つかりません" }, 
+        { error: "パスワード情報が見つかりません" },
         { status: 404 },
       );
     }

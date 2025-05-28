@@ -13,14 +13,20 @@ export class GameHandlerService {
 
   // ヘルパー関数群
   private isGamePlaying(): boolean {
-    return this.room.state.status === 'playing';
+    return this.room.state.status === "playing";
   }
 
   private getOpponent(playerSide: "left" | "right") {
-    return playerSide === "left" ? this.room.players.right : this.room.players.left;
+    return playerSide === "left"
+      ? this.room.players.right
+      : this.room.players.left;
   }
 
-  private sendGameOver(winner: "left" | "right", reason: string, message: string): void {
+  private sendGameOver(
+    winner: "left" | "right",
+    reason: string,
+    message: string,
+  ): void {
     const victorPlayer = this.room.players[winner];
     if (!victorPlayer) return;
 
@@ -41,9 +47,9 @@ export class GameHandlerService {
         },
         reason: reason,
         message: message,
-      }
+      },
     });
-    
+
     victorPlayer.send(victoryMessage);
   }
 
@@ -52,13 +58,13 @@ export class GameHandlerService {
       clearInterval(this.room.timers.game);
       this.room.timers.game = undefined;
     }
-    this.room.state.status = 'finished';
+    this.room.state.status = "finished";
   }
 
   public handlePlayerMessage(message: Buffer, playerSide: "left" | "right") {
     try {
       const data = JSON.parse(message.toString()) as ClientMessage;
-      
+
       switch (data.type) {
         case "auth":
           this.handleAuthMessage(data, playerSide);
@@ -84,12 +90,12 @@ export class GameHandlerService {
   }
 
   private handleAuthMessage(
-    data: Extract<ClientMessage, { type: 'auth' }>,
-    playerSide: "left" | "right"
+    data: Extract<ClientMessage, { type: "auth" }>,
+    playerSide: "left" | "right",
   ): void {
     // ユーザーIDをGameRoomに保存
     this.room.userIds[playerSide] = data.sessionToken;
-    
+
     console.log(`プレイヤー ${playerSide} の認証完了:`, data.sessionToken);
 
     const player = this.room.players[playerSide];
@@ -97,31 +103,35 @@ export class GameHandlerService {
 
     // leftプレイヤーはsetup状態で初期化
     if (playerSide === "left") {
-      this.room.state.status = 'setup';
-      player.send(JSON.stringify({
-        type: "init",
-        side: playerSide,
-        state: this.room.state,
-        roomId: this.room.id,
-      }));
+      this.room.state.status = "setup";
+      player.send(
+        JSON.stringify({
+          type: "init",
+          side: playerSide,
+          state: this.room.state,
+          roomId: this.room.id,
+        }),
+      );
     } else {
       // rightプレイヤーは待機状態で初期化
-      this.room.state.status = 'waiting';
-      
-      player.send(JSON.stringify({
-        type: "init",
-        side: playerSide,
-        state: this.room.state,
-        roomId: this.room.id,
-      }));
-      
+      this.room.state.status = "waiting";
+
+      player.send(
+        JSON.stringify({
+          type: "init",
+          side: playerSide,
+          state: this.room.state,
+          roomId: this.room.id,
+        }),
+      );
+
       checkAndStartGame(this.room);
     }
   }
 
   private handleChatMessage(
-    data: Extract<ClientMessage, { type: 'chat' }>,
-    playerSide: "left" | "right"
+    data: Extract<ClientMessage, { type: "chat" }>,
+    playerSide: "left" | "right",
   ): void {
     this.room.chats.push({
       name: data.name,
@@ -136,14 +146,14 @@ export class GameHandlerService {
     // 両プレイヤーに送信
     const player = this.room.players[playerSide];
     const opponent = this.getOpponent(playerSide);
-    
+
     if (player) player.send(chatUpdate);
     if (opponent) opponent.send(chatUpdate);
   }
 
   private handlePaddleMove(
-    data: Extract<ClientMessage, { type: 'paddleMove' }>,
-    playerSide: "left" | "right"
+    data: Extract<ClientMessage, { type: "paddleMove" }>,
+    playerSide: "left" | "right",
   ): void {
     // パドル位置を更新
     if (playerSide === "left") {
@@ -155,10 +165,12 @@ export class GameHandlerService {
     // 相手プレイヤーに状態を送信
     const opponent = this.getOpponent(playerSide);
     if (opponent) {
-      opponent.send(JSON.stringify({
-        type: "gameState",
-        state: this.room.state,
-      }));
+      opponent.send(
+        JSON.stringify({
+          type: "gameState",
+          state: this.room.state,
+        }),
+      );
     }
   }
 
@@ -167,16 +179,20 @@ export class GameHandlerService {
     if (!this.isGamePlaying()) return;
 
     const winner = playerSide === "left" ? "right" : "left";
-    this.sendGameOver(winner, "surrender", "相手プレイヤーが中断しました。あなたの勝利です！");
+    this.sendGameOver(
+      winner,
+      "surrender",
+      "相手プレイヤーが中断しました。あなたの勝利です！",
+    );
     this.stopGame();
 
     // ゲーム結果をデータベースに保存
-    await saveGameResult(this.room, 'surrender');
+    await saveGameResult(this.room, "surrender");
   }
 
   private handleGameSettings(
-    data: Extract<ClientMessage, { type: 'gameSettings' }>,
-    playerSide: "left" | "right"
+    data: Extract<ClientMessage, { type: "gameSettings" }>,
+    playerSide: "left" | "right",
   ): void {
     // 左側プレイヤー以外は設定変更不可
     if (playerSide !== "left") {
@@ -196,7 +212,7 @@ export class GameHandlerService {
   public async handlePlayerDisconnect(
     playerSide: "left" | "right",
     roomId: string,
-    gameRooms: Map<string, GameRoom>
+    gameRooms: Map<string, GameRoom>,
   ): Promise<void> {
     // プレイヤーの接続を削除
     if (this.room.players[playerSide]) {
@@ -211,11 +227,15 @@ export class GameHandlerService {
     // ゲーム中の場合は相手を勝者にする
     if (this.isGamePlaying()) {
       const winner = playerSide === "left" ? "right" : "left";
-      this.sendGameOver(winner, "opponent_disconnected", "相手プレイヤーが切断しました。あなたの勝利です！");
+      this.sendGameOver(
+        winner,
+        "opponent_disconnected",
+        "相手プレイヤーが切断しました。あなたの勝利です！",
+      );
       this.stopGame();
 
       // ゲーム結果をデータベースに保存
-      await saveGameResult(this.room, 'disconnect');
+      await saveGameResult(this.room, "disconnect");
     }
 
     // カウントダウン中の場合はカウントダウンを停止

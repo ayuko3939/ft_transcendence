@@ -1,10 +1,10 @@
 import type {
   ChatMessage,
+  ClientMessage,
   GameResult,
   GameSettings,
   GameState,
   PlayerSide,
-  ClientMessage,
   ServerMessage,
 } from "../../../types/shared/types";
 
@@ -37,7 +37,7 @@ export class PongSocketClient {
 
     this.ws.onopen = () => {
       console.log("WebSocket接続完了");
-      
+
       // 認証情報を送信
       if (sessionToken) {
         this.sendAuthMessage(sessionToken);
@@ -98,10 +98,12 @@ export class PongSocketClient {
 
   private sendAuthMessage(sessionToken: string): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({
-        type: "auth",
-        sessionToken: sessionToken,
-      }));
+      this.ws.send(
+        JSON.stringify({
+          type: "auth",
+          sessionToken: sessionToken,
+        }),
+      );
     }
   }
 

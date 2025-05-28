@@ -2,8 +2,8 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { db } from "@/api/db";
+import { and, desc, eq, ne } from "drizzle-orm";
 import { games, players, user } from "drizzle/schema";
-import { eq, and, ne, desc } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 
 export async function GET(request: NextRequest) {
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json(
         { error: "認証されていません" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -55,8 +55,8 @@ export async function GET(request: NextRequest) {
           .where(
             and(
               eq(players.gameId, game.gameId),
-              ne(players.userId, session.user.id)
-            )
+              ne(players.userId, session.user.id),
+            ),
           )
           .limit(1);
 
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
           },
           endReason: game.endReason,
         };
-      })
+      }),
     );
 
     return NextResponse.json({
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     console.error("対戦履歴取得エラー:", error);
     return NextResponse.json(
       { error: "対戦履歴の取得中にエラーが発生しました" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

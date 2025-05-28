@@ -1,5 +1,11 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { PongController } from "@/lib/game/gameController";
+import { PongSocketClient } from "@/lib/game/webSocketClient";
+import { useSession } from "next-auth/react";
+
 import type {
   ChatMessage,
   GameResult,
@@ -7,19 +13,13 @@ import type {
   GameState,
   PlayerSide,
 } from "../../../../types/shared/types";
-import { BALL, GAME, CANVAS, PADDLE } from "../../../../types/shared/constants";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { PongController } from "@/lib/game/gameController";
-import { PongSocketClient } from "@/lib/game/webSocketClient";
-
-import GameCanvas from "./GameCanvas";
-import GameSettingsModal from "./GameSettingsModal";
-import GameResultModal from "./GameResultModal";
-import GameChat from "./GameChat";
+import { BALL, CANVAS, GAME, PADDLE } from "../../../../types/shared/constants";
 import ConfirmDialog from "./ConfirmDialog";
 import styles from "./game.module.css";
+import GameCanvas from "./GameCanvas";
+import GameChat from "./GameChat";
+import GameResultModal from "./GameResultModal";
+import GameSettingsModal from "./GameSettingsModal";
 
 const initialGameState: GameState = {
   ball: {
@@ -42,7 +42,7 @@ const initialGameState: GameState = {
     height: PADDLE.HEIGHT,
   },
   score: { left: 0, right: 0 },
-  status: 'connecting',
+  status: "connecting",
   winner: null,
   winningScore: GAME.DEFAULT_WINNING_SCORE,
 };
@@ -50,20 +50,20 @@ const initialGameState: GameState = {
 const PongGame = () => {
   // セッション情報を取得
   const { data: session } = useSession();
-  
+
   // 基本状態
   const [playerSide, setPlayerSide] = useState<PlayerSide>(null);
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
-  
+
   // ゲーム設定
   const [gameSettings, setGameSettings] = useState<GameSettings>({
     ballSpeed: BALL.DEFAULT_SPEED,
     winningScore: GAME.DEFAULT_WINNING_SCORE,
   });
-  
+
   // UI状態
   const [showSurrenderConfirm, setShowSurrenderConfirm] = useState(false);
 
@@ -88,7 +88,7 @@ const PongGame = () => {
       onChatMessages: setChatMessages,
       onCountdown: (count) => {
         setCountdown(count);
-        setGameState(prev => ({ ...prev, status: 'countdown' }));
+        setGameState((prev) => ({ ...prev, status: "countdown" }));
       },
       onGameStart: (state) => {
         setCountdown(null);
@@ -96,17 +96,21 @@ const PongGame = () => {
       },
       onGameOver: (result) => {
         setGameResult(result);
-        setGameState(prev => ({ ...prev, status: 'finished', winner: result.winner }));
+        setGameState((prev) => ({
+          ...prev,
+          status: "finished",
+          winner: result.winner,
+        }));
       },
       onWaitingForPlayer: () => {
-        setGameState(prev => ({ ...prev, status: 'waiting' }));
+        setGameState((prev) => ({ ...prev, status: "waiting" }));
       },
     });
 
     socketClientRef.current = socketClient;
     // ユーザーIDを認証情報として送信
     socketClient.connect("/api/ws-proxy", session.user.id);
-    
+
     return () => {
       socketClient.disconnect();
     };
@@ -116,12 +120,16 @@ const PongGame = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const socketClient = socketClientRef.current;
-    
+
     if (!canvas || !socketClient) return;
 
     // コントローラーを作成（初回のみ）
     if (!controllerRef.current) {
-      controllerRef.current = new PongController(canvas, gameState, socketClient);
+      controllerRef.current = new PongController(
+        canvas,
+        gameState,
+        socketClient,
+      );
       controllerRef.current.start();
     }
 
@@ -139,25 +147,23 @@ const PongGame = () => {
   }, [playerSide, gameState]);
 
   // 背景制御ロジック
-  const shouldDarkenBackground = 
-    gameState.status !== 'playing' || showSurrenderConfirm;
+  const shouldDarkenBackground =
+    gameState.status !== "playing" || showSurrenderConfirm;
 
   return (
     <div className={styles.container}>
       {/* 背景暗化レイヤー */}
-      {shouldDarkenBackground && (
-        <div className={styles.darkBackground} />
-      )}
+      {shouldDarkenBackground && <div className={styles.darkBackground} />}
 
-      <GameCanvas 
+      <GameCanvas
         canvasRef={canvasRef}
         countdown={countdown}
         gameState={gameState}
         onSurrender={() => setShowSurrenderConfirm(true)}
       />
 
-      <GameSettingsModal 
-        show={gameState.status === 'setup'}
+      <GameSettingsModal
+        show={gameState.status === "setup"}
         settings={gameSettings}
         onSettingsChange={setGameSettings}
         onConfirm={() => {
@@ -167,8 +173,8 @@ const PongGame = () => {
         }}
       />
 
-      <GameResultModal 
-        show={gameState.status === 'finished' && gameResult !== null}
+      <GameResultModal
+        show={gameState.status === "finished" && gameResult !== null}
         result={gameResult}
         playerSide={playerSide}
         onBackToHome={() => {
@@ -177,14 +183,14 @@ const PongGame = () => {
         }}
       />
 
-      <GameChat 
+      <GameChat
         show={true}
         messages={chatMessages}
         playerSide={playerSide}
         socketClient={socketClientRef.current}
       />
 
-      <ConfirmDialog 
+      <ConfirmDialog
         show={showSurrenderConfirm}
         title="ゲーム中断"
         message="中断するとあなたは不戦敗となります。ゲームを中断しますか？"

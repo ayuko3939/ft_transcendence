@@ -1,4 +1,8 @@
-import type { GameState, GameSettings, PlayerSide } from "../../types/shared/types";
+import type {
+  GameState,
+  GameSettings,
+  PlayerSide,
+} from "../../types/shared/types";
 import { CANVAS, PADDLE, BALL } from "../../types/shared/constants";
 
 export class GameEngine {
@@ -8,11 +12,11 @@ export class GameEngine {
    */
   constructor(
     private gameState: GameState,
-    private settings: GameSettings
+    private settings: GameSettings,
   ) {
     // ゲーム状態の初期化
     if (this.gameState.status === undefined) {
-      this.gameState.status = 'playing';
+      this.gameState.status = "playing";
     }
     if (this.gameState.winner === undefined) {
       this.gameState.winner = null;
@@ -33,7 +37,7 @@ export class GameEngine {
    */
   update(): void {
     // 0.ゲームが終了している場合は更新しない
-    if (!this.gameState || this.gameState.status === 'finished') return;
+    if (!this.gameState || this.gameState.status === "finished") return;
 
     // 1.ボールの移動
     this.gameState.ball.x += this.gameState.ball.dx;
@@ -131,10 +135,7 @@ export class GameEngine {
    * - 上下の壁に到達した場合、Y方向の速度を反転
    */
   private checkWallCollision(): void {
-    if (
-      this.gameState.ball.y <= 0 ||
-      this.gameState.ball.y >= CANVAS.HEIGHT
-    ) {
+    if (this.gameState.ball.y <= 0 || this.gameState.ball.y >= CANVAS.HEIGHT) {
       this.gameState.ball.dy *= -1;
     }
   }
@@ -171,11 +172,11 @@ export class GameEngine {
     const winningScore = this.gameState.winningScore;
 
     if (this.gameState.score.left >= winningScore) {
-      this.gameState.status = 'finished';
-      this.gameState.winner = 'left';
+      this.gameState.status = "finished";
+      this.gameState.winner = "left";
     } else if (this.gameState.score.right >= winningScore) {
-      this.gameState.status = 'finished';
-      this.gameState.winner = 'right';
+      this.gameState.status = "finished";
+      this.gameState.winner = "right";
     }
   }
 
