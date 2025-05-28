@@ -12,7 +12,7 @@ export class GameEngine {
    */
   constructor(
     private gameState: GameState,
-    private settings: GameSettings
+    private settings: GameSettings,
   ) {
     // ゲーム状態の初期化
     if (this.gameState.status === undefined) {

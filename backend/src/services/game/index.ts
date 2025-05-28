@@ -15,7 +15,7 @@ export const gameRooms = new Map<string, GameRoom>();
 export function handleGameConnection(
   connection: WebSocket,
   req: FastifyRequest,
-  fastify: FastifyInstance
+  fastify: FastifyInstance,
 ) {
   const { roomId, room } = findAvailableRoom(gameRooms);
   assignPlayerToRoom(connection, req, fastify, room, roomId);
@@ -24,7 +24,7 @@ export function handleGameConnection(
 export function handleGameConnectionWithRoomId(
   connection: WebSocket,
   req: FastifyRequest,
-  fastify: FastifyInstance
+  fastify: FastifyInstance,
 ) {
   const { roomId } = req.params as { roomId: string };
   if (!roomId) {
@@ -48,7 +48,7 @@ function assignPlayerToRoom(
   req: FastifyRequest,
   fastify: FastifyInstance,
   room: GameRoom,
-  roomId: string
+  roomId: string,
 ) {
   let playerSide: PlayerSide;
 
@@ -76,6 +76,6 @@ function assignPlayerToRoom(
   // 認証を待つため、ここではinitメッセージを送信しない
   // 認証完了後にGameHandlerService.handleAuthMessage()で送信される
   console.log(
-    `プレイヤー ${playerSide} がルーム ${roomId} に接続しました（認証待ち）`
+    `プレイヤー ${playerSide} がルーム ${roomId} に接続しました（認証待ち）`,
   );
 }
