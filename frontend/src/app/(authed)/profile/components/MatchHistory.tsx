@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import styles from "../profile.module.css";
 
@@ -45,7 +45,7 @@ export default function MatchHistory() {
 
     try {
       const response = await fetch(
-        `/api/profile/match-history?page=${pageNumber}&limit=10`
+        `/api/profile/match-history?page=${pageNumber}&limit=10`,
       );
 
       if (!response.ok) {
@@ -59,7 +59,7 @@ export default function MatchHistory() {
         setMatches(data.matches);
       } else {
         // 追加ロードの場合は追加
-        setMatches(prev => [...prev, ...data.matches]);
+        setMatches((prev) => [...prev, ...data.matches]);
       }
 
       setPage(pageNumber);
@@ -82,7 +82,7 @@ export default function MatchHistory() {
     return (
       <div className={styles.matchHistoryContainer}>
         <h2 className={styles.historyTitle}>対戦履歴</h2>
-        <div style={{ color: 'red', textAlign: 'center', padding: '2rem' }}>
+        <div style={{ color: "red", textAlign: "center", padding: "2rem" }}>
           {error}
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function MatchHistory() {
       <h2 className={styles.historyTitle}>対戦履歴</h2>
 
       {matches.length === 0 && !isLoading ? (
-        <div style={{ color: 'white', textAlign: 'center', padding: '2rem' }}>
+        <div style={{ color: "white", textAlign: "center", padding: "2rem" }}>
           まだ対戦履歴がありません
         </div>
       ) : (
@@ -105,10 +105,15 @@ export default function MatchHistory() {
                 <div className={styles.matchOpponent}>vs {match.opponent}</div>
                 <div className={styles.matchDate}>{match.date}</div>
                 {match.endReason && (
-                  <div style={{ fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.5)' }}>
-                    {match.endReason === 'surrender' && '降参'}
-                    {match.endReason === 'disconnect' && '切断'}
-                    {match.endReason === 'completed' && '完了'}
+                  <div
+                    style={{
+                      fontSize: "0.7rem",
+                      color: "rgba(255, 255, 255, 0.5)",
+                    }}
+                  >
+                    {match.endReason === "surrender" && "降参"}
+                    {match.endReason === "disconnect" && "切断"}
+                    {match.endReason === "completed" && "完了"}
                   </div>
                 )}
               </div>

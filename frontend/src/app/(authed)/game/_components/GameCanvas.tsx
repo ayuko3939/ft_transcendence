@@ -1,5 +1,5 @@
-import { CANVAS } from "../../../../types/shared/constants";
 import type { GameState } from "../../../../types/shared/types";
+import { CANVAS } from "../../../../types/shared/constants";
 import styles from "./game.module.css";
 
 interface GameCanvasProps {
@@ -9,11 +9,11 @@ interface GameCanvasProps {
   onSurrender: () => void;
 }
 
-const GameCanvas = ({ 
-  canvasRef, 
+const GameCanvas = ({
+  canvasRef,
   gameState,
   countdown,
-  onSurrender 
+  onSurrender,
 }: GameCanvasProps) => {
   return (
     <>
@@ -33,16 +33,18 @@ const GameCanvas = ({
         />
 
         {/* カウントダウン表示 */}
-        {gameState.status === 'countdown' && countdown !== null && (
+        {gameState.status === "countdown" && countdown !== null && (
           <div className={styles.overlay}>
             <div className={styles.countdownText}>{countdown}</div>
           </div>
         )}
 
         {/* 待機メッセージ表示 */}
-        {gameState.status === 'waiting' && (
+        {gameState.status === "waiting" && (
           <div className={styles.overlay}>
-            <div className={styles.waitingText}>相手プレイヤーを待っています。</div>
+            <div className={styles.waitingText}>
+              相手プレイヤーを待っています。
+            </div>
           </div>
         )}
       </div>

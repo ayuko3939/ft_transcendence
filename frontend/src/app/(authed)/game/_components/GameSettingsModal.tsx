@@ -9,7 +9,12 @@ interface GameSettingsModalProps {
   onConfirm: () => void;
 }
 
-const GameSettingsModal = ({ show, settings, onSettingsChange, onConfirm }: GameSettingsModalProps) => {
+const GameSettingsModal = ({
+  show,
+  settings,
+  onSettingsChange,
+  onConfirm,
+}: GameSettingsModalProps) => {
   if (!show) return null;
 
   const handleChange = (key: keyof GameSettings, value: number) => {
@@ -22,9 +27,7 @@ const GameSettingsModal = ({ show, settings, onSettingsChange, onConfirm }: Game
   return (
     <div className={styles.overlay}>
       <div className={styles.settingsModal}>
-        <h2 className={styles.settingsTitle}>
-          ゲーム内容を設定してください。
-        </h2>
+        <h2 className={styles.settingsTitle}>ゲーム内容を設定してください。</h2>
 
         <div className={styles.settingItem}>
           <label htmlFor="ballSpeed" className={styles.settingLabel}>
@@ -33,7 +36,9 @@ const GameSettingsModal = ({ show, settings, onSettingsChange, onConfirm }: Game
           <select
             id="ballSpeed"
             value={settings.ballSpeed}
-            onChange={(e) => handleChange("ballSpeed", parseInt(e.target.value))}
+            onChange={(e) =>
+              handleChange("ballSpeed", parseInt(e.target.value))
+            }
             className={styles.settingSelect}
           >
             {Array.from({ length: 10 }, (_, i) => i + 1).map((value) => (
@@ -51,7 +56,9 @@ const GameSettingsModal = ({ show, settings, onSettingsChange, onConfirm }: Game
           <select
             id="winningScore"
             value={settings.winningScore}
-            onChange={(e) => handleChange("winningScore", parseInt(e.target.value))}
+            onChange={(e) =>
+              handleChange("winningScore", parseInt(e.target.value))
+            }
             className={styles.settingSelect}
           >
             {GAME.WINNING_SCORE_OPTIONS.map((value) => (
