@@ -9,6 +9,7 @@ COPY ./backend/package.json .
 RUN pnpm install
 
 COPY ./backend /app
+COPY ./shared/ ./src/types/shared/
 
 RUN pnpm build
 

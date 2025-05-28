@@ -42,7 +42,7 @@ const initialGameState: GameState = {
     height: PADDLE.HEIGHT,
   },
   score: { left: 0, right: 0 },
-  status: 'waiting',
+  status: 'connecting',
   winner: null,
   winningScore: GAME.DEFAULT_WINNING_SCORE,
 };
@@ -55,19 +55,14 @@ const PongGame = () => {
   const [playerSide, setPlayerSide] = useState<PlayerSide>(null);
   const [gameState, setGameState] = useState<GameState>(initialGameState);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   
   // ゲーム設定
-  const [showSettings, setShowSettings] = useState(false);
   const [gameSettings, setGameSettings] = useState<GameSettings>({
     ballSpeed: BALL.DEFAULT_SPEED,
     winningScore: GAME.DEFAULT_WINNING_SCORE,
   });
-  const [settingsConfirmed, setSettingsConfirmed] = useState(false);
-  
-  // ゲーム結果
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [gameResult, setGameResult] = useState<GameResult | null>(null);
   
   // UI状態
   const [showSurrenderConfirm, setShowSurrenderConfirm] = useState(false);
@@ -88,27 +83,23 @@ const PongGame = () => {
       onInit: (side, state) => {
         setPlayerSide(side);
         setGameState(state);
-        if (side === "left") setShowSettings(true);
       },
       onGameState: setGameState,
       onChatMessages: setChatMessages,
       onCountdown: (count) => {
         setCountdown(count);
-        setIsWaitingForPlayer(false);
+        setGameState(prev => ({ ...prev, status: 'countdown' }));
       },
       onGameStart: (state) => {
         setCountdown(null);
         setGameState(state);
-        setIsWaitingForPlayer(false);
       },
       onGameOver: (result) => {
-        setIsGameOver(true);
         setGameResult(result);
         setGameState(prev => ({ ...prev, status: 'finished', winner: result.winner }));
-        setIsWaitingForPlayer(false);
       },
       onWaitingForPlayer: () => {
-        setIsWaitingForPlayer(true);
+        setGameState(prev => ({ ...prev, status: 'waiting' }));
       },
     });
 
@@ -147,16 +138,13 @@ const PongGame = () => {
     };
   }, [playerSide, gameState]);
 
-  // ======== 背景制御ロジック ========
-  const isGameFinished = gameState.status === 'finished' || isGameOver;
-
-  // 暗化条件：ゲーム中以外は暗い
+  // 背景制御ロジック
   const shouldDarkenBackground = 
     gameState.status !== 'playing' || showSurrenderConfirm;
 
   return (
     <div className={styles.container}>
-      {/* ======== 背景暗化レイヤー ======== */}
+      {/* 背景暗化レイヤー */}
       {shouldDarkenBackground && (
         <div className={styles.darkBackground} />
       )}
@@ -164,20 +152,15 @@ const PongGame = () => {
       <GameCanvas 
         canvasRef={canvasRef}
         countdown={countdown}
-        isGameFinished={isGameFinished}
         gameState={gameState}
-        showSettings={showSettings && !settingsConfirmed}
-        playerSide={playerSide}
         onSurrender={() => setShowSurrenderConfirm(true)}
       />
 
       <GameSettingsModal 
-        show={showSettings && !settingsConfirmed}
+        show={gameState.status === 'setup'}
         settings={gameSettings}
         onSettingsChange={setGameSettings}
         onConfirm={() => {
-          setSettingsConfirmed(true);
-          setShowSettings(false);
           if (socketClientRef.current) {
             socketClientRef.current.sendGameSettings(gameSettings);
           }
@@ -185,7 +168,7 @@ const PongGame = () => {
       />
 
       <GameResultModal 
-        show={isGameFinished && gameResult !== null}
+        show={gameState.status === 'finished' && gameResult !== null}
         result={gameResult}
         playerSide={playerSide}
         onBackToHome={() => {

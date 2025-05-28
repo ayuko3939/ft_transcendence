@@ -36,7 +36,7 @@ export interface Score {
 // ===========================================
 
 // ゲームの進行状況（分かりやすい名前）
-export type GameStatus = 'waiting' | 'countdown' | 'playing' | 'finished';
+export type GameStatus = 'connecting' | 'setup' | 'waiting' | 'countdown' | 'playing' | 'finished';
 
 // プレイヤーの位置（左・右・未決定）
 export type PlayerSide = 'left' | 'right' | null;
