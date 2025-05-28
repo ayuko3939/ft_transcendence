@@ -18,7 +18,7 @@ importers:
         version: 11.0.2
       '@ft-transcendence/shared':
         specifier: file:../shared
-        version: link:../shared
+        version: file:shared(@libsql/client@0.15.4)
       '@libsql/client':
         specifier: ^0.15.4
         version: 0.15.4
@@ -44,9 +44,6 @@ importers:
       '@types/ws':
         specifier: ^8.5.14
         version: 8.5.14
-      drizzle-kit:
-        specifier: ^0.31.0
-        version: 0.31.0
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
@@ -144,9 +141,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.5
         version: 19.1.5(@types/react@19.1.5)
-      drizzle-kit:
-        specifier: ^0.31.1
-        version: 0.31.1
       eslint:
         specifier: ^9.27.0
         version: 9.27.0(jiti@2.4.2)
@@ -167,7 +161,14 @@ importers:
         version: 5.8.3
 
   shared:
+    dependencies:
+      drizzle-orm:
+        specifier: ^0.43.1
+        version: 0.43.1(@libsql/client@0.15.7)
     devDependencies:
+      drizzle-kit:
+        specifier: ^0.31.0
+        version: 0.31.1
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1437,6 +1438,9 @@ packages:
 
   '@fastify/websocket@11.0.2':
     resolution: {integrity: sha512-1oyJkNSZNJGjo/A5fXvlpEcm1kTBD91nRAN9lA7RNVsVNsyC5DuhOXdNL9/4UawVe7SKvzPT/QVI4RdtE9ylnA==}
+
+  '@ft-transcendence/shared@file:shared':
+    resolution: {directory: shared, type: directory}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -5907,6 +5911,39 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+
+  '@ft-transcendence/shared@file:shared(@libsql/client@0.15.4)':
+    dependencies:
+      drizzle-orm: 0.43.1(@libsql/client@0.15.4)
+    transitivePeerDependencies:
+      - '@aws-sdk/client-rds-data'
+      - '@cloudflare/workers-types'
+      - '@electric-sql/pglite'
+      - '@libsql/client'
+      - '@libsql/client-wasm'
+      - '@neondatabase/serverless'
+      - '@op-engineering/op-sqlite'
+      - '@opentelemetry/api'
+      - '@planetscale/database'
+      - '@prisma/client'
+      - '@tidbcloud/serverless'
+      - '@types/better-sqlite3'
+      - '@types/pg'
+      - '@types/sql.js'
+      - '@vercel/postgres'
+      - '@xata.io/client'
+      - better-sqlite3
+      - bun-types
+      - expo-sqlite
+      - gel
+      - knex
+      - kysely
+      - mysql2
+      - pg
+      - postgres
+      - prisma
+      - sql.js
+      - sqlite3
 
   '@humanfs/core@0.19.1': {}
 

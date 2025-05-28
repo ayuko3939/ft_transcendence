@@ -1,0 +1,3 @@
+src/drizzle/*
+!src/drizzle/*.md
+!src/drizzle/*.ts

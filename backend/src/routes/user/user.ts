@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { db } from "../../db";
-import { user } from "../../../drizzle/schema";
+import { user } from "@ft-transcendence/shared";
 import { eq } from "drizzle-orm";
 
 export default async function userRoutes(fastify: FastifyInstance) {
