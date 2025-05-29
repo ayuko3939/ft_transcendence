@@ -2,8 +2,8 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { db } from "@/api/db";
+import { games, players, user } from "@ft-transcendence/shared";
 import { and, desc, eq, ne } from "drizzle-orm";
-import { games, players, user } from "drizzle/schema";
 import { getServerSession } from "next-auth";
 
 export async function GET(request: NextRequest) {

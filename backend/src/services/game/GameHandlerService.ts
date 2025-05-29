@@ -2,7 +2,7 @@ import { checkAndStartGame } from "./roomUtils";
 import { saveGameResult } from "./saveGameResult";
 
 import type { GameRoom } from "../../types/game";
-import type { ClientMessage } from "../../types/shared/types";
+import type { ClientMessage } from "@ft-transcendence/shared";
 
 export class GameHandlerService {
   private room: GameRoom;

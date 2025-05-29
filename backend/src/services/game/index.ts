@@ -1,5 +1,5 @@
 import type { GameRoom } from "../../types/game";
-import type { PlayerSide } from "../../types/shared/types";
+import type { PlayerSide } from "@ft-transcendence/shared";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { WebSocket } from "@fastify/websocket";
 

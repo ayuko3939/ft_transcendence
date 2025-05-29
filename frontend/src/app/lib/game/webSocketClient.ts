@@ -6,7 +6,7 @@ import type {
   GameState,
   PlayerSide,
   ServerMessage,
-} from "../../../types/shared/types";
+} from "@ft-transcendence/shared";
 
 export interface WebSocketHandlers {
   onInit: (side: PlayerSide, gameState: GameState) => void;

@@ -1,7 +1,7 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { db } from "@/api/db";
+import { account, session, user, userPassword } from "@ft-transcendence/shared";
 import { eq } from "drizzle-orm";
-import { account, session, user, userPassword } from "drizzle/schema";
 
 import { hashPassword, verifyPassword } from "./utils";
 

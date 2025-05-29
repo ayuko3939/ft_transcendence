@@ -6,7 +6,8 @@
   "scripts": {
     "frontend": "pnpm -F \"frontend\"",
     "backend": "pnpm -F \"backend\"",
-    "db": "pnpm -F \"database\""
+    "db": "pnpm -F \"database\"",
+    "fmt" : "pnpm -F \"backend\" fmt && pnpm -F \"frontend\" fmt"
   },
   "engines": {
     "pnpm": ">=9.15.0",

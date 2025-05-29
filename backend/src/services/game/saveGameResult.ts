@@ -1,5 +1,5 @@
 import { db } from "../../db";
-import { games, players } from "../../../drizzle/schema";
+import { games, players } from "@ft-transcendence/shared";
 import type { GameRoom } from "../../types/game";
 
 /**

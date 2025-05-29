@@ -1,4 +1,5 @@
-import type { GameResult, PlayerSide } from "../../../../types/shared/types";
+import type { GameResult, PlayerSide } from "@ft-transcendence/shared";
+
 import styles from "./game.module.css";
 
 interface GameResultModalProps {

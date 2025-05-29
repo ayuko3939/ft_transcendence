@@ -1,5 +1,6 @@
-import type { GameSettings } from "../../../../types/shared/types";
-import { GAME } from "../../../../types/shared/constants";
+import type { GameSettings } from "@ft-transcendence/shared";
+import { GAME } from "@ft-transcendence/shared";
+
 import styles from "./game.module.css";
 
 interface GameSettingsModalProps {

@@ -3,12 +3,15 @@ FROM node:22-slim AS builder
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm install -g pnpm
-WORKDIR /app
 
+WORKDIR /shared
+COPY ./shared .
+RUN pnpm i && pnpm build
+
+WORKDIR /app
 COPY ./frontend/package.json .
 RUN pnpm install
 COPY ./frontend /app
-COPY ./shared/ ./src/types/shared/
 
 RUN NEXT_BUILD=true pnpm build
 

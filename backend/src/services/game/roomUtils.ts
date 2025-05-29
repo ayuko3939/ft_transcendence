@@ -2,8 +2,8 @@ import { GameEngine } from "../../services/game/GameEngine";
 import { saveGameResult } from "./saveGameResult";
 import { v4 as uuidv4 } from "uuid";
 import type { GameRoom } from "../../types/game";
-import type { GameState, GameSettings } from "../../types/shared/types";
-import { CANVAS, BALL, PADDLE, GAME } from "../../types/shared/constants";
+import type { GameState, GameSettings } from "@ft-transcendence/shared";
+import { CANVAS, BALL, PADDLE, GAME } from "@ft-transcendence/shared";
 
 export function createGameRoom(): GameRoom {
   const defaultBallSpeed = BALL.DEFAULT_SPEED;

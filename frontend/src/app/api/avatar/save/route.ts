@@ -2,8 +2,8 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { db } from "@/api/db";
+import { user } from "@ft-transcendence/shared";
 import { eq } from "drizzle-orm";
-import { user } from "drizzle/schema";
 import { getServerSession } from "next-auth";
 
 export async function POST(request: NextRequest) {

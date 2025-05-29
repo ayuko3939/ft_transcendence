@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { hashPassword, verifyPassword } from "@/api/auth/utils";
 import { client } from "@/api/db";
+import { userPassword } from "@ft-transcendence/shared";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
-import { userPassword } from "drizzle/schema";
 import { getServerSession } from "next-auth";
 
 export async function POST(req: NextRequest) {

@@ -1,7 +1,7 @@
 import type { PongSocketClient } from "@/lib/game/webSocketClient";
+import type { GameState, PlayerSide } from "@ft-transcendence/shared";
+import { PADDLE } from "@ft-transcendence/shared";
 
-import type { GameState, PlayerSide } from "../../../types/shared/types";
-import { PADDLE } from "../../../types/shared/constants";
 import { PongRenderer } from "./gameRenderer";
 
 export class PongController {

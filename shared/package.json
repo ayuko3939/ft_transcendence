@@ -1,0 +1,20 @@
+{
+  "name": "@ft-transcendence/shared",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "pnpm run build",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "introspect": "drizzle-kit introspect"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.43.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "drizzle-kit": "^0.31.0"
+  }
+}
