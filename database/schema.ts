@@ -150,7 +150,9 @@ export const tournaments = sqliteTable("tournaments", {
   creatorId: text("creator_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  status: text("status").notNull().default("waiting"), // waiting, in_progress, completed, cancelled
+  status: text("status", { enum: ["waiting", "in_progress", "completed", "cancelled"] })
+    .notNull()
+    .default("waiting"),
   maxParticipants: integer("max_participants").notNull(),
   currentRound: integer("current_round").notNull().default(0),
   winnerId: text("winner_id").references(() => users.id),
@@ -171,7 +173,9 @@ export const tournamentParticipants = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    status: text("status").notNull().default("active"), // active, eliminated, winner
+    status: text("status", { enum: ["active", "eliminated", "winner"] })
+      .notNull()
+      .default("active"),
     eliminatedRound: integer("eliminated_round"),
     joinedAt: integer("joined_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
   },
@@ -199,7 +203,9 @@ export const tournamentMatches = sqliteTable(
       .references(() => users.id, { onDelete: "cascade" }),
     winnerId: text("winner_id").references(() => users.id),
     gameId: text("game_id").references(() => games.id),
-    status: text("status").notNull().default("pending"), // pending, in_progress, completed
+    status: text("status", { enum: ["pending", "in_progress", "completed"] })
+      .notNull()
+      .default("pending"),
     scheduledAt: integer("scheduled_at", { mode: "timestamp_ms" }).notNull().default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
