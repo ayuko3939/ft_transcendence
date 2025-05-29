@@ -75,10 +75,11 @@ export class PongSocketClient {
     });
   }
 
-  public sendPaddleMove(y: number): void {
+  public sendPaddleMove(y: number, playerSide?: PlayerSide): void {
     this.sendMessage({
       type: "paddleMove",
       y,
+      playerSide,
     });
   }
 

@@ -24,6 +24,10 @@ export class GameEngine {
     if (this.gameState.winningScore === undefined) {
       this.gameState.winningScore = this.settings.winningScore;
     }
+    // gameTypeはオプショナルなので、設定されていない場合はデフォルトでonlineとする
+    if (this.gameState.gameType === undefined) {
+      this.gameState.gameType = "online";
+    }
   }
 
   /**

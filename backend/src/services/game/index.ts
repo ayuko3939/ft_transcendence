@@ -33,7 +33,7 @@ export function handleGameConnectionWithRoomId(
   }
   let room = gameRooms.get(roomId);
   if (!room) {
-    room = createGameRoom();
+    room = createGameRoom("online");
     gameRooms.set(roomId, room);
   }
   if (room.players.left && room.players.right) {

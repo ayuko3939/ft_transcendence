@@ -41,6 +41,9 @@ export type GameStatus = 'connecting' | 'setup' | 'waiting' | 'countdown' | 'pla
 // プレイヤーの位置（左・右・未決定）
 export type PlayerSide = "left" | "right" | null;
 
+// ゲームタイプ（オンライン・ローカル・トーナメント）
+export type GameType = "online" | "local" | "tournament";
+
 // ゲーム設定（プレイヤーが変更可能な項目）
 export interface GameSettings {
   ballSpeed: number; // ボールの速度 (1-10)
@@ -56,6 +59,7 @@ export interface GameState {
   status: GameStatus; // 現在のゲーム進行状況
   winner: PlayerSide; // 勝者（ゲーム終了時のみ）
   winningScore: number; // 勝利条件の点数
+  gameType?: GameType; // ゲームタイプ
 }
 
 // ===========================================
@@ -83,7 +87,7 @@ export interface GameResult {
 // クライアント → サーバー へのメッセージ
 export type ClientMessage =
   | { type: "auth"; sessionToken: string } // 認証情報送信
-  | { type: "paddleMove"; y: number } // パドル移動
+  | { type: "paddleMove"; y: number; playerSide?: PlayerSide } // パドル移動
   | { type: "chat"; name: string; message: string } // チャット送信
   | { type: "surrender" } // ゲーム中断
   | { type: "gameSettings"; ballSpeed: number; winningScore: number }; // ゲーム設定

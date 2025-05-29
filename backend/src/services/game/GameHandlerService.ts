@@ -70,7 +70,9 @@ export class GameHandlerService {
           this.handleAuthMessage(data, playerSide);
           break;
         case "chat":
-          this.handleChatMessage(data, playerSide);
+          if (this.room.state.gameType !== "local") {
+            this.handleChatMessage(data, playerSide);
+          }
           break;
         case "paddleMove":
           this.handlePaddleMove(data, playerSide);
@@ -186,8 +188,10 @@ export class GameHandlerService {
     );
     this.stopGame();
 
-    // ゲーム結果をデータベースに保存
-    await saveGameResult(this.room, "surrender");
+    // ローカルモードではDB保存をスキップ
+    if (this.room.state.gameType !== "local") {
+      await saveGameResult(this.room, "surrender");
+    }
   }
 
   private handleGameSettings(
@@ -234,8 +238,10 @@ export class GameHandlerService {
       );
       this.stopGame();
 
-      // ゲーム結果をデータベースに保存
-      await saveGameResult(this.room, "disconnect");
+      // ローカルモードではDB保存をスキップ
+      if (this.room.state.gameType !== "local") {
+        await saveGameResult(this.room, "disconnect");
+      }
     }
 
     // カウントダウン中の場合はカウントダウンを停止
