@@ -30,13 +30,17 @@ export default async function tournamentSocketRoute(fastify: FastifyInstance) {
       connection.on("message", async (message: Buffer) => {
         try {
           const data = JSON.parse(message.toString());
-          
+
           switch (data.type) {
             case "join":
               await handleJoinTournament(data, tournamentId, tournamentService);
               break;
             case "start":
-              await handleStartTournament(data, tournamentId, tournamentService);
+              await handleStartTournament(
+                data,
+                tournamentId,
+                tournamentService,
+              );
               break;
             case "chat":
               handleTournamentChat(data, tournamentId);
@@ -60,7 +64,7 @@ export default async function tournamentSocketRoute(fastify: FastifyInstance) {
         }
         console.log(`トーナメント ${tournamentId} から切断しました`);
       });
-    }
+    },
   );
 }
 
@@ -70,12 +74,12 @@ export default async function tournamentSocketRoute(fastify: FastifyInstance) {
 async function handleJoinTournament(
   data: any,
   tournamentId: string,
-  tournamentService: TournamentService
+  tournamentService: TournamentService,
 ) {
   try {
     const { userId } = data;
     await tournamentService.joinTournament(tournamentId, userId);
-    
+
     // 全員に更新を通知
     await sendTournamentUpdate(tournamentId, tournamentService);
   } catch (error) {
@@ -90,12 +94,12 @@ async function handleJoinTournament(
 async function handleStartTournament(
   data: any,
   tournamentId: string,
-  tournamentService: TournamentService
+  tournamentService: TournamentService,
 ) {
   try {
     const { creatorId } = data;
     await tournamentService.startTournament(tournamentId, creatorId);
-    
+
     // 全員に更新を通知
     await sendTournamentUpdate(tournamentId, tournamentService);
   } catch (error) {
@@ -108,7 +112,7 @@ async function handleStartTournament(
  */
 function handleTournamentChat(data: any, tournamentId: string) {
   const { name, message } = data;
-  
+
   const chatMessage = JSON.stringify({
     type: "chat",
     name,
@@ -125,10 +129,11 @@ function handleTournamentChat(data: any, tournamentId: string) {
  */
 async function sendTournamentUpdate(
   tournamentId: string,
-  tournamentService: TournamentService
+  tournamentService: TournamentService,
 ) {
   try {
-    const tournament = await tournamentService.getTournamentWithDetails(tournamentId);
+    const tournament =
+      await tournamentService.getTournamentWithDetails(tournamentId);
     if (!tournament) return;
 
     const updateMessage = JSON.stringify({

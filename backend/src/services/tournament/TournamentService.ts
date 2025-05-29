@@ -33,21 +33,21 @@ export class TournamentService {
       .from(tournaments)
       .innerJoin(
         tournamentParticipants,
-        eq(tournaments.id, tournamentParticipants.tournamentId)
+        eq(tournaments.id, tournamentParticipants.tournamentId),
       )
       .where(
         and(
           eq(tournaments.status, "in_progress"),
           eq(tournamentParticipants.userId, userId),
-          eq(tournamentParticipants.status, "active")
-        )
+          eq(tournamentParticipants.status, "active"),
+        ),
       );
 
     const participatingTournaments = await Promise.all(
       participatingQuery.map(async ({ tournaments: tournament }) => {
         const details = await this.getTournamentWithDetails(tournament.id);
         return details!;
-      })
+      }),
     );
 
     return {
@@ -60,7 +60,7 @@ export class TournamentService {
    */
   async createTournament(
     request: CreateTournamentRequest,
-    creatorId: string
+    creatorId: string,
   ): Promise<Tournament> {
     const tournamentId = crypto.randomUUID();
     const now = Date.now();
@@ -117,8 +117,8 @@ export class TournamentService {
       .where(
         and(
           eq(tournamentParticipants.tournamentId, tournamentId),
-          eq(tournamentParticipants.userId, userId)
-        )
+          eq(tournamentParticipants.userId, userId),
+        ),
       )
       .limit(1);
 
@@ -153,7 +153,7 @@ export class TournamentService {
    */
   async startTournament(
     tournamentId: string,
-    creatorId: string
+    creatorId: string,
   ): Promise<void> {
     const tournament = await this.getTournamentById(tournamentId);
     if (!tournament) {
@@ -198,11 +198,11 @@ export class TournamentService {
   private async generateRoundMatches(
     tournamentId: string,
     participants: any[],
-    round: number
+    round: number,
   ): Promise<void> {
     // 参加者をシャッフル
     const shuffledParticipants = [...participants].sort(
-      () => Math.random() - 0.5
+      () => Math.random() - 0.5,
     );
 
     const matches: any[] = [];
@@ -243,7 +243,7 @@ export class TournamentService {
     const { roomId } = createTournamentGameRoom(
       tournamentId,
       matchId,
-      gameRooms
+      gameRooms,
     );
     console.log(`トーナメント試合用ルーム作成: ${roomId} (試合ID: ${matchId})`);
     return roomId;
@@ -253,7 +253,7 @@ export class TournamentService {
    * トーナメント詳細を取得
    */
   async getTournamentWithDetails(
-    tournamentId: string
+    tournamentId: string,
   ): Promise<TournamentWithDetails | null> {
     const tournament = await this.getTournamentById(tournamentId);
     if (!tournament) {
@@ -284,8 +284,8 @@ export class TournamentService {
         .where(
           and(
             eq(tournamentMatches.tournamentId, tournamentId),
-            eq(tournamentMatches.round, tournament.currentRound)
-          )
+            eq(tournamentMatches.round, tournament.currentRound),
+          ),
         )) as unknown as TournamentMatch[];
     }
     const participantsWithUsers: Array<
@@ -335,7 +335,7 @@ export class TournamentService {
         createdAt: tournament.createdAt,
         startedAt: tournament.startedAt ?? undefined,
         endedAt: tournament.endedAt ?? undefined,
-      })
+      }),
     );
 
     // 全トーナメントの参加者を一度に取得
@@ -354,8 +354,8 @@ export class TournamentService {
       .where(
         inArray(
           tournamentParticipants.tournamentId,
-          tournamentList.map((t) => t.id)
-        )
+          tournamentList.map((t) => t.id),
+        ),
       );
 
     // allParticipantsFromDB を適切な型に変換
@@ -378,7 +378,7 @@ export class TournamentService {
         acc[participant.tournamentId].push(participant);
         return acc;
       },
-      {} as Record<string, typeof allParticipants>
+      {} as Record<string, typeof allParticipants>,
     );
 
     return tournamentList.map((tournament) => ({
@@ -394,7 +394,7 @@ export class TournamentService {
   async processMatchResult(
     matchId: string,
     winnerId: string,
-    gameId: string
+    gameId: string,
   ): Promise<void> {
     // 試合情報を取得
     const match = await db
@@ -434,14 +434,14 @@ export class TournamentService {
       .where(
         and(
           eq(tournamentParticipants.tournamentId, currentMatch.tournamentId),
-          eq(tournamentParticipants.userId, loserId)
-        )
+          eq(tournamentParticipants.userId, loserId),
+        ),
       );
 
     // このラウンドのすべての試合が完了したかチェック
     await this.checkAndAdvanceRound(
       currentMatch.tournamentId,
-      currentMatch.round
+      currentMatch.round,
     );
   }
 
@@ -450,7 +450,7 @@ export class TournamentService {
    */
   private async checkAndAdvanceRound(
     tournamentId: string,
-    round: number
+    round: number,
   ): Promise<void> {
     // このラウンドの試合をすべて取得
     const roundMatches = await db
@@ -459,12 +459,12 @@ export class TournamentService {
       .where(
         and(
           eq(tournamentMatches.tournamentId, tournamentId),
-          eq(tournamentMatches.round, round)
-        )
+          eq(tournamentMatches.round, round),
+        ),
       );
 
     const completedMatches = roundMatches.filter(
-      (match) => match.status === "completed"
+      (match) => match.status === "completed",
     );
 
     // すべての試合が完了していない場合は何もしない
@@ -495,8 +495,8 @@ export class TournamentService {
         .where(
           and(
             eq(tournamentParticipants.tournamentId, tournamentId),
-            eq(tournamentParticipants.userId, winners[0] ?? "")
-          )
+            eq(tournamentParticipants.userId, winners[0] ?? ""),
+          ),
         );
     } else if (winners.length > 1) {
       // 次のラウンドを開始
@@ -514,7 +514,7 @@ export class TournamentService {
       await this.generateRoundMatches(
         tournamentId,
         nextRoundParticipants,
-        nextRound
+        nextRound,
       );
     }
   }
@@ -536,7 +536,7 @@ export class TournamentService {
    * IDでトーナメントを取得
    */
   private async getTournamentById(
-    tournamentId: string
+    tournamentId: string,
   ): Promise<Tournament | null> {
     const result = await db
       .select()
@@ -559,7 +559,7 @@ export class TournamentService {
           createdAt: row.createdAt,
           startedAt: row.startedAt ?? undefined,
           endedAt: row.endedAt ?? undefined,
-        }))
+        })),
       );
 
     return result.length > 0 ? result[0] : null;
