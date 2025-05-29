@@ -2,10 +2,10 @@ import { GameEngine } from "../../services/game/GameEngine";
 import { saveGameResult } from "./saveGameResult";
 import { v4 as uuidv4 } from "uuid";
 import type { GameRoom } from "../../types/game";
-import type { GameState, GameSettings } from "@ft-transcendence/shared";
+import type { GameState, GameSettings, GameType } from "@ft-transcendence/shared";
 import { CANVAS, BALL, PADDLE, GAME } from "@ft-transcendence/shared";
 
-export function createGameRoom(): GameRoom {
+export function createGameRoom(gameType: GameType = "online"): GameRoom {
   const defaultBallSpeed = BALL.DEFAULT_SPEED;
   const defaultWinningScore = GAME.DEFAULT_WINNING_SCORE;
 
@@ -37,6 +37,7 @@ export function createGameRoom(): GameRoom {
       status: "connecting",
       winner: null,
       winningScore: defaultWinningScore,
+      gameType: gameType,
     },
     chats: [],
     settings: {
@@ -171,8 +172,10 @@ function handleGameOver(room: GameRoom) {
 
   room.state.status = "waiting";
 
-  // ゲーム結果をデータベースに保存
-  saveGameResult(room, "completed");
+  // ローカル対戦ではDB保存をスキップ
+  if (room.state.gameType !== "local") {
+    saveGameResult(room, "completed");
+  }
 }
 
 export function findAvailableRoom(gameRooms: Map<string, GameRoom>): {
@@ -186,7 +189,7 @@ export function findAvailableRoom(gameRooms: Map<string, GameRoom>): {
   }
 
   const newRoomId = uuidv4();
-  const newRoom = createGameRoom();
+  const newRoom = createGameRoom("online");
   gameRooms.set(newRoomId, newRoom);
   return { roomId: newRoomId, room: newRoom };
 }

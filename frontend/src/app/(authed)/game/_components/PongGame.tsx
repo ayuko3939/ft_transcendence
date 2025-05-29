@@ -45,6 +45,7 @@ const initialGameState: GameState = {
   status: "connecting",
   winner: null,
   winningScore: GAME.DEFAULT_WINNING_SCORE,
+  gameType: "online",
 };
 
 const PongGame = () => {
