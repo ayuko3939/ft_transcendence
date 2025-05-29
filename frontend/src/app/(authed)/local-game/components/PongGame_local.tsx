@@ -207,12 +207,10 @@ const LocalPongGame = () => {
       />
 
       {/* ローカル対戦用の操作説明 */}
-      {gameState.status === "playing" && (
-        <div className="mt-4 text-center text-white">
-          <p className="text-sm mb-2">操作方法</p>
-          <p className="text-xs">プレイヤー1（左）: W/S キー | プレイヤー2（右）: ↑/↓ キー</p>
-        </div>
-      )}
+      <div className="mt-4 text-center text-white">
+        <p className="text-sm mb-2">操作方法</p>
+        <p className="text-xs">プレイヤー1（左）: W/S キー | プレイヤー2（右）: ↑/↓ キー</p>
+      </div>
     </div>
   );
 };
