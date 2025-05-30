@@ -119,30 +119,11 @@ make fclean
 
 ## アーキテクチャ
 
-```
-                   +----------------+
-                   |    NGINX       |
-                   |  (Reverse Proxy)|
-                   +--------+-------+
-                            |
-             +-------------+--------------+
-             |                            |
-      +------v-------+            +------v-------+
-      |  Frontend    |            |  Backend     |
-      |  (Next.js)   |<---------->|  (Fastify)   |
-      +------+-------+   WebSocket+------+-------+
-             |                            |
-             |                            |
-      +------v-------+            +------v-------+
-      |  Database    |            |  MinIO       |
-      |  (SQLite)    |            | (Object Store)|
-      +--------------+            +--------------+
-                                         |
-                                  +------v-------+
-                                  | Elastic Stack|
-                                  | (Monitoring) |
-                                  +--------------+
-```
+最小構成
+![minアーキテクチャ図](./image/ft_transcendence.drawio.png)
+
+最大構成
+![allアーキテクチャ図](./image/ft_transcendence-all.drawio.png)
 
 ### 主要コンポーネント
 
