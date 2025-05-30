@@ -67,19 +67,13 @@ export const TournamentLobby = () => {
             onClick={() => setShowCreateModal(true)}
             className="bg-green-500 hover:bg-green-600"
           >
-            Create Tournament
+            トーナメントを作成
           </Button>
         </div>
 
         {tournaments.length === 0 ? (
           <div className="text-center text-gray-400">
             <p className="mb-4">現在利用可能なトーナメントがありません</p>
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-green-500 hover:bg-green-600"
-            >
-              最初のトーナメントを作成
-            </Button>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
