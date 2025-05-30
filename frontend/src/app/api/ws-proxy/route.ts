@@ -1,10 +1,12 @@
 import type { NextRequest } from "next/server";
+import { logApiRequest, logApiError } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   try {
     const upgradeHeader = req.headers.get("upgrade");
 
     if (upgradeHeader !== "websocket") {
+      logApiRequest(req.method, req.nextUrl.pathname, 426);
       return new Response("Expected Upgrade: websocket", { status: 426 });
     }
 
@@ -20,8 +22,10 @@ export async function GET(req: NextRequest) {
       redirect: "manual",
     } as RequestInit);
 
+    logApiRequest(req.method, req.nextUrl.pathname, response.status);
     return response;
   } catch (error: unknown) {
+    logApiError(req.method, req.nextUrl.pathname, error instanceof Error ? error : new Error(String(error)));
     console.error("WebSocketプロキシエラー:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
