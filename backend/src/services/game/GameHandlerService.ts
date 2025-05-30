@@ -181,6 +181,8 @@ export class GameHandlerService {
     if (!this.isGamePlaying()) return;
 
     const winner = playerSide === "left" ? "right" : "left";
+    this.room.state.winner = winner;
+    this.room.state.status = "finished";
     this.sendGameOver(
       winner,
       "surrender",
@@ -231,6 +233,8 @@ export class GameHandlerService {
     // ゲーム中の場合は相手を勝者にする
     if (this.isGamePlaying()) {
       const winner = playerSide === "left" ? "right" : "left";
+      this.room.state.winner = winner;
+      this.room.state.status = "finished";
       this.sendGameOver(
         winner,
         "opponent_disconnected",
