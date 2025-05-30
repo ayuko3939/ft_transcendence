@@ -10,7 +10,7 @@ export default async function tournamentSocketRoute(fastify: FastifyInstance) {
 
   // トーナメント待機室のWebSocket接続
   fastify.get<{ Params: { tournamentId: string } }>(
-    "/:tournamentId/ws",
+    "/:tournamentId",
     { websocket: true },
     (connection, req) => {
       const { tournamentId } = req.params;
