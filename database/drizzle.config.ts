@@ -9,13 +9,11 @@ const databaseFileName =
     process.env.DB_FILE_NAME ?? "database.db"
   );
 
-const databaseMigrationsDir = path.join(
-  process.env.DB_FILE_DIR ?? "./",
-  "drizzle"
-);
+console.log("Database file:", databaseFileName);
+console.log("Migrations directory: ./drizzle (relative path)");
 
 export default defineConfig({
-  out: databaseMigrationsDir,
+  out: "./drizzle",
   schema: "./schema.ts",
   dialect: "sqlite",
   dbCredentials: {
