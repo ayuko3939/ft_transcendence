@@ -5,9 +5,9 @@ RUN npm install -g pnpm
 WORKDIR /app
 
 COPY ./database/package.json .
-COPY ./database/*.ts .
-
 RUN pnpm install
+
+COPY ./database/*.ts .
 
 COPY ./database/*.sh .
 RUN chmod +x *.sh
