@@ -15,7 +15,7 @@ mkdirSync("logs", { recursive: true });
 const fastify = Fastify({
   logger: {
     level: "debug",
-    file: "logs/server.log",
+    file: "logs/backend.log",
   },
 });
 
