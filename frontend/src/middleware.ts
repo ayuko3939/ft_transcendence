@@ -10,7 +10,8 @@ export function middleware(req: NextRequest) {
 
   // ローカル対戦用WebSocketプロキシ
   if (req.nextUrl.pathname === "/api/ws-proxy-local") {
-    const backendWsUrl = process.env.BACKEND_WS_URL || "ws://localhost:3001/game";
+    const backendWsUrl =
+      process.env.BACKEND_WS_URL || "ws://localhost:3001/game";
     const localWsUrl = backendWsUrl.replace("/game", "/game/local");
     const url = new URL(localWsUrl);
     return NextResponse.rewrite(url);

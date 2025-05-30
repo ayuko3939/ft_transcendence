@@ -93,7 +93,7 @@ export const TournamentLobby = () => {
                 <p className="mb-4 text-gray-400">
                   Status: {getStatusText(tournament.status)}
                 </p>
-                
+
                 {/* 参加者一覧 */}
                 {tournament.participants.length > 0 && (
                   <div className="mb-4">
@@ -120,12 +120,14 @@ export const TournamentLobby = () => {
                   }}
                   className="w-full bg-blue-500 hover:bg-blue-600"
                   disabled={
-                    tournament.participants.length >= tournament.maxParticipants ||
+                    tournament.participants.length >=
+                      tournament.maxParticipants ||
                     tournament.status !== "waiting"
                   }
                 >
                   {tournament.status === "waiting"
-                    ? tournament.participants.length >= tournament.maxParticipants
+                    ? tournament.participants.length >=
+                      tournament.maxParticipants
                       ? "満員"
                       : "参加する"
                     : "参加受付終了"}

@@ -50,7 +50,9 @@ export const CreateTournamentModal = ({
     } catch (error) {
       console.error("トーナメント作成エラー:", error);
       setError(
-        error instanceof Error ? error.message : "トーナメント作成に失敗しました",
+        error instanceof Error
+          ? error.message
+          : "トーナメント作成に失敗しました",
       );
     } finally {
       setIsLoading(false);
@@ -66,10 +68,7 @@ export const CreateTournamentModal = ({
 
   return (
     <div className={styles.modalOverlay} onClick={handleClose}>
-      <div 
-        className={styles.modalContent} 
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
           className={styles.modalCloseButton}
@@ -114,11 +113,7 @@ export const CreateTournamentModal = ({
             </select>
           </div>
 
-          {error && (
-            <div className={styles.errorMessage}>
-              {error}
-            </div>
-          )}
+          {error && <div className={styles.errorMessage}>{error}</div>}
 
           <div className={styles.buttonContainer}>
             <button
