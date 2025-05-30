@@ -119,7 +119,11 @@ make fclean
 
 ## アーキテクチャ
 
-![アーキテクチャ図](./image/ft_transcendence.drawio.png)
+最小構成
+![minアーキテクチャ図](./image/ft_transcendence.drawio.png)
+
+最大構成
+![allアーキテクチャ図](./image/ft_transcendence-all.drawio.png)
 
 ### 主要コンポーネント
 
