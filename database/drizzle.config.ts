@@ -9,10 +9,13 @@ const databaseFileName =
     process.env.DB_FILE_NAME ?? "database.db"
   );
 
-const databaseMigrationsDir = path.join(
-  process.env.DB_FILE_DIR ?? "./",
-  "drizzle"
-);
+// 何故か, databaseMigrationsDir が絶対パスだとエラーになるため、相対パスで指定する必要がある。
+const databaseMigrationsDir = process.env.DB_FILE_DIR
+  ? path.relative(process.cwd(), path.join(process.env.DB_FILE_DIR, "drizzle"))
+  : "./drizzle";
+
+console.log("Database file:", databaseFileName);
+console.log("Migrations directory:", databaseMigrationsDir);
 
 export default defineConfig({
   out: databaseMigrationsDir,
