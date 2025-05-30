@@ -1,14 +1,11 @@
-import type { TournamentWithDetails } from "@ft-transcendence/shared";
 import { useState } from "react";
 
-import { Button } from "./button";
+import styles from "./CreateTournamentModal.module.css";
 
 interface CreateTournamentModalProps {
   show: boolean;
   onClose: () => void;
-  onTournamentCreated: (
-    tournament: TournamentWithDetails,
-  ) => void;
+  onTournamentCreated: (tournament: any) => void;
 }
 
 export const CreateTournamentModal = ({
@@ -53,9 +50,7 @@ export const CreateTournamentModal = ({
     } catch (error) {
       console.error("トーナメント作成エラー:", error);
       setError(
-        error instanceof Error
-          ? error.message
-          : "トーナメント作成に失敗しました",
+        error instanceof Error ? error.message : "トーナメント作成に失敗しました",
       );
     } finally {
       setIsLoading(false);
@@ -70,25 +65,23 @@ export const CreateTournamentModal = ({
   };
 
   return (
-    <div className="bg-opacity-70 fixed inset-0 z-50 flex items-center justify-center bg-black">
-      <div className="w-full max-w-md rounded-lg bg-gray-800 p-6 text-white">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">新しいトーナメントを作成</h2>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-white"
-            type="button"
-          >
-            ✕
-          </button>
-        </div>
+    <div className={styles.modalOverlay} onClick={handleClose}>
+      <div 
+        className={styles.modalContent} 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          className={styles.modalCloseButton}
+          onClick={handleClose}
+          aria-label="閉じる"
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="tournamentName"
-              className="mb-2 block text-sm font-medium"
-            >
+        <h2 className={styles.modalTitle}>新しいトーナメントを作成</h2>
+
+        <form className={styles.tournamentForm} onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <label htmlFor="tournamentName" className={styles.formLabel}>
               トーナメント名
             </label>
             <input
@@ -96,25 +89,22 @@ export const CreateTournamentModal = ({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded bg-gray-700 p-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className={styles.formInput}
               placeholder="トーナメント名を入力"
               required
               disabled={isLoading}
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="maxParticipants"
-              className="mb-2 block text-sm font-medium"
-            >
+          <div className={styles.formGroup}>
+            <label htmlFor="maxParticipants" className={styles.formLabel}>
               最大参加者数
             </label>
             <select
               id="maxParticipants"
               value={maxParticipants}
               onChange={(e) => setMaxParticipants(parseInt(e.target.value))}
-              className="w-full rounded bg-gray-700 p-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className={styles.formSelect}
               disabled={isLoading}
             >
               <option value={2}>2人</option>
@@ -125,23 +115,27 @@ export const CreateTournamentModal = ({
           </div>
 
           {error && (
-            <div className="rounded bg-red-600 p-2 text-sm text-white">
+            <div className={styles.errorMessage}>
               {error}
             </div>
           )}
 
-          <div className="flex justify-end space-x-3">
-            <Button
+          <div className={styles.buttonContainer}>
+            <button
               type="button"
               onClick={handleClose}
-              variant="secondary"
+              className={styles.cancelButton}
               disabled={isLoading}
             >
               キャンセル
-            </Button>
-            <Button type="submit" variant="primary" disabled={isLoading}>
+            </button>
+            <button
+              type="submit"
+              className={styles.submitButton}
+              disabled={isLoading}
+            >
               {isLoading ? "作成中..." : "作成"}
-            </Button>
+            </button>
           </div>
         </form>
       </div>
