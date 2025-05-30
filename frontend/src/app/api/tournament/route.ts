@@ -3,10 +3,7 @@ import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 
-// バックエンドのベースURL
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || !session.user.id) {
@@ -16,8 +13,9 @@ export async function GET() {
       );
     }
 
-    // バックエンドからトーナメント一覧を取得
-    const response = await fetch(`${BACKEND_URL}/tournament/`, {
+    // バックエンドAPIを呼び出し
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001";
+    const response = await fetch(`${backendUrl}/tournament`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -25,11 +23,7 @@ export async function GET() {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      return NextResponse.json(
-        { error: errorData.error || "トーナメント一覧の取得に失敗しました" },
-        { status: response.status },
-      );
+      throw new Error("トーナメント一覧の取得に失敗しました");
     }
 
     const data = await response.json();
@@ -63,22 +57,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (maxParticipants < 2 || maxParticipants > 16) {
-      return NextResponse.json(
-        { error: "参加者数は2人以上16人以下で設定してください" },
-        { status: 400 },
-      );
-    }
-
-    // バックエンドにトーナメント作成リクエストを送信
-    const response = await fetch(`${BACKEND_URL}/tournament/`, {
+    // バックエンドAPIを呼び出し
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001";
+    const response = await fetch(`${backendUrl}/tournament`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         name,
-        maxParticipants: parseInt(maxParticipants),
+        maxParticipants,
         creatorId: session.user.id,
       }),
     });
@@ -96,7 +84,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("トーナメント作成エラー:", error);
     return NextResponse.json(
-      { error: "トーナメント作成中にエラーが発生しました" },
+      { error: "トーナメントの作成中にエラーが発生しました" },
       { status: 500 },
     );
   }

@@ -1,5 +1,7 @@
 import type { TournamentWithDetails } from "@ft-transcendence/shared";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 import { useTournament } from "../hooks/useTournament";
 import { Button } from "./button";
@@ -7,6 +9,8 @@ import { Card } from "./card";
 import { CreateTournamentModal } from "./CreateTournamentModal";
 
 export const TournamentLobby = () => {
+  const router = useRouter();
+  const { data: session } = useSession();
   const { tournaments, isLoading, error, refetch } = useTournament();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -109,25 +113,49 @@ export const TournamentLobby = () => {
                   </div>
                 )}
 
-                <Button
-                  onClick={() => {
-                    /* TODO: Join tournament */
-                    console.log("参加処理:", tournament.id);
-                  }}
-                  className="w-full bg-blue-500 hover:bg-blue-600"
-                  disabled={
+                {(() => {
+                  const isUserParticipating = tournament.participants.some(
+                    (p) => p.userId === session?.user?.id,
+                  );
+                  const isFull =
                     tournament.participants.length >=
-                      tournament.maxParticipants ||
-                    tournament.status !== "waiting"
+                    tournament.maxParticipants;
+
+                  if (isUserParticipating) {
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex items-center text-green-400">
+                          <span className="mr-2">✓</span>
+                          参加済み
+                        </div>
+                        <Button
+                          onClick={() =>
+                            router.push(`/tournament/${tournament.id}`)
+                          }
+                          className="w-full bg-blue-500 hover:bg-blue-600"
+                        >
+                          詳細を見る
+                        </Button>
+                      </div>
+                    );
                   }
-                >
-                  {tournament.status === "waiting"
-                    ? tournament.participants.length >=
-                      tournament.maxParticipants
-                      ? "満員"
-                      : "参加する"
-                    : "参加受付終了"}
-                </Button>
+
+                  return (
+                    <Button
+                      onClick={() =>
+                        router.push(`/tournament/${tournament.id}`)
+                      }
+                      className="w-full bg-blue-500 hover:bg-blue-600"
+                      disabled={isFull || tournament.status !== "waiting"}
+                    >
+                      {tournament.status === "waiting"
+                        ? isFull
+                          ? "満員"
+                          : "参加する"
+                        : "参加受付終了"}
+                    </Button>
+                  );
+                })()}
               </Card>
             ))}
           </div>
