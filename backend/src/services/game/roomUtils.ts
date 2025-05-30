@@ -5,6 +5,16 @@ import type { GameRoom } from "../../types/game";
 import type { GameState, GameSettings, GameType } from "@ft-transcendence/shared";
 import { CANVAS, BALL, PADDLE, GAME } from "@ft-transcendence/shared";
 
+/**
+ * トーナメントマッチのゲームルーム管理用の型
+ */
+export interface TournamentGameInfo {
+  roomId: string;
+  room: GameRoom;
+  player1Id: string;
+  player2Id: string;
+}
+
 export function createGameRoom(gameType: GameType = "online"): GameRoom {
   const defaultBallSpeed = BALL.DEFAULT_SPEED;
   const defaultWinningScore = GAME.DEFAULT_WINNING_SCORE;
@@ -150,6 +160,16 @@ export function checkAndStartGame(room: GameRoom): void {
   }
 }
 
+/**
+ * トーナメント用のゲーム開始チェック（設定不要）
+ */
+export function checkAndStartTournamentGame(room: GameRoom): void {
+  if (room.players.left && room.players.right) {
+    // 両プレイヤーがいれば即座にカウントダウン開始
+    startGameCountdown(room);
+  }
+}
+
 function handleGameOver(room: GameRoom) {
   const gameOverMessage = JSON.stringify({
     type: "gameOver",
@@ -159,6 +179,9 @@ function handleGameOver(room: GameRoom) {
         left: room.state.score.left,
         right: room.state.score.right,
       },
+      message: room.state.gameType === "tournament" 
+        ? "トーナメント戦が終了しました" 
+        : undefined,
     },
   });
 
@@ -170,7 +193,7 @@ function handleGameOver(room: GameRoom) {
     room.timers.game = undefined;
   }
 
-  room.state.status = "waiting";
+  room.state.status = "finished";
 
   // ローカル対戦ではDB保存をスキップ
   if (room.state.gameType !== "local") {
@@ -192,4 +215,26 @@ export function findAvailableRoom(gameRooms: Map<string, GameRoom>): {
   const newRoom = createGameRoom("online");
   gameRooms.set(newRoomId, newRoom);
   return { roomId: newRoomId, room: newRoom };
+}
+
+/**
+ * トーナメント専用のゲームルームを作成
+ */
+export function createTournamentGameRoom(
+  tournamentId: string,
+  matchId: string,
+  gameRooms: Map<string, GameRoom>
+): { roomId: string; room: GameRoom } {
+  const roomId = uuidv4();
+  const room = createGameRoom("tournament");
+  
+  // トーナメント情報を設定
+  room.tournamentId = tournamentId;
+  room.tournamentMatchId = matchId;
+  
+  // トーナメントでは設定済みですぐ開始
+  room.leftPlayerReady = true;
+  
+  gameRooms.set(roomId, room);
+  return { roomId, room };
 }

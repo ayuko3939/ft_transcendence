@@ -1,5 +1,7 @@
 import { db } from "../../db";
 import { games, players } from "@ft-transcendence/shared";
+import { TournamentService } from "../tournament/TournamentService";
+import { notifyTournamentUpdate } from "../../routes/tournament/socket";
 import type { GameRoom } from "../../types/game";
 
 /**
@@ -59,4 +61,50 @@ export async function saveGameResult(
   });
 
   console.log(`ゲーム結果を保存しました: ${gameId}, 終了理由: ${endReason}`);
+  
+  // トーナメントマッチの場合は、トーナメントシステムに結果を反映
+  if (room.tournamentMatchId && room.state.winner) {
+    await handleTournamentMatchResult(room, gameId);
+  }
+}
+
+/**
+ * トーナメントマッチの結果をトーナメントシステムに反映
+ */
+async function handleTournamentMatchResult(
+  room: GameRoom,
+  gameId: string,
+): Promise<void> {
+  try {
+    if (!room.tournamentMatchId || !room.state.winner) {
+      return;
+    }
+
+    // 勝者のユーザーIDを取得
+    const winnerId = room.state.winner === "left" 
+      ? room.userIds.left 
+      : room.userIds.right;
+
+    if (!winnerId) {
+      console.error("勝者のユーザーIDが見つかりません");
+      return;
+    }
+
+    // トーナメントサービスで試合結果を処理
+    const tournamentService = new TournamentService();
+    await tournamentService.processMatchResult(
+      room.tournamentMatchId,
+      winnerId,
+      gameId
+    );
+
+    // トーナメントの更新をWebSocket経由で通知
+    if (room.tournamentId) {
+      notifyTournamentUpdate(room.tournamentId);
+    }
+
+    console.log(`トーナメントマッチ結果を処理しました: ${room.tournamentMatchId}`);
+  } catch (error) {
+    console.error("トーナメントマッチ結果処理エラー:", error);
+  }
 }
