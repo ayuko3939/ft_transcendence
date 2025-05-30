@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+# ログディレクトリの作成と権限設定
+mkdir -p /logstash
+chown nginx:nginx /logstash
+chmod 755 /logstash
+
 # 自己署名証明書が存在しない場合は作成
 if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then
     echo "Generating self-signed SSL certificate..."
