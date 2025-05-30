@@ -206,6 +206,10 @@ export function findAvailableRoom(gameRooms: Map<string, GameRoom>): {
   room: GameRoom;
 } {
   for (const [id, room] of gameRooms.entries()) {
+    // finished状態のルームは除外
+    if (room.state.status === "finished") {
+      continue;
+    }
     if (!room.players.left || !room.players.right) {
       return { roomId: id, room };
     }
