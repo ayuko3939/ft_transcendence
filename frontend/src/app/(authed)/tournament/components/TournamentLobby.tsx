@@ -1,10 +1,10 @@
-import { useState } from "react";
 import type { TournamentWithDetails } from "@ft-transcendence/shared";
+import { useState } from "react";
 
+import { useTournament } from "../hooks/useTournament";
 import { Button } from "./button";
 import { Card } from "./card";
 import { CreateTournamentModal } from "./CreateTournamentModal";
-import { useTournament } from "../hooks/useTournament";
 
 export const TournamentLobby = () => {
   const { tournaments, isLoading, error, refetch } = useTournament();
@@ -43,11 +43,13 @@ export const TournamentLobby = () => {
   if (error) {
     return (
       <div className="container mx-auto p-4">
-        <div className="mb-4 rounded bg-red-600 p-4 text-white">
-          <p>エラー: {error}</p>
+        <div className="flex flex-col items-center justify-center">
+          <div className="mb-4 rounded-md bg-transparent p-4 text-center">
+            <p>エラー: {error}</p>
+          </div>
           <Button
             onClick={refetch}
-            className="mt-2 bg-red-700 hover:bg-red-800"
+            className="rounded-md border-2 border-cyan-400 bg-transparent px-4 py-2 font-bold text-cyan-400 transition-colors hover:bg-cyan-900/50"
           >
             再試行
           </Button>
