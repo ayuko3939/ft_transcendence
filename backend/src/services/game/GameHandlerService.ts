@@ -1,5 +1,6 @@
 import { checkAndStartGame } from "./roomUtils";
 import { saveGameResult } from "./saveGameResult";
+import { TournamentService } from "../tournament/TournamentService";
 
 import type { GameRoom } from "../../types/game";
 import type { ClientMessage } from "@ft-transcendence/shared";
@@ -126,6 +127,11 @@ export class GameHandlerService {
           roomId: this.room.id,
         }),
       );
+
+      // トーナメントマッチの場合、試合状態を更新
+      if (this.room.tournamentMatchId) {
+        this.updateTournamentMatchStatus("in_progress").catch(console.error);
+      }
 
       checkAndStartGame(this.room);
     }
@@ -269,6 +275,28 @@ export class GameHandlerService {
     if (this.room.timers.game) {
       clearInterval(this.room.timers.game);
       this.room.timers.game = undefined;
+    }
+  }
+
+  /**
+   * トーナメントマッチの状態を更新
+   */
+  private async updateTournamentMatchStatus(
+    status: "pending" | "in_progress" | "completed",
+  ): Promise<void> {
+    if (!this.room.tournamentMatchId) return;
+
+    try {
+      const tournamentService = new TournamentService();
+      await tournamentService.updateMatchStatus(
+        this.room.tournamentMatchId,
+        status,
+      );
+      console.log(
+        `トーナメントマッチ ${this.room.tournamentMatchId} の状態を ${status} に更新しました`,
+      );
+    } catch (error) {
+      console.error("トーナメントマッチ状態更新エラー:", error);
     }
   }
 }

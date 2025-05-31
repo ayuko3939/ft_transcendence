@@ -427,28 +427,86 @@ export default function TournamentDetailPage() {
                 <h3 className="text-lg font-semibold">
                   ラウンド {tournament.currentRound}
                 </h3>
-                {tournament.currentMatches.map((match) => (
-                  <div
-                    key={match.id}
-                    className="flex items-center justify-between rounded bg-gray-700 p-4"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <span className="font-semibold">
-                        試合 {match.matchNumber}:
-                      </span>
-                      <span>プレイヤー1 vs プレイヤー2</span>
+                {tournament.currentMatches.map((match) => {
+                  // ログインユーザーがこの試合に参加しているかチェック
+                  const isUserInMatch =
+                    match.player1Id === session?.user?.id ||
+                    match.player2Id === session?.user?.id;
+
+                  // プレイヤー名を取得
+                  const player1Name =
+                    tournament.participants.find(
+                      (p) => p.userId === match.player1Id,
+                    )?.userName || "Unknown Player";
+                  const player2Name =
+                    tournament.participants.find(
+                      (p) => p.userId === match.player2Id,
+                    )?.userName || "Unknown Player";
+
+                  return (
+                    <div
+                      key={match.id}
+                      className={`rounded bg-gray-700 p-4 ${
+                        isUserInMatch ? "ring-2 ring-cyan-400" : ""
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <span className="font-semibold">
+                            試合 {match.matchNumber}:
+                          </span>
+                          <span>
+                            {player1Name} vs {player2Name}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="text-sm">
+                            {match.status === "pending"
+                              ? "待機中"
+                              : match.status === "in_progress"
+                                ? "進行中"
+                                : match.status === "completed"
+                                  ? "完了"
+                                  : match.status}
+                          </div>
+                          {/* 自分が参加する試合で待機中の場合に試合開始ボタンを表示 */}
+                          {isUserInMatch && match.status === "pending" && (
+                            <Button
+                              onClick={() =>
+                                router.push(
+                                  `/tournament/${tournament.id}/match/${match.id}`,
+                                )
+                              }
+                              className="bg-green-500 hover:bg-green-600"
+                              size="sm"
+                            >
+                              試合開始
+                            </Button>
+                          )}
+                          {/* 進行中の場合は観戦ボタン */}
+                          {isUserInMatch && match.status === "in_progress" && (
+                            <Button
+                              onClick={() =>
+                                router.push(
+                                  `/tournament/${tournament.id}/match/${match.id}`,
+                                )
+                              }
+                              className="bg-blue-500 hover:bg-blue-600"
+                              size="sm"
+                            >
+                              試合に参加
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      {isUserInMatch && (
+                        <div className="mt-2 text-xs text-cyan-400">
+                          あなたの試合です
+                        </div>
+                      )}
                     </div>
-                    <div className="text-sm">
-                      {match.status === "pending"
-                        ? "待機中"
-                        : match.status === "in_progress"
-                          ? "進行中"
-                          : match.status === "completed"
-                            ? "完了"
-                            : match.status}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-gray-400">試合情報を読み込み中...</p>

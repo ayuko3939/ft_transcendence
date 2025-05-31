@@ -520,6 +520,86 @@ export class TournamentService {
   }
 
   /**
+   * マッチ詳細を取得
+   */
+  async getMatchDetails(matchId: string): Promise<{
+    id: string;
+    tournamentId: string;
+    round: number;
+    matchNumber: number;
+    player1Id: string;
+    player2Id: string;
+    player1Name: string;
+    player2Name: string;
+    status: "pending" | "in_progress" | "completed";
+    gameRoomId?: string;
+  } | null> {
+    // マッチ情報を取得
+    const matchResult = await db
+      .select({
+        id: tournamentMatches.id,
+        tournamentId: tournamentMatches.tournamentId,
+        round: tournamentMatches.round,
+        matchNumber: tournamentMatches.matchNumber,
+        player1Id: tournamentMatches.player1Id,
+        player2Id: tournamentMatches.player2Id,
+        status: tournamentMatches.status,
+      })
+      .from(tournamentMatches)
+      .where(eq(tournamentMatches.id, matchId))
+      .limit(1);
+
+    if (matchResult.length === 0) {
+      return null;
+    }
+
+    const match = matchResult[0];
+
+    // プレイヤー名を取得
+    const [player1, player2] = await Promise.all([
+      db
+        .select({ name: user.name })
+        .from(user)
+        .where(eq(user.id, match.player1Id))
+        .limit(1),
+      db
+        .select({ name: user.name })
+        .from(user)
+        .where(eq(user.id, match.player2Id))
+        .limit(1),
+    ]);
+
+    // ゲームルームIDを取得
+    const gameRoomId = await this.getMatchGameRoomId(matchId);
+
+    return {
+      id: match.id,
+      tournamentId: match.tournamentId,
+      round: match.round,
+      matchNumber: match.matchNumber,
+      player1Id: match.player1Id,
+      player2Id: match.player2Id,
+      player1Name: player1[0]?.name || "Unknown Player",
+      player2Name: player2[0]?.name || "Unknown Player",
+      status: match.status as "pending" | "in_progress" | "completed",
+      gameRoomId: gameRoomId ?? undefined,
+    };
+  }
+
+  /**
+   * 試合状態を更新
+   */
+  async updateMatchStatus(
+    matchId: string,
+    status: "pending" | "in_progress" | "completed",
+  ): Promise<void> {
+    await db
+      .update(tournamentMatches)
+      .set({ status })
+      .where(eq(tournamentMatches.id, matchId));
+  }
+
+  /**
    * 特定の試合のゲームルームIDを取得
    */
   async getMatchGameRoomId(matchId: string): Promise<string | null> {

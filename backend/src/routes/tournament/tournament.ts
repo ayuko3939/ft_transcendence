@@ -136,6 +136,30 @@ export default async function tournamentRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // マッチ詳細を取得
+  fastify.get<{ Params: { matchId: string } }>(
+    "/matches/:matchId",
+    async (request, reply) => {
+      try {
+        const { matchId } = request.params;
+        const matchDetails = await tournamentService.getMatchDetails(matchId);
+
+        if (!matchDetails) {
+          return reply.status(404).send({
+            error: "マッチが見つかりません",
+          });
+        }
+
+        return { match: matchDetails };
+      } catch (error) {
+        fastify.log.error(`マッチ詳細取得エラー: ${error}`);
+        return reply.status(500).send({
+          error: "マッチ詳細の取得中にエラーが発生しました",
+        });
+      }
+    },
+  );
+
   // 試合結果を報告
   fastify.post<{
     Params: { matchId: string };
