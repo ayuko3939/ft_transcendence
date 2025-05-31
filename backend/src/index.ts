@@ -16,6 +16,15 @@ const fastify = Fastify({
   logger: {
     level: "debug",
     file: "logs/backend.log",
+    formatters: {
+      // levelを文字列にする（"info", "warn", "error"）
+      level: (label: string) => {
+        return { level: label };
+      }
+    },
+    // timestampをISO8601形式に設定
+    timestamp: () => `,"time":"${new Date().toISOString()}"`,
+    base: null  // pid, hostname等を削除
   },
 });
 
