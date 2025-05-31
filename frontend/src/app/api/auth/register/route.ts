@@ -12,6 +12,12 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
+    if (name.length < 2 || name.length > 17) {
+      return NextResponse.json(
+        { error: "名前は2文字以上17文字以下で入力してください" },
+        { status: 400 },
+      );
+    }
     if (password !== confirmPassword) {
       return NextResponse.json(
         { error: "パスワードが一致しません" },
