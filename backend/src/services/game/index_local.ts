@@ -38,7 +38,7 @@ function assignLocalPlayerToRoom(
   connection.on("message", (message: Buffer) => {
     try {
       const data = JSON.parse(message.toString());
-      
+
       // paddleMoveメッセージの場合、playerSideを判定
       if (data.type === "paddleMove" && data.playerSide) {
         gameHandlerService.handlePlayerMessage(message, data.playerSide);

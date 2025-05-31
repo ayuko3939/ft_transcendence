@@ -5,7 +5,8 @@
   "scripts": {
     "push": "drizzle-kit push",
     "migrate": "drizzle-kit migrate",
-    "generate": "drizzle-kit generate"
+    "generate": "drizzle-kit generate",
+    "re": "(rm -f database.db || del database.db) && drizzle-kit generate && drizzle-kit migrate"
   },
   "keywords": [],
   "author": "",

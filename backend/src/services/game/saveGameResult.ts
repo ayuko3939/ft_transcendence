@@ -61,7 +61,7 @@ export async function saveGameResult(
   });
 
   console.log(`ゲーム結果を保存しました: ${gameId}, 終了理由: ${endReason}`);
-  
+
   // トーナメントマッチの場合は、トーナメントシステムに結果を反映
   if (room.tournamentMatchId && room.state.winner) {
     await handleTournamentMatchResult(room, gameId);
@@ -81,9 +81,8 @@ async function handleTournamentMatchResult(
     }
 
     // 勝者のユーザーIDを取得
-    const winnerId = room.state.winner === "left" 
-      ? room.userIds.left 
-      : room.userIds.right;
+    const winnerId =
+      room.state.winner === "left" ? room.userIds.left : room.userIds.right;
 
     if (!winnerId) {
       console.error("勝者のユーザーIDが見つかりません");
@@ -95,7 +94,7 @@ async function handleTournamentMatchResult(
     await tournamentService.processMatchResult(
       room.tournamentMatchId,
       winnerId,
-      gameId
+      gameId,
     );
 
     // トーナメントの更新をWebSocket経由で通知
@@ -103,7 +102,9 @@ async function handleTournamentMatchResult(
       notifyTournamentUpdate(room.tournamentId);
     }
 
-    console.log(`トーナメントマッチ結果を処理しました: ${room.tournamentMatchId}`);
+    console.log(
+      `トーナメントマッチ結果を処理しました: ${room.tournamentMatchId}`,
+    );
   } catch (error) {
     console.error("トーナメントマッチ結果処理エラー:", error);
   }

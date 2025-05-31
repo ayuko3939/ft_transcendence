@@ -2,7 +2,11 @@ import { GameEngine } from "../../services/game/GameEngine";
 import { saveGameResult } from "./saveGameResult";
 import { v4 as uuidv4 } from "uuid";
 import type { GameRoom } from "../../types/game";
-import type { GameState, GameSettings, GameType } from "@ft-transcendence/shared";
+import type {
+  GameState,
+  GameSettings,
+  GameType,
+} from "@ft-transcendence/shared";
 import { CANVAS, BALL, PADDLE, GAME } from "@ft-transcendence/shared";
 
 /**
@@ -179,9 +183,10 @@ function handleGameOver(room: GameRoom) {
         left: room.state.score.left,
         right: room.state.score.right,
       },
-      message: room.state.gameType === "tournament" 
-        ? "トーナメント戦が終了しました" 
-        : undefined,
+      message:
+        room.state.gameType === "tournament"
+          ? "トーナメント戦が終了しました"
+          : undefined,
     },
   });
 
@@ -227,18 +232,18 @@ export function findAvailableRoom(gameRooms: Map<string, GameRoom>): {
 export function createTournamentGameRoom(
   tournamentId: string,
   matchId: string,
-  gameRooms: Map<string, GameRoom>
+  gameRooms: Map<string, GameRoom>,
 ): { roomId: string; room: GameRoom } {
   const roomId = uuidv4();
   const room = createGameRoom("tournament");
-  
+
   // トーナメント情報を設定
   room.tournamentId = tournamentId;
   room.tournamentMatchId = matchId;
-  
+
   // トーナメントでは設定済みですぐ開始
   room.leftPlayerReady = true;
-  
+
   gameRooms.set(roomId, room);
   return { roomId, room };
 }

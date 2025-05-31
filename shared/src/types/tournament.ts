@@ -38,7 +38,7 @@ export interface TournamentMatch {
 }
 
 export interface TournamentWithDetails extends Tournament {
-  participants: Array<TournamentParticipant & { userName: string }>;
+  participants: Array<TournamentParticipant & { userName: string }>; // TODO: { userName: string } これを無くす
   currentMatches?: TournamentMatch[];
 }
 
@@ -57,5 +57,10 @@ export interface StartTournamentRequest {
 
 export interface TournamentStatus {
   tournament: TournamentWithDetails;
-  currentUserStatus?: "not_joined" | "joined" | "eliminated" | "active" | "winner";
+  currentUserStatus?:
+    | "not_joined"
+    | "joined"
+    | "eliminated"
+    | "active"
+    | "winner";
 }
