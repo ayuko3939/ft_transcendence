@@ -3,7 +3,6 @@
 import { TournamentBracket } from "./components/TournamentBracket";
 import { TournamentLobby } from "./components/TournamentLobby";
 import { TournamentResult } from "./components/TournamentResult";
-import { TournamentWaitingRoom } from "./components/TournamentWaitingRoom";
 import { TournamentProvider, useTournament } from "./context/TournamentContext";
 import styles from "./tournament.module.css";
 
@@ -18,13 +17,16 @@ export default function TournamentPage() {
 function TournamentContent() {
   const { tournamentState, setTournamentState } = useTournament();
 
-  // ダミーの試合結果
-  const dummyWinner = {
-    id: 1,
-    name: "Player1",
-    score: 5,
-  };
+  return (
+    <div className="container mx-auto min-h-screen pt-18 pb-13">
+      <div className={styles.tournamentContainer}>
+        <TournamentLobby />
+      </div>
+    </div>
+  );
 
+  // デバッグ用の切り替えコンポーネントをコメントアウト
+  /*
   const renderContent = () => {
     switch (tournamentState) {
       case "lobby":
@@ -43,7 +45,6 @@ function TournamentContent() {
   return (
     <div className="container mx-auto min-h-screen pt-18 pb-13">
       <div className={styles.tournamentContainer}>
-        {/* 仮の切り替えコンポーネント - デバッグ用 */}
         <div className="mb-4 flex space-x-3">
           <button
             type="button"
@@ -79,4 +80,5 @@ function TournamentContent() {
       </div>
     </div>
   );
+  */
 }

@@ -35,9 +35,9 @@ export default async function tournamentRoutes(fastify: FastifyInstance) {
           });
         }
 
-        if (maxParticipants < 2 || maxParticipants > 32) {
+        if (maxParticipants < 2 || maxParticipants > 16) {
           return reply.status(400).send({
-            error: "参加者数は2人以上32人以下で設定してください",
+            error: "参加者数は2人以上16人以下で設定してください",
           });
         }
 

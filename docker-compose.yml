@@ -30,6 +30,7 @@ services:
       - AWS_ENDPOINT=${AWS_ENDPOINT}
       - AWS_REGION=ap-northeast-1
       - UPLOAD_BUCKET_NAME=${UPLOAD_BUCKET_NAME}
+      - BACKEND_URL=http://backend:3001
     volumes:
       - logdir:/app/logs
       - dbdir:/var/lib/db
@@ -125,9 +126,6 @@ services:
       - .env
 
   elastic-search:
-    depends_on:
-      setup:
-        condition: service_completed_successfully
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     labels:
       co.elastic.logs/module: elasticsearch
