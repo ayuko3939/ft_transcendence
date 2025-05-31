@@ -14,7 +14,7 @@ if [ ! -f /etc/nginx/ssl/nginx.crt ] || [ ! -f /etc/nginx/ssl/nginx.key ]; then
             -keyout /etc/nginx/ssl/nginx.key \
             -out /etc/nginx/ssl/nginx.crt \
             -subj "/C=JP/ST=Tokyo/L=Shinjuku/O=42Tokyo/CN=localhost" \
-            -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+            -addext "subjectAltName=DNS:localhost,DNS:avator.localhost,IP:127.0.0.1"
     chmod 644 /etc/nginx/ssl/nginx.key
     echo "SSL certificate generated."
 fi
