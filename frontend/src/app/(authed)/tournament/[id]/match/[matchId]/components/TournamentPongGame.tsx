@@ -8,16 +8,15 @@ import type {
 } from "@ft-transcendence/shared";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PongController } from "@/lib/game/gameController";
-import { PongSocketClient } from "@/lib/game/webSocketClient";
-import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
-import { useSession } from "next-auth/react";
-
 import ConfirmDialog from "@/(authed)/game/_components/ConfirmDialog";
 import styles from "@/(authed)/game/_components/game.module.css";
 import GameCanvas from "@/(authed)/game/_components/GameCanvas";
 import GameChat from "@/(authed)/game/_components/GameChat";
 import GameResultModal from "@/(authed)/game/_components/GameResultModal";
+import { PongController } from "@/lib/game/gameController";
+import { PongSocketClient } from "@/lib/game/webSocketClient";
+import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
+import { useSession } from "next-auth/react";
 
 interface TournamentMatchInfo {
   id: string;
@@ -64,7 +63,10 @@ const initialGameState: GameState = {
   gameType: "tournament",
 };
 
-const TournamentPongGame = ({ matchInfo, onGameReady }: TournamentPongGameProps) => {
+const TournamentPongGame = ({
+  matchInfo,
+  onGameReady,
+}: TournamentPongGameProps) => {
   // セッション情報を取得
   const { data: session } = useSession();
 
@@ -121,7 +123,10 @@ const TournamentPongGame = ({ matchInfo, onGameReady }: TournamentPongGameProps)
 
     socketClientRef.current = socketClient;
     // トーナメント専用のWebSocketエンドポイントを使用
-    socketClient.connect(`/api/tournament-ws-proxy/${matchInfo.gameRoomId}`, session.user.id);
+    socketClient.connect(
+      `/ws/tournament-match/${matchInfo.gameRoomId}`,
+      session.user.id,
+    );
 
     return () => {
       socketClient.disconnect();

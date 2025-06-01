@@ -110,7 +110,7 @@ const PongGame = () => {
 
     socketClientRef.current = socketClient;
     // ユーザーIDを認証情報として送信
-    socketClient.connect("/api/ws-proxy", session.user.id);
+    socketClient.connect("/ws/game", session.user.id);
 
     return () => {
       socketClient.disconnect();

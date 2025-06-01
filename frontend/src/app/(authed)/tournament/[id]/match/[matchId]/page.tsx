@@ -6,9 +6,12 @@ import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 // SSRを無効化したコンポーネントの読み込み
-const TournamentPongGame = dynamic(() => import("./components/TournamentPongGame"), {
-  ssr: false,
-});
+const TournamentPongGame = dynamic(
+  () => import("./components/TournamentPongGame"),
+  {
+    ssr: false,
+  },
+);
 
 interface TournamentMatchInfo {
   id: string;
@@ -27,7 +30,7 @@ export default function TournamentMatchPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams();
-  
+
   const tournamentId = params.id as string;
   const matchId = params.matchId as string;
 
@@ -51,7 +54,8 @@ export default function TournamentMatchPage() {
   useEffect(() => {
     window.history.pushState(null, "", window.location.pathname);
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      const message = "トーナメントマッチをプレイ中です。このページを離れますか？";
+      const message =
+        "トーナメントマッチをプレイ中です。このページを離れますか？";
       (e || window.event).returnValue = message;
       return message;
     };
@@ -83,8 +87,10 @@ export default function TournamentMatchPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/tournament/${tournamentId}/match/${matchId}`);
-      
+      const response = await fetch(
+        `/api/tournament/${tournamentId}/match/${matchId}`,
+      );
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "マッチ情報の取得に失敗しました");
@@ -95,9 +101,9 @@ export default function TournamentMatchPage() {
     } catch (error) {
       console.error("マッチ情報取得エラー:", error);
       setError(
-        error instanceof Error 
-          ? error.message 
-          : "マッチ情報の取得に失敗しました"
+        error instanceof Error
+          ? error.message
+          : "マッチ情報の取得に失敗しました",
       );
     } finally {
       setLoading(false);

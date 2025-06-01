@@ -1,7 +1,7 @@
 "use client";
 
 import type { TournamentWithDetails } from "@ft-transcendence/shared";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -211,7 +211,7 @@ export default function TournamentDetailPage() {
         name: session.user.name,
         message: newMessage,
       };
-      
+
       wsRef.current.send(JSON.stringify(chatData));
       setNewMessage("");
     }

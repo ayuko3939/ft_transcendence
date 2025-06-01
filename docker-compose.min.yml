@@ -24,13 +24,13 @@ services:
       - NEXTAUTH_URL=${NEXTAUTH_URL}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - BACKEND_WS_URL=ws://backend:3001/game
+      - BACKEND_URL=http://backend:3001
+      - BACKEND_WS_URL=ws://backend:3001
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_ENDPOINT=${AWS_ENDPOINT}
       - AWS_REGION=ap-northeast-1
       - UPLOAD_BUCKET_NAME=${UPLOAD_BUCKET_NAME}
-      - BACKEND_URL=http://backend:3001
     volumes:
       - logdir:/app/logs
       - dbdir:/var/lib/db

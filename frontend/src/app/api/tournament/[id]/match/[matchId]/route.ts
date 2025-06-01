@@ -20,12 +20,15 @@ export async function GET(
 
     // バックエンドAPIを呼び出してマッチ詳細を取得
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001";
-    const response = await fetch(`${backendUrl}/tournament/matches/${matchId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${backendUrl}/tournament/matches/${matchId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       const errorData = await response.json();

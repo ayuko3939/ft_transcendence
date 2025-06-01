@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import type { TournamentWithDetails } from "@ft-transcendence/shared";
+import { useEffect, useState } from "react";
 
 interface UseTournamentReturn {
   tournaments: TournamentWithDetails[];

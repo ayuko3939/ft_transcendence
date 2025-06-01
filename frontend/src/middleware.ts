@@ -8,6 +8,9 @@ function joinWsUrl(baseUrl: string, ...paths: string[]): string {
   return `${cleanBase}/${cleanPaths.join("/")}`;
 }
 
+// WebSocketリクエストを検出し、適切なWebSocket URLにリダイレクトするミドルウェア
+// ただし、本番のdocker-compose環境では、Nginxのルーティングにより、以下の設定を制御するので
+// ここでの記載している理由はローカル実行のためのものです。
 export function middleware(req: NextRequest) {
   const upgradeHeader = req.headers.get("upgrade");
 
@@ -19,7 +22,7 @@ export function middleware(req: NextRequest) {
   const backendWsUrl = process.env.BACKEND_WS_URL || "ws://localhost:3001";
 
   // ローカル対戦用WebSocketプロキシ
-  if (req.nextUrl.pathname === "/api/ws-proxy-local") {
+  if (req.nextUrl.pathname === "/ws/game-local") {
     const localgameWsUrl = joinWsUrl(backendWsUrl, "game", "local");
     console.log("ローカル対戦用WebSocketプロキシ:", localgameWsUrl);
     return NextResponse.rewrite(localgameWsUrl);
@@ -29,6 +32,12 @@ export function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith("/ws/tournament/")) {
     const pathSegments = req.nextUrl.pathname.split("/");
     const tournamentId = pathSegments[3];
+    if (!tournamentId) {
+      console.error(
+        "トーナメント用WebSocketプロキシ: tournamentIdが見つかりません",
+      );
+      return new NextResponse("Invalid tournament ID", { status: 400 });
+    }
     const tournamentWsUrl = joinWsUrl(
       backendWsUrl,
       "tournament",
@@ -39,7 +48,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.rewrite(tournamentWsUrl);
   }
 
-  if (req.nextUrl.pathname.startsWith("/api/tournament-ws-proxy/")) {
+  if (req.nextUrl.pathname.startsWith("/ws/tournament-match/")) {
     const roomId = req.nextUrl.pathname.split("/").pop();
     if (!roomId) {
       console.error(
@@ -55,8 +64,11 @@ export function middleware(req: NextRequest) {
     return NextResponse.rewrite(tournamentWsUrl);
   }
 
-  // オンライン対戦用WebSocketプロキシ（デフォルト）
-  const onlineWsUrl = joinWsUrl(backendWsUrl, "game");
-  console.log("オンライン対戦用WebSocketプロキシ:", onlineWsUrl);
-  return NextResponse.rewrite(onlineWsUrl);
+  if (req.nextUrl.pathname.startsWith("/ws/game/")) {
+    const onlineWsUrl = joinWsUrl(backendWsUrl, "game");
+    console.log("オンライン対戦用WebSocketプロキシ:", onlineWsUrl);
+    return NextResponse.rewrite(onlineWsUrl);
+  }
+  console.error("不明なWebSocketリクエスト:", req.nextUrl.pathname);
+  return new NextResponse("Unknown WebSocket request", { status: 400 });
 }
