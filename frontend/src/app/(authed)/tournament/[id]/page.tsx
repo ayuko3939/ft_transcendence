@@ -1,7 +1,7 @@
 "use client";
 
 import type { TournamentWithDetails } from "@ft-transcendence/shared";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -20,6 +20,7 @@ export default function TournamentDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
   const [starting, setStarting] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
 
   // チャット機能用の状態
   const [chatMessages, setChatMessages] = useState<
@@ -37,7 +38,16 @@ export default function TournamentDetailPage() {
 
     if (status === "authenticated" && tournamentId) {
       fetchTournamentDetails();
+      // WebSocket接続を開始
+      connectToTournamentWebSocket();
     }
+
+    // クリーンアップ
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
   }, [status, tournamentId, router]);
 
   const fetchTournamentDetails = async () => {
@@ -64,6 +74,65 @@ export default function TournamentDetailPage() {
     }
   };
 
+  const connectToTournamentWebSocket = () => {
+    if (!tournamentId) return;
+
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws/tournament/${tournamentId}`;
+
+    console.log(`トーナメントWebSocket接続中: ${wsUrl}`);
+
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("トーナメントWebSocket接続完了");
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        handleTournamentWebSocketMessage(data);
+      } catch (error) {
+        console.error("トーナメントWebSocketメッセージ解析エラー:", error);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error("トーナメントWebSocketエラー:", error);
+    };
+
+    ws.onclose = (event) => {
+      if (event.code !== 1000) {
+        console.log("トーナメントWebSocket接続が切断されました");
+      }
+    };
+  };
+
+  const handleTournamentWebSocketMessage = (data: any) => {
+    switch (data.type) {
+      case "tournamentUpdate":
+        // トーナメント情報の更新
+        if (data.tournament) {
+          setTournament(data.tournament);
+        }
+        break;
+      case "chat":
+        // チャットメッセージの受信
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            text: data.message,
+            name: data.name,
+          },
+        ]);
+        break;
+      default:
+        console.log("未知のメッセージタイプ:", data.type);
+    }
+  };
+
   const handleJoinTournament = async () => {
     if (!session?.user?.id || !tournament) return;
 
@@ -80,8 +149,14 @@ export default function TournamentDetailPage() {
         );
       }
 
-      // トーナメント情報を再取得
-      await fetchTournamentDetails();
+      // WebSocket経由で参加通知を送信
+      if (wsRef.current) {
+        const joinData = {
+          type: "join",
+          userId: session.user.id,
+        };
+        wsRef.current.send(JSON.stringify(joinData));
+      }
     } catch (error) {
       console.error("トーナメント参加エラー:", error);
       alert(
@@ -108,8 +183,14 @@ export default function TournamentDetailPage() {
         throw new Error(errorData.error || "トーナメントの開始に失敗しました");
       }
 
-      // トーナメント情報を再取得
-      await fetchTournamentDetails();
+      // WebSocket経由で開始通知を送信
+      if (wsRef.current) {
+        const startData = {
+          type: "start",
+          creatorId: session.user.id,
+        };
+        wsRef.current.send(JSON.stringify(startData));
+      }
     } catch (error) {
       console.error("トーナメント開始エラー:", error);
       alert(
@@ -123,15 +204,15 @@ export default function TournamentDetailPage() {
   };
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && session?.user?.name) {
-      setChatMessages([
-        ...chatMessages,
-        {
-          id: crypto.randomUUID(),
-          text: newMessage,
-          name: session.user.name,
-        },
-      ]);
+    if (newMessage.trim() && session?.user?.name && wsRef.current) {
+      // WebSocket経由でチャットメッセージを送信
+      const chatData = {
+        type: "chat",
+        name: session.user.name,
+        message: newMessage,
+      };
+
+      wsRef.current.send(JSON.stringify(chatData));
       setNewMessage("");
     }
   };
@@ -427,28 +508,86 @@ export default function TournamentDetailPage() {
                 <h3 className="text-lg font-semibold">
                   ラウンド {tournament.currentRound}
                 </h3>
-                {tournament.currentMatches.map((match) => (
-                  <div
-                    key={match.id}
-                    className="flex items-center justify-between rounded bg-gray-700 p-4"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <span className="font-semibold">
-                        試合 {match.matchNumber}:
-                      </span>
-                      <span>プレイヤー1 vs プレイヤー2</span>
+                {tournament.currentMatches.map((match) => {
+                  // ログインユーザーがこの試合に参加しているかチェック
+                  const isUserInMatch =
+                    match.player1Id === session?.user?.id ||
+                    match.player2Id === session?.user?.id;
+
+                  // プレイヤー名を取得
+                  const player1Name =
+                    tournament.participants.find(
+                      (p) => p.userId === match.player1Id,
+                    )?.userName || "Unknown Player";
+                  const player2Name =
+                    tournament.participants.find(
+                      (p) => p.userId === match.player2Id,
+                    )?.userName || "Unknown Player";
+
+                  return (
+                    <div
+                      key={match.id}
+                      className={`rounded bg-gray-700 p-4 ${
+                        isUserInMatch ? "ring-2 ring-cyan-400" : ""
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <span className="font-semibold">
+                            試合 {match.matchNumber}:
+                          </span>
+                          <span>
+                            {player1Name} vs {player2Name}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="text-sm">
+                            {match.status === "pending"
+                              ? "待機中"
+                              : match.status === "in_progress"
+                                ? "進行中"
+                                : match.status === "completed"
+                                  ? "完了"
+                                  : match.status}
+                          </div>
+                          {/* 自分が参加する試合で待機中の場合に試合開始ボタンを表示 */}
+                          {isUserInMatch && match.status === "pending" && (
+                            <Button
+                              onClick={() =>
+                                router.push(
+                                  `/tournament/${tournament.id}/match/${match.id}`,
+                                )
+                              }
+                              className="bg-green-500 hover:bg-green-600"
+                              size="sm"
+                            >
+                              試合開始
+                            </Button>
+                          )}
+                          {/* 進行中の場合は観戦ボタン */}
+                          {isUserInMatch && match.status === "in_progress" && (
+                            <Button
+                              onClick={() =>
+                                router.push(
+                                  `/tournament/${tournament.id}/match/${match.id}`,
+                                )
+                              }
+                              className="bg-blue-500 hover:bg-blue-600"
+                              size="sm"
+                            >
+                              試合に参加
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      {isUserInMatch && (
+                        <div className="mt-2 text-xs text-cyan-400">
+                          あなたの試合です
+                        </div>
+                      )}
                     </div>
-                    <div className="text-sm">
-                      {match.status === "pending"
-                        ? "待機中"
-                        : match.status === "in_progress"
-                          ? "進行中"
-                          : match.status === "completed"
-                            ? "完了"
-                            : match.status}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-gray-400">試合情報を読み込み中...</p>

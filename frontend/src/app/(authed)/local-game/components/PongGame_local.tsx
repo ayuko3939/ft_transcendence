@@ -14,11 +14,11 @@ import { LocalPongSocketClient } from "@/lib/game/webSocketClient_local";
 import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
 import { useSession } from "next-auth/react";
 
-import LocalGameCanvas from "./GameCanvas_local";
-import GameSettingsModal from "../../game/_components/GameSettingsModal";
-import GameResultModal from "../../game/_components/GameResultModal";
 import ConfirmDialog from "../../game/_components/ConfirmDialog";
 import styles from "../../game/_components/game.module.css";
+import GameResultModal from "../../game/_components/GameResultModal";
+import GameSettingsModal from "../../game/_components/GameSettingsModal";
+import LocalGameCanvas from "./GameCanvas_local";
 
 const initialGameState: GameState = {
   ball: {
@@ -208,7 +208,7 @@ const LocalPongGame = () => {
 
       {/* ローカル対戦用の操作説明 */}
       <div className="mt-4 text-center text-white">
-        <p className="text-sm mb-2">操作方法</p>
+        <p className="mb-2 text-sm">操作方法</p>
         <p className="text-xs">
           プレイヤー1（左）: W/S キー | プレイヤー2（右）: ↑/↓ キー
         </p>

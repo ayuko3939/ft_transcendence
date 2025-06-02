@@ -3,23 +3,38 @@
 import type {
   ChatMessage,
   GameResult,
-  GameSettings,
   GameState,
   PlayerSide,
 } from "@ft-transcendence/shared";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import ConfirmDialog from "@/(authed)/game/_components/ConfirmDialog";
+import styles from "@/(authed)/game/_components/game.module.css";
+import GameCanvas from "@/(authed)/game/_components/GameCanvas";
+import GameChat from "@/(authed)/game/_components/GameChat";
+import GameResultModal from "@/(authed)/game/_components/GameResultModal";
 import { PongController } from "@/lib/game/gameController";
 import { PongSocketClient } from "@/lib/game/webSocketClient";
 import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
 import { useSession } from "next-auth/react";
 
-import ConfirmDialog from "./ConfirmDialog";
-import styles from "./game.module.css";
-import GameCanvas from "./GameCanvas";
-import GameChat from "./GameChat";
-import GameResultModal from "./GameResultModal";
-import GameSettingsModal from "./GameSettingsModal";
+interface TournamentMatchInfo {
+  id: string;
+  tournamentId: string;
+  round: number;
+  matchNumber: number;
+  player1Id: string;
+  player2Id: string;
+  player1Name: string;
+  player2Name: string;
+  status: "pending" | "in_progress" | "completed";
+  gameRoomId?: string;
+}
+
+interface TournamentPongGameProps {
+  matchInfo: TournamentMatchInfo;
+  onGameReady: () => void;
+}
 
 const initialGameState: GameState = {
   ball: {
@@ -45,10 +60,13 @@ const initialGameState: GameState = {
   status: "connecting",
   winner: null,
   winningScore: GAME.DEFAULT_WINNING_SCORE,
-  gameType: "online",
+  gameType: "tournament",
 };
 
-const PongGame = () => {
+const TournamentPongGame = ({
+  matchInfo,
+  onGameReady,
+}: TournamentPongGameProps) => {
   // セッション情報を取得
   const { data: session } = useSession();
 
@@ -58,12 +76,6 @@ const PongGame = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
-
-  // ゲーム設定
-  const [gameSettings, setGameSettings] = useState<GameSettings>({
-    ballSpeed: BALL.DEFAULT_SPEED,
-    winningScore: GAME.DEFAULT_WINNING_SCORE,
-  });
 
   // UI状態
   const [showSurrenderConfirm, setShowSurrenderConfirm] = useState(false);
@@ -76,7 +88,7 @@ const PongGame = () => {
   // WebSocket接続の初期化
   useEffect(() => {
     // セッション情報がない場合は接続しない
-    if (!session?.user?.id) {
+    if (!session?.user?.id || !matchInfo.gameRoomId) {
       return;
     }
 
@@ -84,6 +96,7 @@ const PongGame = () => {
       onInit: (side, state) => {
         setPlayerSide(side);
         setGameState(state);
+        onGameReady();
       },
       onGameState: setGameState,
       onChatMessages: setChatMessages,
@@ -109,13 +122,16 @@ const PongGame = () => {
     });
 
     socketClientRef.current = socketClient;
-    // ユーザーIDを認証情報として送信
-    socketClient.connect("/ws/game", session.user.id);
+    // トーナメント専用のWebSocketエンドポイントを使用
+    socketClient.connect(
+      `/ws/tournament-match/${matchInfo.gameRoomId}`,
+      session.user.id,
+    );
 
     return () => {
       socketClient.disconnect();
     };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, matchInfo.gameRoomId, onGameReady]);
 
   // ゲームコントローラーの初期化と状態同期
   useEffect(() => {
@@ -151,10 +167,25 @@ const PongGame = () => {
   const shouldDarkenBackground =
     gameState.status !== "playing" || showSurrenderConfirm;
 
+  const handleBackToTournament = () => {
+    if (socketClientRef.current) socketClientRef.current.disconnect();
+    router.push(`/tournament/${matchInfo.tournamentId}`);
+  };
+
   return (
     <div className={styles.container}>
       {/* 背景暗化レイヤー */}
       {shouldDarkenBackground && <div className={styles.darkBackground} />}
+
+      {/* トーナメント情報表示 */}
+      <div className="mb-4 text-center text-white">
+        <h2 className="text-xl font-bold text-cyan-400">
+          ラウンド {matchInfo.round} - 試合 {matchInfo.matchNumber}
+        </h2>
+        <p className="text-sm">
+          {matchInfo.player1Name} vs {matchInfo.player2Name}
+        </p>
+      </div>
 
       <GameCanvas
         canvasRef={canvasRef}
@@ -163,25 +194,11 @@ const PongGame = () => {
         onSurrender={() => setShowSurrenderConfirm(true)}
       />
 
-      <GameSettingsModal
-        show={gameState.status === "setup"}
-        settings={gameSettings}
-        onSettingsChange={setGameSettings}
-        onConfirm={() => {
-          if (socketClientRef.current) {
-            socketClientRef.current.sendGameSettings(gameSettings);
-          }
-        }}
-      />
-
       <GameResultModal
         show={gameState.status === "finished" && gameResult !== null}
         result={gameResult}
         playerSide={playerSide}
-        onBackToHome={() => {
-          if (socketClientRef.current) socketClientRef.current.disconnect();
-          router.push("/");
-        }}
+        onBackToHome={handleBackToTournament}
       />
 
       <GameChat
@@ -193,13 +210,13 @@ const PongGame = () => {
 
       <ConfirmDialog
         show={showSurrenderConfirm}
-        title="ゲーム中断"
-        message="中断するとあなたは不戦敗となります。ゲームを中断しますか？"
+        title="試合中断"
+        message="中断するとあなたは不戦敗となります。試合を中断しますか？"
         onConfirm={() => {
           if (socketClientRef.current) {
             socketClientRef.current.sendSurrenderMessage();
             socketClientRef.current.disconnect();
-            router.push("/");
+            handleBackToTournament();
           }
           setShowSurrenderConfirm(false);
         }}
@@ -209,4 +226,4 @@ const PongGame = () => {
   );
 };
 
-export default PongGame;
+export default TournamentPongGame;
