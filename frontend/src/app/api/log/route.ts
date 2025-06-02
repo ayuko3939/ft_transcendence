@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { logInfo, logWarn, logError, type SimpleLogContext } from "@/app/lib/logger";
+import { logInfo, logWarn, logError, type SimpleLogContext } from "@/lib/logger";
 
 // クライアントから送信されるログの型
 interface ClientLogRequest {

@@ -50,7 +50,7 @@ services:
       - FRONTEND_URL="http://localhost:3000"
     command: ["/app/dist/index.js"]
     volumes:
-      - logdir:/app/logs
+      - logdir:/logs
       - dbdir:/var/lib/db
     depends_on:
       database-init:

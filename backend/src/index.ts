@@ -15,7 +15,7 @@ mkdirSync("logs", { recursive: true });
 const fastify = Fastify({
   logger: {
     level: "debug",
-    file: "logs/backend.log",
+    file: "/logs/backend.log",
     formatters: {
       // levelを文字列にする（"info", "warn", "error"）
       level: (label: string) => {

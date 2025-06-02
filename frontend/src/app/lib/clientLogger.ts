@@ -1,4 +1,4 @@
-import type { SimpleLogContext } from "@/app/lib/logger";
+import type { SimpleLogContext } from "@/lib/logger";
 
 // クライアントサイドでのみ動作
 const isClient = typeof window !== 'undefined';
