@@ -14,7 +14,7 @@ type LogLevel = 'info' | 'warn' | 'error';
 
 // サーバーサイドでのみログ出力を実行
 const isServer = typeof window === 'undefined';
-const LOG_FILE_PATH = '/app/logs/frontend.log';
+const LOG_FILE_PATH = '/logs/frontend.log';
 
 // ベースログ関数
 function writeLog(level: LogLevel, message: string, context?: SimpleLogContext): void {

@@ -31,7 +31,7 @@ services:
       - AWS_REGION=ap-northeast-1
       - UPLOAD_BUCKET_NAME=${UPLOAD_BUCKET_NAME}
     volumes:
-      - logdir:/app/logs
+      - logdir:/logs
       - dbdir:/var/lib/db
     depends_on:
       database-init:

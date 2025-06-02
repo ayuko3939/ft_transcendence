@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { clientLogError, logUserAction } from "@/lib/clientLogger";
 
 import styles from "./GoogleButton.module.css";
 import GoogleLoginIcon from "./GoogleLoginButton.svg";
@@ -16,9 +17,19 @@ export default function GoogleButton({ callbackUrl = "/" }: GoogleButtonProps) {
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
-      await signIn("google", { callbackUrl });
+      const result = await signIn("google", { 
+        callbackUrl,
+        redirect: false 
+      });
+      
+      if (result?.error) {
+        clientLogError("Google認証失敗", { error: result.error });
+      } else if (result?.ok) {
+        logUserAction("Google認証成功");
+      }
     } catch (error) {
       console.error("ログインエラー:", error);
+      clientLogError("Google認証エラー");
     } finally {
       setIsLoading(false);
     }
