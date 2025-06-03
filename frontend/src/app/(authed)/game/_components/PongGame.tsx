@@ -13,6 +13,7 @@ import { PongController } from "@/lib/game/gameController";
 import { PongSocketClient } from "@/lib/game/webSocketClient";
 import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
 import { useSession } from "next-auth/react";
+import { clientLogInfo, logUserAction, logButtonClick } from "@/lib/clientLogger";
 
 import ConfirmDialog from "./ConfirmDialog";
 import styles from "./game.module.css";
@@ -80,20 +81,27 @@ const PongGame = () => {
       return;
     }
 
+    const userId = session.user.id;
+
     const socketClient = new PongSocketClient({
       onInit: (side, state) => {
         setPlayerSide(side);
         setGameState(state);
+        clientLogInfo("ゲーム接続完了", { userId, playerSide: side });
       },
       onGameState: setGameState,
       onChatMessages: setChatMessages,
       onCountdown: (count) => {
         setCountdown(count);
         setGameState((prev) => ({ ...prev, status: "countdown" }));
+        if (count === 5) {
+          clientLogInfo("ゲームカウントダウン開始", { userId });
+        }
       },
       onGameStart: (state) => {
         setCountdown(null);
         setGameState(state);
+        logUserAction("ゲーム開始", userId);
       },
       onGameOver: (result) => {
         setGameResult(result);
@@ -102,9 +110,17 @@ const PongGame = () => {
           status: "finished",
           winner: result.winner,
         }));
+        
+        const isWinner = playerSide === result.winner;
+        const finalScore = `${result.finalScore.left}-${result.finalScore.right}`;
+        logUserAction(
+          `ゲーム終了: ${isWinner ? "勝利" : "敗北"} (${finalScore})`, 
+          userId
+        );
       },
       onWaitingForPlayer: () => {
         setGameState((prev) => ({ ...prev, status: "waiting" }));
+        clientLogInfo("対戦相手待機中", { userId });
       },
     });
 
@@ -115,7 +131,7 @@ const PongGame = () => {
     return () => {
       socketClient.disconnect();
     };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, playerSide]);
 
   // ゲームコントローラーの初期化と状態同期
   useEffect(() => {
@@ -146,6 +162,24 @@ const PongGame = () => {
       }
     };
   }, [playerSide, gameState]);
+
+  const handleSurrender = () => {
+    const userId = session?.user?.id;
+    logButtonClick("ゲーム中断", userId);
+    if (socketClientRef.current) {
+      socketClientRef.current.sendSurrenderMessage();
+      socketClientRef.current.disconnect();
+      router.push("/");
+    }
+    setShowSurrenderConfirm(false);
+  };
+
+  const handleBackToHome = () => {
+    const userId = session?.user?.id;
+    logButtonClick("ホームに戻る", userId);
+    if (socketClientRef.current) socketClientRef.current.disconnect();
+    router.push("/");
+  };
 
   // 背景制御ロジック
   const shouldDarkenBackground =
@@ -178,10 +212,7 @@ const PongGame = () => {
         show={gameState.status === "finished" && gameResult !== null}
         result={gameResult}
         playerSide={playerSide}
-        onBackToHome={() => {
-          if (socketClientRef.current) socketClientRef.current.disconnect();
-          router.push("/");
-        }}
+        onBackToHome={handleBackToHome}
       />
 
       <GameChat
@@ -195,14 +226,7 @@ const PongGame = () => {
         show={showSurrenderConfirm}
         title="ゲーム中断"
         message="中断するとあなたは不戦敗となります。ゲームを中断しますか？"
-        onConfirm={() => {
-          if (socketClientRef.current) {
-            socketClientRef.current.sendSurrenderMessage();
-            socketClientRef.current.disconnect();
-            router.push("/");
-          }
-          setShowSurrenderConfirm(false);
-        }}
+        onConfirm={handleSurrender}
         onCancel={() => setShowSurrenderConfirm(false)}
       />
     </div>

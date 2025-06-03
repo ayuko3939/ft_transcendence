@@ -4,18 +4,29 @@ import websocket from "@fastify/websocket";
 import { mkdirSync } from "node:fs";
 import dotenv from "dotenv";
 import routes from "./routes";
+import { dirname } from 'path';
 
 // 環境変数の読み込み
 dotenv.config();
 
 // ログファイルのディレクトリを作成
-mkdirSync("logs", { recursive: true });
+const logFilePath = process.env.LOG_FILE_PATH || "/logs/backend.log";
+mkdirSync(dirname(logFilePath), { recursive: true });
 
 // Fastifyインスタンスの作成
 const fastify = Fastify({
   logger: {
     level: "debug",
-    file: "logs/server.log",
+    file: logFilePath,
+    formatters: {
+      // levelを文字列にする（"info", "warn", "error"）
+      level: (label: string) => {
+        return { level: label };
+      }
+    },
+    // timestampをISO8601形式に設定
+    timestamp: () => `,"time":"${new Date().toISOString()}"`,
+    base: null  // pid, hostname等を削除
   },
 });
 

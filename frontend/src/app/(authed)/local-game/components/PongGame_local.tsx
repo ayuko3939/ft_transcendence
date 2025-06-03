@@ -13,6 +13,7 @@ import { LocalPongController } from "@/lib/game/gameController_local";
 import { LocalPongSocketClient } from "@/lib/game/webSocketClient_local";
 import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
 import { useSession } from "next-auth/react";
+import { clientLogInfo, logUserAction, logButtonClick } from "@/lib/clientLogger";
 
 import ConfirmDialog from "../../game/_components/ConfirmDialog";
 import styles from "../../game/_components/game.module.css";
@@ -79,20 +80,27 @@ const LocalPongGame = () => {
       return;
     }
 
+    const userId = session.user.id;
+
     const socketClient = new LocalPongSocketClient({
       onInit: (side, state) => {
         setPlayerSide(side);
         setGameState(state);
+        clientLogInfo("ローカルゲーム接続完了", { userId });
       },
       onGameState: setGameState,
       onChatMessages: setChatMessages,
       onCountdown: (count) => {
         setCountdown(count);
         setGameState((prev) => ({ ...prev, status: "countdown" }));
+        if (count === 5) {
+          clientLogInfo("ローカルゲームカウントダウン開始", { userId });
+        }
       },
       onGameStart: (state) => {
         setCountdown(null);
         setGameState(state);
+        logUserAction("ローカルゲーム開始", userId);
       },
       onGameOver: (result) => {
         setGameResult(result);
@@ -101,6 +109,9 @@ const LocalPongGame = () => {
           status: "finished",
           winner: result.winner,
         }));
+        
+        const finalScore = `${result.finalScore.left}-${result.finalScore.right}`;
+        logUserAction(`ローカルゲーム終了 (${finalScore})`, userId);
       },
       onWaitingForPlayer: () => {
         setGameState((prev) => ({ ...prev, status: "waiting" }));
@@ -154,6 +165,8 @@ const LocalPongGame = () => {
 
   // 中断処理
   const handleSurrender = () => {
+    const userId = session?.user?.id;
+    logButtonClick("ローカルゲーム中断", userId);
     if (socketClientRef.current) {
       socketClientRef.current.sendSurrenderMessage();
       socketClientRef.current.disconnect();
@@ -164,6 +177,8 @@ const LocalPongGame = () => {
 
   // ホームに戻る処理
   const handleBackToHome = () => {
+    const userId = session?.user?.id;
+    logButtonClick("ホームに戻る", userId);
     if (socketClientRef.current) socketClientRef.current.disconnect();
     router.push("/");
   };

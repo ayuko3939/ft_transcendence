@@ -7,6 +7,7 @@ import type {
   PlayerSide,
   ServerMessage,
 } from "@ft-transcendence/shared";
+import { clientLogError, clientLogWarn } from "@/lib/clientLogger";
 
 export interface LocalWebSocketHandlers {
   onInit: (side: PlayerSide, gameState: GameState) => void;
@@ -50,11 +51,15 @@ export class LocalPongSocketClient {
 
     this.ws.onerror = (error) => {
       console.error("ローカル対戦WebSocket接続エラー:", error);
+      clientLogError("ローカル対戦WebSocket接続エラー");
     };
 
     this.ws.onclose = (event) => {
       if (event.code !== 1000) {
         console.log("ローカル対戦WebSocket切断されました");
+        clientLogWarn("ローカル対戦WebSocket接続が切断されました", {
+          code: event.code.toString()
+        });
       }
     };
   }
@@ -103,6 +108,8 @@ export class LocalPongSocketClient {
   private sendMessage(message: ClientMessage): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
+    } else {
+      clientLogError("ローカル対戦WebSocket送信エラー: 接続が切断されています");
     }
   }
 

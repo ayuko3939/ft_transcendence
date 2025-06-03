@@ -5,12 +5,14 @@ import { db } from "@/api/db";
 import { players } from "@ft-transcendence/shared";
 import { count, eq, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
+import { logApiRequest, logApiError } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user || !session.user.id) {
+      logApiRequest(request.method, request.nextUrl.pathname, 401);
       return NextResponse.json(
         { error: "認証されていません" },
         { status: 401 },
@@ -66,6 +68,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    logApiRequest(request.method, request.nextUrl.pathname, 200, session.user.id);
     return NextResponse.json({
       totalGames,
       wins,
@@ -75,6 +78,7 @@ export async function GET(request: NextRequest) {
       longestStreak,
     });
   } catch (error) {
+    logApiError(request.method, request.nextUrl.pathname, error instanceof Error ? error : new Error(String(error)));
     console.error("統計情報取得エラー:", error);
     return NextResponse.json(
       { error: "統計情報の取得中にエラーが発生しました" },

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
+import { logUserAction } from "@/lib/clientLogger";
 
 import PasswordChangeModal from "./PasswordChangeModal";
 
@@ -26,6 +27,8 @@ export default function Header() {
   };
 
   const handleLogout = () => {
+    const userId = session?.user?.id;
+    logUserAction("ログアウト", userId);
     signOut({ redirect: true, callbackUrl: "/login" });
   };
 

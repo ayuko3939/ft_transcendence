@@ -7,6 +7,7 @@ import type {
   PlayerSide,
   ServerMessage,
 } from "@ft-transcendence/shared";
+import { clientLogError, clientLogWarn } from "@/lib/clientLogger";
 
 export interface WebSocketHandlers {
   onInit: (side: PlayerSide, gameState: GameState) => void;
@@ -51,11 +52,15 @@ export class PongSocketClient {
 
     this.ws.onerror = (error) => {
       console.error("WebSocket接続エラー:", error);
+      clientLogError("WebSocket接続エラー");
     };
 
     this.ws.onclose = (event) => {
       if (event.code !== 1000) {
         console.log("WebSocket切断されました");
+        clientLogWarn("WebSocket接続が切断されました", { 
+          code: event.code.toString() 
+        });
       }
     };
   }
@@ -111,6 +116,8 @@ export class PongSocketClient {
   private sendMessage(message: ClientMessage): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
+    } else {
+      clientLogError("WebSocket送信エラー: 接続が切断されています");
     }
   }
 

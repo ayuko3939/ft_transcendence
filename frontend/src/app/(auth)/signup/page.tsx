@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/api/auth/api-client";
 import { useSession } from "next-auth/react";
+import { clientLogInfo, clientLogError, logUserAction } from "@/lib/clientLogger";
 
 import styles from "./signup.module.css";
 
@@ -52,20 +53,24 @@ function SignupContent() {
 
     if (!email || !name || !password || !confirmPassword) {
       setError("すべての項目を入力してください");
+      clientLogError("ユーザー登録失敗: 入力項目不足");
       return;
     }
     if (password !== confirmPassword) {
       setError("パスワードが一致しません");
+      clientLogError("ユーザー登録失敗: パスワード不一致");
       return;
     }
     const emailRegex =
       /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/i;
     if (!emailRegex.test(email)) {
       setError("有効なメールアドレスを入力してください");
+      clientLogError("ユーザー登録失敗: メールアドレス形式不正");
       return;
     }
     if (password.length < 8) {
       setError("パスワードは最低8文字必要です");
+      clientLogError("ユーザー登録失敗: パスワード文字数不足");
       return;
     }
     setIsLoading(true);
@@ -79,12 +84,15 @@ function SignupContent() {
       );
       if (response.error) {
         setError(response.error);
+        clientLogError("ユーザー登録失敗: API エラー", { error: response.error });
         return;
       }
+      logUserAction("ユーザー登録成功", email);
       router.push("/login?registered=true");
     } catch (error) {
       console.error("Error during signup:", error);
       setError("アカウント登録に失敗しました。もう一度お試しください。");
+      clientLogError("ユーザー登録失敗: システムエラー");
     } finally {
       setIsLoading(false);
     }
