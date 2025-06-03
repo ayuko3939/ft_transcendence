@@ -164,6 +164,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    networks:
+      - app-network
 
   kibana:
     depends_on:
@@ -195,6 +197,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+    networks:
+      - app-network
 
   logstash:
     depends_on:
@@ -216,6 +220,26 @@ services:
       - ELASTIC_USER=elastic
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - ELASTIC_HOSTS=https://elastic-search:9200
+    networks:
+      - app-network
+
+  kibana-init:
+    image: alpine:latest
+    depends_on:
+      kibana:
+        condition: service_healthy
+      logstash:
+        condition: service_started
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+    volumes:
+      - ./internal/settings/kibana/kibana_init.sh:/kibana_init.sh
+      - ./internal/settings/kibana/frontend-dashboard.ndjson:/kibana-config/frontend-dashboard.ndjson
+    command: ["/bin/sh", "-c", "apk add --no-cache curl && sleep 30 && /bin/sh /kibana_init.sh"]
+    networks:
+      - app-network
+    restart: "no"
 
 volumes:
   logdir:
