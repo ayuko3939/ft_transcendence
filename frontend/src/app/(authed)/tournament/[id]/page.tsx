@@ -36,6 +36,65 @@ export default function TournamentDetailPage() {
       return;
     }
 
+    const fetchTournamentDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/tournament/${tournamentId}`);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "トーナメントの取得に失敗しました");
+        }
+
+        const data = await response.json();
+        setTournament(data.tournament);
+      } catch (error) {
+        console.error("トーナメント詳細取得エラー:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "トーナメントの取得に失敗しました",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const connectToTournamentWebSocket = () => {
+      if (!tournamentId) return;
+
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${window.location.host}/ws/tournament/${tournamentId}`;
+
+      console.log(`トーナメントWebSocket接続中: ${wsUrl}`);
+
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        console.log("トーナメントWebSocket接続完了");
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          handleTournamentWebSocketMessage(data);
+        } catch (error) {
+          console.error("トーナメントWebSocketメッセージ解析エラー:", error);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error("トーナメントWebSocketエラー:", error);
+      };
+
+      ws.onclose = (event) => {
+        if (event.code !== 1000) {
+          console.log("トーナメントWebSocket接続が切断されました");
+        }
+      };
+    };
+
     if (status === "authenticated" && tournamentId) {
       fetchTournamentDetails();
       // WebSocket接続を開始
@@ -49,65 +108,6 @@ export default function TournamentDetailPage() {
       }
     };
   }, [status, tournamentId, router]);
-
-  const fetchTournamentDetails = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/tournament/${tournamentId}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "トーナメントの取得に失敗しました");
-      }
-
-      const data = await response.json();
-      setTournament(data.tournament);
-    } catch (error) {
-      console.error("トーナメント詳細取得エラー:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "トーナメントの取得に失敗しました",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const connectToTournamentWebSocket = () => {
-    if (!tournamentId) return;
-
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws/tournament/${tournamentId}`;
-
-    console.log(`トーナメントWebSocket接続中: ${wsUrl}`);
-
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      console.log("トーナメントWebSocket接続完了");
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        handleTournamentWebSocketMessage(data);
-      } catch (error) {
-        console.error("トーナメントWebSocketメッセージ解析エラー:", error);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error("トーナメントWebSocketエラー:", error);
-    };
-
-    ws.onclose = (event) => {
-      if (event.code !== 1000) {
-        console.log("トーナメントWebSocket接続が切断されました");
-      }
-    };
-  };
 
   const handleTournamentWebSocketMessage = (data: any) => {
     switch (data.type) {
