@@ -56,7 +56,7 @@ export function middleware(req: NextRequest) {
       );
       return new NextResponse("Invalid room ID", { status: 400 });
     }
-    const tournamentWsUrl = joinWsUrl(backendWsUrl, "game", roomId);
+    const tournamentWsUrl = joinWsUrl(backendWsUrl, "game", "tournament-match", roomId);
     console.log(
       "トーナメントゲームルーム用WebSocketプロキシ:",
       tournamentWsUrl,

@@ -99,7 +99,7 @@ export class GameHandlerService {
     // ユーザーIDをGameRoomに保存
     this.room.userIds[playerSide] = data.sessionToken;
 
-    console.log(`プレイヤー ${playerSide} の認証完了:`, data.sessionToken);
+    console.log(`プレイヤー ${playerSide} 接続:`, data.sessionToken);
 
     const player = this.room.players[playerSide];
     if (!player) return;
