@@ -30,6 +30,7 @@ services:
       - AWS_ENDPOINT=${AWS_ENDPOINT}
       - AWS_REGION=ap-northeast-1
       - UPLOAD_BUCKET_NAME=${UPLOAD_BUCKET_NAME}
+      - LOG_FILE_PATH=/logs/frontend.log
     volumes:
       - logdir:/logs
       - dbdir:/var/lib/db
@@ -48,6 +49,7 @@ services:
       - DB_FILE_DIR=/var/lib/db
       - DB_FILE_NAME=${DB_FILE_NAME}
       - FRONTEND_URL=http://frontend:3000
+      - LOG_FILE_PATH=/logs/backend.log
     command: ["/app/dist/index.js"]
     volumes:
       - logdir:/app/logs

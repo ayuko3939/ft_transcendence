@@ -14,7 +14,7 @@ type LogLevel = 'info' | 'warn' | 'error';
 
 // サーバーサイドでのみログ出力を実行
 const isServer = typeof window === 'undefined';
-const LOG_FILE_PATH = '/logs/frontend.log';
+const logFilePath = process.env.LOG_FILE_PATH || '/logs/frontend.log';
 
 // ベースログ関数
 function writeLog(level: LogLevel, message: string, context?: SimpleLogContext): void {
@@ -30,7 +30,7 @@ function writeLog(level: LogLevel, message: string, context?: SimpleLogContext):
     };
 
     // JSONニューライン形式で出力
-    appendFileSync(LOG_FILE_PATH, JSON.stringify(logEntry) + '\n');
+    appendFileSync(logFilePath, JSON.stringify(logEntry) + '\n');
   } catch (error) {
     // ログ出力自体のエラーはコンソールに出力
     console.error('Failed to write log:', error);
