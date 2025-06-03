@@ -77,36 +77,6 @@ export default async function tournamentRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // トーナメントに参加
-  fastify.post<{
-    Params: { id: string };
-    Body: { userId: string };
-  }>("/:id/join", async (request, reply) => {
-    try {
-      const { id } = request.params;
-      const { userId } = request.body;
-
-      if (!userId) {
-        return reply.status(400).send({
-          error: "ユーザーIDが必要です",
-        });
-      }
-
-      await tournamentService.joinTournament(id, userId);
-      return { success: true, message: "トーナメントに参加しました" };
-    } catch (error) {
-      fastify.log.error(`トーナメント参加エラー: ${error}`);
-
-      // エラーメッセージをそのまま返す（TournamentServiceで適切なエラーメッセージを設定している）
-      return reply.status(400).send({
-        error:
-          error instanceof Error
-            ? error.message
-            : "トーナメント参加中にエラーが発生しました",
-      });
-    }
-  });
-
   // トーナメントを開始
   fastify.post<{
     Params: { id: string };

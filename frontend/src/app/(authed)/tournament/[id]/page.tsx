@@ -138,17 +138,6 @@ export default function TournamentDetailPage() {
 
     try {
       setJoining(true);
-      const response = await fetch(`/api/tournament/${tournament.id}/join`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || "トーナメントへの参加に失敗しました",
-        );
-      }
-
       // WebSocket経由で参加通知を送信
       if (wsRef.current) {
         const joinData = {
