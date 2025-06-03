@@ -77,35 +77,6 @@ export default async function tournamentRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // トーナメントを開始
-  fastify.post<{
-    Params: { id: string };
-    Body: { creatorId: string };
-  }>("/:id/start", async (request, reply) => {
-    try {
-      const { id } = request.params;
-      const { creatorId } = request.body;
-
-      if (!creatorId) {
-        return reply.status(400).send({
-          error: "作成者IDが必要です",
-        });
-      }
-
-      await tournamentService.startTournament(id, creatorId);
-      return { success: true, message: "トーナメントを開始しました" };
-    } catch (error) {
-      fastify.log.error(`トーナメント開始エラー: ${error}`);
-
-      return reply.status(400).send({
-        error:
-          error instanceof Error
-            ? error.message
-            : "トーナメント開始中にエラーが発生しました",
-      });
-    }
-  });
-
   // マッチ詳細を取得
   fastify.get<{ Params: { matchId: string } }>(
     "/matches/:matchId",

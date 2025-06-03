@@ -163,14 +163,6 @@ export default function TournamentDetailPage() {
 
     try {
       setStarting(true);
-      const response = await fetch(`/api/tournament/${tournament.id}/start`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "トーナメントの開始に失敗しました");
-      }
 
       // WebSocket経由で開始通知を送信
       if (wsRef.current) {
