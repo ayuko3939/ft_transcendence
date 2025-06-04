@@ -11,13 +11,14 @@
     "introspect": "drizzle-kit introspect"
   },
   "dependencies": {
-    "@ft-transcendence/shared": "file:../shared",
     "@auth/drizzle-adapter": "^1.9.1",
     "@aws-sdk/client-s3": "^3.812.0",
     "@aws-sdk/s3-request-presigner": "^3.812.0",
+    "@ft-transcendence/shared": "file:../shared",
     "@libsql/client": "^0.15.7",
     "@types/uuid": "^10.0.0",
     "bcryptjs": "^3.0.2",
+    "date-fns-tz": "^3.2.0",
     "drizzle-orm": "^0.43.1",
     "next": "15.3.1",
     "next-auth": "^4.24.11",

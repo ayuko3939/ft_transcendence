@@ -6,6 +6,7 @@ import * as jwt from "next-auth/jwt";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import { updateLastActivity } from "@/api/auth/lastActivityService";
 
 export const authOptions: NextAuthOptions = {
   debug: true,
@@ -62,6 +63,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = user.id;
         session.user.provider = (await getProvider(user.id)) ?? "credentials";
+        await updateLastActivity(user.id);
       }
       return session;
     },

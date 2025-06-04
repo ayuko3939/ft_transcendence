@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { user, account, authenticator, session, userPassword, players, games, tournamentMatches, tournaments, tournamentParticipants } from "./schema";
+import { user, account, authenticator, players, games, session, tournamentMatches, tournaments, tournamentParticipants, userPassword } from "./schema";
 
 export const accountRelations = relations(account, ({one}) => ({
 	user: one(user, {
@@ -11,9 +11,8 @@ export const accountRelations = relations(account, ({one}) => ({
 export const userRelations = relations(user, ({many}) => ({
 	accounts: many(account),
 	authenticators: many(authenticator),
-	sessions: many(session),
-	userPasswords: many(userPassword),
 	players: many(players),
+	sessions: many(session),
 	tournamentMatches_winnerId: many(tournamentMatches, {
 		relationName: "tournamentMatches_winnerId_user_id"
 	}),
@@ -30,25 +29,12 @@ export const userRelations = relations(user, ({many}) => ({
 	tournaments_creatorId: many(tournaments, {
 		relationName: "tournaments_creatorId_user_id"
 	}),
+	userPasswords: many(userPassword),
 }));
 
 export const authenticatorRelations = relations(authenticator, ({one}) => ({
 	user: one(user, {
 		fields: [authenticator.userId],
-		references: [user.id]
-	}),
-}));
-
-export const sessionRelations = relations(session, ({one}) => ({
-	user: one(user, {
-		fields: [session.userId],
-		references: [user.id]
-	}),
-}));
-
-export const userPasswordRelations = relations(userPassword, ({one}) => ({
-	user: one(user, {
-		fields: [userPassword.userId],
 		references: [user.id]
 	}),
 }));
@@ -67,6 +53,13 @@ export const playersRelations = relations(players, ({one}) => ({
 export const gamesRelations = relations(games, ({many}) => ({
 	players: many(players),
 	tournamentMatches: many(tournamentMatches),
+}));
+
+export const sessionRelations = relations(session, ({one}) => ({
+	user: one(user, {
+		fields: [session.userId],
+		references: [user.id]
+	}),
 }));
 
 export const tournamentMatchesRelations = relations(tournamentMatches, ({one}) => ({
@@ -118,5 +111,12 @@ export const tournamentParticipantsRelations = relations(tournamentParticipants,
 	tournament: one(tournaments, {
 		fields: [tournamentParticipants.tournamentId],
 		references: [tournaments.id]
+	}),
+}));
+
+export const userPasswordRelations = relations(userPassword, ({one}) => ({
+	user: one(user, {
+		fields: [userPassword.userId],
+		references: [user.id]
 	}),
 }));

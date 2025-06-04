@@ -33,28 +33,6 @@ export const authenticator = sqliteTable("authenticator", {
 	primaryKey({ columns: [table.credentialId, table.userId], name: "authenticator_credentialID_userId_pk"})
 ]);
 
-export const session = sqliteTable("session", {
-	sessionToken: text().primaryKey().notNull(),
-	userId: text().notNull().references(() => user.id, { onDelete: "cascade" } ),
-	expires: integer().notNull(),
-});
-
-export const userPassword = sqliteTable("user_password", {
-	userId: text("user_id").primaryKey().notNull().references(() => user.id, { onDelete: "cascade" } ),
-	passwordHash: text("password_hash").notNull(),
-	createdAt: integer("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-	updatedAt: integer("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
-});
-
-export const verificationToken = sqliteTable("verificationToken", {
-	identifier: text().notNull(),
-	token: text().notNull(),
-	expires: integer().notNull(),
-},
-(table) => [
-	primaryKey({ columns: [table.identifier, table.token], name: "verificationToken_identifier_token_pk"})
-]);
-
 export const games = sqliteTable("games", {
 	id: text().primaryKey().notNull(),
 	startedAt: integer("started_at").notNull(),
@@ -80,6 +58,12 @@ export const players = sqliteTable("players", {
 (table) => [
 	uniqueIndex("players_game_side_unique").on(table.gameId, table.side),
 ]);
+
+export const session = sqliteTable("session", {
+	sessionToken: text().primaryKey().notNull(),
+	userId: text().notNull().references(() => user.id, { onDelete: "cascade" } ),
+	expires: integer().notNull(),
+});
 
 export const tournamentMatches = sqliteTable("tournament_matches", {
 	id: text().primaryKey().notNull(),
@@ -122,12 +106,29 @@ export const tournaments = sqliteTable("tournaments", {
 	endedAt: integer("ended_at"),
 });
 
+export const userPassword = sqliteTable("user_password", {
+	userId: text("user_id").primaryKey().notNull().references(() => user.id, { onDelete: "cascade" } ),
+	passwordHash: text("password_hash").notNull(),
+	createdAt: integer("created_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+	updatedAt: integer("updated_at").default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+});
+
+export const verificationToken = sqliteTable("verificationToken", {
+	identifier: text().notNull(),
+	token: text().notNull(),
+	expires: integer().notNull(),
+},
+(table) => [
+	primaryKey({ columns: [table.identifier, table.token], name: "verificationToken_identifier_token_pk"})
+]);
+
 export const user = sqliteTable("user", {
 	id: text().primaryKey().notNull(),
 	name: text({ length: 17 }),
 	email: text(),
 	emailVerified: integer(),
 	image: text(),
+	lastActivity: integer("last_activity"),
 },
 (table) => [
 	uniqueIndex("user_email_unique").on(table.email),
