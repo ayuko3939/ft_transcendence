@@ -9,7 +9,7 @@ import type {
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/(authed)/game/_components/ConfirmDialog";
-import styles from "../../../../../game/_components/game.module.css";
+import styles from "@/(authed)/game/_components/game.module.css";
 import GameCanvas from "@/(authed)/game/_components/GameCanvas";
 import GameChat from "@/(authed)/game/_components/GameChat";
 import GameResultModal from "@/(authed)/game/_components/GameResultModal";
