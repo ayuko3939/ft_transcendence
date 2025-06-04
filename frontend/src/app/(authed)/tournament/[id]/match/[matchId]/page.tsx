@@ -23,7 +23,6 @@ interface TournamentMatchInfo {
   player1Name: string;
   player2Name: string;
   status: "pending" | "in_progress" | "completed";
-  gameRoomId?: string;
 }
 
 export default function TournamentMatchPage() {

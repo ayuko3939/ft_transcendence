@@ -44,14 +44,25 @@ export function handleGameConnectionWithRoomId(
 }
 
 // トーナメント試合用のWebSocket接続ハンドラ
-export function handleTournamentMatchConnection(
+export async function handleTournamentMatchConnection(
   connection: WebSocket,
   req: FastifyRequest,
   fastify: FastifyInstance
 ) {
   const { matchId } = req.params as { matchId: string };
+  console.log(`[Tournament] WebSocket接続要求: matchId=${matchId}`);
   if (!matchId) {
     connection.close(1003, "Invalid tournament match ID");
+    return;
+  }
+
+  // トーナメントサービスを使ってマッチ情報を取得
+  const { TournamentService } = await import("../tournament/TournamentService");
+  const tournamentService = new TournamentService();
+  const matchDetails = await tournamentService.getMatchDetails(matchId);
+  
+  if (!matchDetails) {
+    connection.close(1003, "Tournament match not found");
     return;
   }
 
@@ -59,6 +70,10 @@ export function handleTournamentMatchConnection(
   let room = gameRooms.get(matchId);
   if (!room) {
     room = createGameRoom("tournament");
+    room.tournamentId = matchDetails.tournamentId;
+    room.tournamentMatchId = matchId;
+    // トーナメントでは設定済みですぐ開始
+    room.leftPlayerReady = true;
     gameRooms.set(matchId, room);
   }
 
@@ -91,8 +106,23 @@ function assignPlayerToRoom(
 
   const gameHandlerService = new GameHandlerService(room);
 
+  // トーナメントマッチの場合、最初のメッセージでプレイヤー認証を待つ
+  let isAuthenticated = room.state.gameType !== "tournament";
+  
   connection.on("message", (message: Buffer) => {
     gameHandlerService.handlePlayerMessage(message, playerSide);
+    
+    // トーナメントの場合、authメッセージ後に認証フラグを立てる
+    if (!isAuthenticated) {
+      try {
+        const data = JSON.parse(message.toString());
+        if (data.type === "auth") {
+          isAuthenticated = true;
+        }
+      } catch {
+        // パースエラーは無視
+      }
+    }
   });
 
   connection.on("close", () => {

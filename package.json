@@ -7,13 +7,13 @@
     "frontend": "pnpm -F \"frontend\"",
     "backend": "pnpm -F \"backend\"",
     "db": "pnpm -F \"database\"",
-    "fmt" : "pnpm -F \"backend\" fmt && pnpm -F \"frontend\" fmt"
+    "fmt": "pnpm -F \"backend\" fmt && pnpm -F \"frontend\" fmt"
   },
   "engines": {
     "pnpm": ">=9.15.0",
     "npm": "please use pnpm"
   },
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@10.11.1",
   "keywords": [],
   "author": "",
   "license": "ISC"

@@ -534,11 +534,16 @@ export default function TournamentDetailPage() {
                           {/* 自分が参加する試合で待機中の場合に試合開始ボタンを表示 */}
                           {isUserInMatch && match.status === "pending" && (
                             <Button
-                              onClick={() =>
+                              onClick={() => {
+                                // WebSocket接続を切断してから試合ページへ
+                                if (wsRef.current) {
+                                  wsRef.current.close();
+                                  wsRef.current = null;
+                                }
                                 router.push(
                                   `/tournament/${tournament.id}/match/${match.id}`,
-                                )
-                              }
+                                );
+                              }}
                               className="bg-green-500 hover:bg-green-600"
                               size="sm"
                             >
@@ -548,11 +553,16 @@ export default function TournamentDetailPage() {
                           {/* 進行中の場合は観戦ボタン */}
                           {isUserInMatch && match.status === "in_progress" && (
                             <Button
-                              onClick={() =>
+                              onClick={() => {
+                                // WebSocket接続を切断してから試合ページへ
+                                if (wsRef.current) {
+                                  wsRef.current.close();
+                                  wsRef.current = null;
+                                }
                                 router.push(
                                   `/tournament/${tournament.id}/match/${match.id}`,
-                                )
-                              }
+                                );
+                              }}
                               className="bg-blue-500 hover:bg-blue-600"
                               size="sm"
                             >

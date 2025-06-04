@@ -20,8 +20,8 @@ export default async function gameIdRoute(fastify: FastifyInstance) {
   fastify.get(
     "/tournament-match/:matchId",
     { websocket: true },
-    (connection, req) => {
-      handleTournamentMatchConnection(connection, req, fastify);
+    async (connection, req) => {
+      await handleTournamentMatchConnection(connection, req, fastify);
     }
   );
 }
