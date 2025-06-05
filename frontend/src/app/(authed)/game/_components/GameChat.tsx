@@ -1,5 +1,5 @@
 import type { PongSocketClient } from "@/lib/game/webSocketClient";
-import type { ChatMessage, PlayerSide } from "@ft-transcendence/shared";
+import type { ChatMessage } from "@ft-transcendence/shared";
 import { useState } from "react";
 
 import styles from "./game.module.css";
@@ -7,26 +7,24 @@ import styles from "./game.module.css";
 interface GameChatProps {
   show: boolean;
   messages: ChatMessage[];
-  playerSide: PlayerSide;
   socketClient: PongSocketClient | null;
+  senderName: string;
 }
 
 const GameChat = ({
   show,
   messages,
-  playerSide,
   socketClient,
+  senderName,
 }: GameChatProps) => {
   const [chatInput, setChatInput] = useState("");
 
   if (!show) return null;
 
   const sendChat = () => {
-    if (chatInput.trim() && playerSide && socketClient) {
-      socketClient.sendChatMessage(
-        playerSide === "left" ? "プレイヤー1" : "プレイヤー2",
-        chatInput,
-      );
+    if (chatInput.trim() && socketClient) {
+      const name = senderName;
+      socketClient.sendChatMessage(name, chatInput);
       setChatInput("");
     }
   };

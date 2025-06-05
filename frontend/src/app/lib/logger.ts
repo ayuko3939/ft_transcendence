@@ -7,6 +7,7 @@ export interface SimpleLogContext {
   statusCode?: number;
   userId?: string;
   error?: string;
+  playerSide?: string;
 }
 
 // ログレベルの型定義
