@@ -126,6 +126,8 @@ services:
       retries: 120
     env_file:
       - .env
+    networks:
+      - app-network
 
   elastic-search:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
