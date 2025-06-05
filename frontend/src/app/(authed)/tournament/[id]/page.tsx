@@ -3,11 +3,18 @@
 import type { TournamentWithDetails } from "@ft-transcendence/shared";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { TournamentResult } from "@/(authed)/tournament/[id]/components/TournamentResult";
 import { useSession } from "next-auth/react";
 
-import { Button } from "../components/button";
-import { Card } from "../components/card";
-import styles from "../tournament.module.css";
+import { Button } from "@/(authed)/tournament/components/button";
+import { Card } from "@/(authed)/tournament/components/card";
+import styles from "@/(authed)/tournament/tournament.module.css";
+
+const dummyWinner = {
+  id: 1,
+  name: "プレイヤー1",
+  score: 5,
+};
 
 export default function TournamentDetailPage() {
   const router = useRouter();
@@ -20,6 +27,7 @@ export default function TournamentDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
 
   // チャット機能用の状態
@@ -43,7 +51,9 @@ export default function TournamentDetailPage() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || "トーナメントの取得に失敗しました");
+          throw new Error(
+            errorData.error || "トーナメントの取得に失敗しました",
+          );
         }
 
         const data = await response.json();
@@ -581,13 +591,18 @@ export default function TournamentDetailPage() {
                 })}
               </div>
             ) : (
-                <p className="py-4 text-center text-lg font-semibold text-cyan-400">
+              <p className="py-4 text-center text-lg font-semibold text-cyan-400">
                 すべての試合が終了しました
-                </p>
+              </p>
             )}
           </Card>
         )}
       </div>
+      <TournamentResult
+        show={!!(tournament && tournament.status === "completed" && showResultModal)}
+        winner={dummyWinner}
+        onClose={() => setShowResultModal(false)}
+      />
     </div>
   );
 }
