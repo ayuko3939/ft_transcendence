@@ -39,7 +39,7 @@ export default async function tournamentSocketRoute(fastify: FastifyInstance) {
               await handleStartTournament(
                 data,
                 tournamentId,
-                tournamentService,
+                tournamentService
               );
               break;
             case "chat":
@@ -64,7 +64,7 @@ export default async function tournamentSocketRoute(fastify: FastifyInstance) {
         }
         console.log(`トーナメント ${tournamentId} から切断しました`);
       });
-    },
+    }
   );
 }
 
@@ -74,7 +74,7 @@ export default async function tournamentSocketRoute(fastify: FastifyInstance) {
 async function handleJoinTournament(
   data: any,
   tournamentId: string,
-  tournamentService: TournamentService,
+  tournamentService: TournamentService
 ) {
   try {
     const { userId } = data;
@@ -94,7 +94,7 @@ async function handleJoinTournament(
 async function handleStartTournament(
   data: any,
   tournamentId: string,
-  tournamentService: TournamentService,
+  tournamentService: TournamentService
 ) {
   try {
     const { creatorId } = data;
@@ -129,7 +129,7 @@ function handleTournamentChat(data: any, tournamentId: string) {
  */
 async function sendTournamentUpdate(
   tournamentId: string,
-  tournamentService: TournamentService,
+  tournamentService: TournamentService
 ) {
   try {
     const tournament =
@@ -140,7 +140,9 @@ async function sendTournamentUpdate(
       type: "tournamentUpdate",
       tournament,
     });
-
+    console.log(
+      `トーナメント ${tournamentId} の状態を更新: ${JSON.stringify(tournament)}`
+    );
     broadcastToTournament(tournamentId, updateMessage);
   } catch (error) {
     console.error("トーナメント状態更新送信エラー:", error);

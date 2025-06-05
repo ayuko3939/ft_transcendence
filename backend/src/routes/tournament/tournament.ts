@@ -77,65 +77,6 @@ export default async function tournamentRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // トーナメントに参加
-  fastify.post<{
-    Params: { id: string };
-    Body: { userId: string };
-  }>("/:id/join", async (request, reply) => {
-    try {
-      const { id } = request.params;
-      const { userId } = request.body;
-
-      if (!userId) {
-        return reply.status(400).send({
-          error: "ユーザーIDが必要です",
-        });
-      }
-
-      await tournamentService.joinTournament(id, userId);
-      return { success: true, message: "トーナメントに参加しました" };
-    } catch (error) {
-      fastify.log.error(`トーナメント参加エラー: ${error}`);
-
-      // エラーメッセージをそのまま返す（TournamentServiceで適切なエラーメッセージを設定している）
-      return reply.status(400).send({
-        error:
-          error instanceof Error
-            ? error.message
-            : "トーナメント参加中にエラーが発生しました",
-      });
-    }
-  });
-
-  // トーナメントを開始
-  fastify.post<{
-    Params: { id: string };
-    Body: { creatorId: string };
-  }>("/:id/start", async (request, reply) => {
-    try {
-      const { id } = request.params;
-      const { creatorId } = request.body;
-
-      if (!creatorId) {
-        return reply.status(400).send({
-          error: "作成者IDが必要です",
-        });
-      }
-
-      await tournamentService.startTournament(id, creatorId);
-      return { success: true, message: "トーナメントを開始しました" };
-    } catch (error) {
-      fastify.log.error(`トーナメント開始エラー: ${error}`);
-
-      return reply.status(400).send({
-        error:
-          error instanceof Error
-            ? error.message
-            : "トーナメント開始中にエラーが発生しました",
-      });
-    }
-  });
-
   // マッチ詳細を取得
   fastify.get<{ Params: { matchId: string } }>(
     "/matches/:matchId",

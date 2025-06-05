@@ -1,4 +1,4 @@
-import { checkAndStartGame } from "./roomUtils";
+import { checkAndStartGame, checkAndStartTournamentGame } from "./roomUtils";
 import { saveGameResult } from "./saveGameResult";
 import { TournamentService } from "../tournament/TournamentService";
 
@@ -68,7 +68,7 @@ export class GameHandlerService {
 
       switch (data.type) {
         case "auth":
-          this.handleAuthMessage(data, playerSide);
+          this.handleAuthMessage(data, playerSide).catch(console.error);
           break;
         case "chat":
           if (this.room.state.gameType !== "local") {
@@ -92,33 +92,42 @@ export class GameHandlerService {
     }
   }
 
-  private handleAuthMessage(
+  private async handleAuthMessage(
     data: Extract<ClientMessage, { type: "auth" }>,
     playerSide: "left" | "right",
-  ): void {
+  ): Promise<void> {
     // ユーザーIDをGameRoomに保存
     this.room.userIds[playerSide] = data.sessionToken;
 
-    console.log(`プレイヤー ${playerSide} の認証完了:`, data.sessionToken);
+    console.log(`プレイヤー ${playerSide} 接続:`, data.sessionToken);
+
+    // トーナメントマッチの場合、プレイヤーが正しいか検証
+    if (this.room.tournamentMatchId) {
+      const isValidPlayer = await this.validateTournamentPlayer(
+        data.sessionToken,
+        playerSide
+      );
+      if (!isValidPlayer) {
+        const player = this.room.players[playerSide];
+        if (player) {
+          player.send(
+            JSON.stringify({
+              type: "error",
+              message: "このトーナメントマッチに参加する権限がありません",
+            })
+          );
+          player.close(1008, "Unauthorized for this tournament match");
+        }
+        return;
+      }
+    }
 
     const player = this.room.players[playerSide];
     if (!player) return;
 
-    // leftプレイヤーはsetup状態で初期化
-    if (playerSide === "left") {
-      this.room.state.status = "setup";
-      player.send(
-        JSON.stringify({
-          type: "init",
-          side: playerSide,
-          state: this.room.state,
-          roomId: this.room.id,
-        }),
-      );
-    } else {
-      // rightプレイヤーは待機状態で初期化
+    // トーナメントマッチの場合は設定をスキップ
+    if (this.room.tournamentMatchId) {
       this.room.state.status = "waiting";
-
       player.send(
         JSON.stringify({
           type: "init",
@@ -128,12 +137,40 @@ export class GameHandlerService {
         }),
       );
 
-      // トーナメントマッチの場合、試合状態を更新
-      if (this.room.tournamentMatchId) {
+      // 両プレイヤーが接続したら試合を開始
+      if (this.room.players.left && this.room.players.right) {
         this.updateTournamentMatchStatus("in_progress").catch(console.error);
+        // トーナメント専用のゲーム開始処理
+        checkAndStartTournamentGame(this.room);
       }
+    } else {
+      // 通常のゲーム
+      // leftプレイヤーはsetup状態で初期化
+      if (playerSide === "left") {
+        this.room.state.status = "setup";
+        player.send(
+          JSON.stringify({
+            type: "init",
+            side: playerSide,
+            state: this.room.state,
+            roomId: this.room.id,
+          }),
+        );
+      } else {
+        // rightプレイヤーは待機状態で初期化
+        this.room.state.status = "waiting";
 
-      checkAndStartGame(this.room);
+        player.send(
+          JSON.stringify({
+            type: "init",
+            side: playerSide,
+            state: this.room.state,
+            roomId: this.room.id,
+          }),
+        );
+
+        checkAndStartGame(this.room);
+      }
     }
   }
 
@@ -297,6 +334,48 @@ export class GameHandlerService {
       );
     } catch (error) {
       console.error("トーナメントマッチ状態更新エラー:", error);
+    }
+  }
+
+  /**
+   * トーナメントプレイヤーの検証
+   */
+  private async validateTournamentPlayer(
+    userId: string,
+    playerSide: "left" | "right"
+  ): Promise<boolean> {
+    if (!this.room.tournamentMatchId) return false;
+
+    try {
+      const tournamentService = new TournamentService();
+      const matchDetails = await tournamentService.getMatchDetails(
+        this.room.tournamentMatchId
+      );
+
+      if (!matchDetails) return false;
+
+      // プレイヤーがマッチの参加者であることを確認
+      const isPlayer1 = matchDetails.player1Id === userId;
+      const isPlayer2 = matchDetails.player2Id === userId;
+
+      if (!isPlayer1 && !isPlayer2) {
+        console.log(
+          `ユーザー ${userId} はマッチ ${this.room.tournamentMatchId} の参加者ではありません`
+        );
+        return false;
+      }
+
+      // 既に両プレイヤーが接続している場合、重複接続を防ぐ
+      const oppositeSlot = playerSide === "left" ? "right" : "left";
+      if (this.room.userIds[oppositeSlot] === userId) {
+        console.log(`ユーザー ${userId} は既に接続しています`);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("トーナメントプレイヤー検証エラー:", error);
+      return false;
     }
   }
 }

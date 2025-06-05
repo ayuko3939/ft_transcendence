@@ -5,8 +5,28 @@ import { TournamentLobby } from "./components/TournamentLobby";
 import { TournamentResult } from "./components/TournamentResult";
 import { TournamentProvider, useTournament } from "./context/TournamentContext";
 import styles from "./tournament.module.css";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function TournamentPage() {
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return (
+    <div className="flex min-h-screen items-center justify-center text-white">
+      <p>Loading...</p>
+    </div>
+    );
+  }
+
   return (
     <TournamentProvider>
       <TournamentContent />

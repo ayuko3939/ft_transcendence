@@ -28,7 +28,6 @@ interface TournamentMatchInfo {
   player1Name: string;
   player2Name: string;
   status: "pending" | "in_progress" | "completed";
-  gameRoomId?: string;
 }
 
 interface TournamentPongGameProps {
@@ -88,23 +87,29 @@ const TournamentPongGame = ({
   // WebSocket接続の初期化
   useEffect(() => {
     // セッション情報がない場合は接続しない
-    if (!session?.user?.id || !matchInfo.gameRoomId) {
+    if (!session?.user?.id || !matchInfo.id) {
       return;
     }
 
     const socketClient = new PongSocketClient({
       onInit: (side, state) => {
+        console.log('[Tournament] onInit called:', { side, state });
         setPlayerSide(side);
         setGameState(state);
         onGameReady();
       },
-      onGameState: setGameState,
+      onGameState: (state) => {
+        console.log('[Tournament] onGameState:', state);
+        setGameState(state);
+      },
       onChatMessages: setChatMessages,
       onCountdown: (count) => {
+        console.log('[Tournament] onCountdown:', count);
         setCountdown(count);
         setGameState((prev) => ({ ...prev, status: "countdown" }));
       },
       onGameStart: (state) => {
+        console.log('[Tournament] onGameStart:', state);
         setCountdown(null);
         setGameState(state);
       },
@@ -117,21 +122,24 @@ const TournamentPongGame = ({
         }));
       },
       onWaitingForPlayer: () => {
+        console.log('[Tournament] onWaitingForPlayer');
         setGameState((prev) => ({ ...prev, status: "waiting" }));
       },
     });
 
     socketClientRef.current = socketClient;
-    // トーナメント専用のWebSocketエンドポイントを使用
+    // トーナメント専用のWebSocketエンドポイントを使用（matchIdを使用）
+    const wsUrl = `/ws/tournament-match/${matchInfo.id}`;
+    console.log('[Tournament] Connecting to WebSocket:', wsUrl, 'with userId:', session.user.id);
     socketClient.connect(
-      `/ws/tournament-match/${matchInfo.gameRoomId}`,
+      wsUrl,
       session.user.id,
     );
 
     return () => {
       socketClient.disconnect();
     };
-  }, [session?.user?.id, matchInfo.gameRoomId, onGameReady]);
+  }, [session?.user?.id, matchInfo.id, onGameReady]);
 
   // ゲームコントローラーの初期化と状態同期
   useEffect(() => {

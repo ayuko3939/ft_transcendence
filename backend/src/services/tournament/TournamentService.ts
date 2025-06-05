@@ -228,11 +228,7 @@ export class TournamentService {
     // 試合をデータベースに保存
     if (matches.length > 0) {
       await db.insert(tournamentMatches).values(matches);
-
-      // 各試合用のゲームルームを作成
-      for (const match of matches) {
-        this.createMatchGameRoom(tournamentId, match.id);
-      }
+      // ゲームルームの作成は実際にプレイヤーが接続した時に行う
     }
   }
 
@@ -569,9 +565,6 @@ export class TournamentService {
         .limit(1),
     ]);
 
-    // ゲームルームIDを取得
-    const gameRoomId = await this.getMatchGameRoomId(matchId);
-
     return {
       id: match.id,
       tournamentId: match.tournamentId,
@@ -582,7 +575,6 @@ export class TournamentService {
       player1Name: player1[0]?.name || "Unknown Player",
       player2Name: player2[0]?.name || "Unknown Player",
       status: match.status as "pending" | "in_progress" | "completed",
-      gameRoomId: gameRoomId ?? undefined,
     };
   }
 
