@@ -581,7 +581,9 @@ export default function TournamentDetailPage() {
                 })}
               </div>
             ) : (
-              <p className="text-gray-400">試合情報を読み込み中...</p>
+                <p className="py-4 text-center text-lg font-semibold text-cyan-400">
+                すべての試合が終了しました
+                </p>
             )}
           </Card>
         )}
