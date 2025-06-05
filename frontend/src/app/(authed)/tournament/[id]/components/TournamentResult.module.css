@@ -67,6 +67,45 @@
   margin-bottom: 40px;
 }
 
+.winnerImageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  animation: bounce 2s infinite;
+}
+
+.winnerImage {
+  border-radius: 50%;
+  border: 3px solid var(--cyber-primary);
+  box-shadow:
+    0 0 20px rgba(0, 255, 255, 0.5),
+    inset 0 0 10px rgba(0, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  animation: profileGlow 3s infinite alternate;
+}
+
+.winnerImage:hover {
+  transform: scale(1.1);
+  box-shadow:
+    0 0 30px rgba(0, 255, 255, 0.8),
+    inset 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+@keyframes profileGlow {
+  0% {
+    box-shadow:
+      0 0 20px rgba(0, 255, 255, 0.5),
+      inset 0 0 10px rgba(0, 255, 255, 0.2);
+  }
+  100% {
+    box-shadow:
+      0 0 30px rgba(0, 255, 255, 0.8),
+      inset 0 0 15px rgba(0, 255, 255, 0.3);
+  }
+}
+
 .trophy {
   font-size: 4rem;
   margin-bottom: 20px;
@@ -142,6 +181,25 @@
   border-radius: 6px;
   background-color: rgba(0, 30, 60, 0.3);
   animation: pulse 2s infinite;
+}
+
+.loading {
+  color: var(--cyber-primary);
+  font-size: 1.1rem;
+  padding: 20px;
+  text-align: center;
+  animation: pulse 1.5s infinite;
+}
+
+.error {
+  color: #ef4444;
+  font-size: 1rem;
+  padding: 15px;
+  border: 1px solid #ef4444;
+  border-radius: 6px;
+  background-color: rgba(239, 68, 68, 0.1);
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 /* アニメーション */

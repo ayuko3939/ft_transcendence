@@ -10,12 +10,6 @@ import { Button } from "@/(authed)/tournament/components/button";
 import { Card } from "@/(authed)/tournament/components/card";
 import styles from "@/(authed)/tournament/tournament.module.css";
 
-const dummyWinner = {
-  id: 1,
-  name: "プレイヤー1",
-  score: 5,
-};
-
 export default function TournamentDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -600,7 +594,7 @@ export default function TournamentDetailPage() {
       </div>
       <TournamentResult
         show={!!(tournament && tournament.status === "completed" && showResultModal)}
-        winner={dummyWinner}
+        winnerId={tournament.winnerId || ""}
         onClose={() => setShowResultModal(false)}
       />
     </div>
