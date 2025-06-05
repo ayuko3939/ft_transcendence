@@ -64,7 +64,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.rewrite(tournamentWsUrl);
   }
 
-  if (req.nextUrl.pathname.startsWith("/ws/game/")) {
+  if (req.nextUrl.pathname.startsWith("/ws/game")) {
     const onlineWsUrl = joinWsUrl(backendWsUrl, "game");
     console.log("オンライン対戦用WebSocketプロキシ:", onlineWsUrl);
     return NextResponse.rewrite(onlineWsUrl);
