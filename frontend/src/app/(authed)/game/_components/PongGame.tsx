@@ -87,7 +87,7 @@ const PongGame = () => {
       onInit: (side, state) => {
         setPlayerSide(side);
         setGameState(state);
-        clientLogInfo("ゲーム接続完了", { userId, playerSide: side });
+        clientLogInfo("ゲーム接続完了", { userId, playerSide: side as string});
       },
       onGameState: setGameState,
       onChatMessages: setChatMessages,
@@ -218,8 +218,8 @@ const PongGame = () => {
       <GameChat
         show={true}
         messages={chatMessages}
-        playerSide={playerSide}
         socketClient={socketClientRef.current}
+        senderName={session?.user?.name || "undefined"}
       />
 
       <ConfirmDialog

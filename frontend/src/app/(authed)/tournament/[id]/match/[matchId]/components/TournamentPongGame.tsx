@@ -93,23 +93,23 @@ const TournamentPongGame = ({
 
     const socketClient = new PongSocketClient({
       onInit: (side, state) => {
-        console.log('[Tournament] onInit called:', { side, state });
+        console.log("[Tournament] onInit called:", { side, state });
         setPlayerSide(side);
         setGameState(state);
         onGameReady();
       },
       onGameState: (state) => {
-        console.log('[Tournament] onGameState:', state);
+        console.log("[Tournament] onGameState:", state);
         setGameState(state);
       },
       onChatMessages: setChatMessages,
       onCountdown: (count) => {
-        console.log('[Tournament] onCountdown:', count);
+        console.log("[Tournament] onCountdown:", count);
         setCountdown(count);
         setGameState((prev) => ({ ...prev, status: "countdown" }));
       },
       onGameStart: (state) => {
-        console.log('[Tournament] onGameStart:', state);
+        console.log("[Tournament] onGameStart:", state);
         setCountdown(null);
         setGameState(state);
       },
@@ -122,7 +122,7 @@ const TournamentPongGame = ({
         }));
       },
       onWaitingForPlayer: () => {
-        console.log('[Tournament] onWaitingForPlayer');
+        console.log("[Tournament] onWaitingForPlayer");
         setGameState((prev) => ({ ...prev, status: "waiting" }));
       },
     });
@@ -130,11 +130,13 @@ const TournamentPongGame = ({
     socketClientRef.current = socketClient;
     // トーナメント専用のWebSocketエンドポイントを使用（matchIdを使用）
     const wsUrl = `/ws/tournament-match/${matchInfo.id}`;
-    console.log('[Tournament] Connecting to WebSocket:', wsUrl, 'with userId:', session.user.id);
-    socketClient.connect(
+    console.log(
+      "[Tournament] Connecting to WebSocket:",
       wsUrl,
+      "with userId:",
       session.user.id,
     );
+    socketClient.connect(wsUrl, session.user.id);
 
     return () => {
       socketClient.disconnect();
@@ -212,8 +214,8 @@ const TournamentPongGame = ({
       <GameChat
         show={true}
         messages={chatMessages}
-        playerSide={playerSide}
         socketClient={socketClientRef.current}
+        senderName={session?.user?.name || "undefined"}
       />
 
       <ConfirmDialog
