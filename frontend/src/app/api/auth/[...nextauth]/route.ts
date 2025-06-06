@@ -64,6 +64,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = user.id;
         session.user.provider = (await getProvider(user.id)) ?? "credentials";
         await updateLastActivity(user.id);
+        session.user.displayName = user.displayName ?? user.name ?? "";
       }
       return session;
     },
