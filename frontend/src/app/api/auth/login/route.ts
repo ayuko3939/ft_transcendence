@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { authenticateUser } from "@/api/auth/users";
-import { logApiRequest, logApiError } from "@/lib/logger";
+import { logApiError, logApiRequest } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,7 +24,11 @@ export async function POST(req: NextRequest) {
     logApiRequest(req.method, req.nextUrl.pathname, 200, user.id);
     return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
-    logApiError(req.method, req.nextUrl.pathname, error instanceof Error ? error : new Error(String(error)));
+    logApiError(
+      req.method,
+      req.nextUrl.pathname,
+      error instanceof Error ? error : new Error(String(error)),
+    );
     console.error("ログインエラー:", error);
     return NextResponse.json(
       { error: "ログイン処理中にエラーが発生しました" },

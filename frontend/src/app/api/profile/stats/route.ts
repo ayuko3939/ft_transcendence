@@ -2,10 +2,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { db } from "@/api/db";
+import { logApiError, logApiRequest } from "@/lib/logger";
 import { players } from "@ft-transcendence/shared";
 import { count, eq, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
-import { logApiRequest, logApiError } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -68,7 +68,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    logApiRequest(request.method, request.nextUrl.pathname, 200, session.user.id);
+    logApiRequest(
+      request.method,
+      request.nextUrl.pathname,
+      200,
+      session.user.id,
+    );
     return NextResponse.json({
       totalGames,
       wins,
@@ -78,7 +83,11 @@ export async function GET(request: NextRequest) {
       longestStreak,
     });
   } catch (error) {
-    logApiError(request.method, request.nextUrl.pathname, error instanceof Error ? error : new Error(String(error)));
+    logApiError(
+      request.method,
+      request.nextUrl.pathname,
+      error instanceof Error ? error : new Error(String(error)),
+    );
     console.error("統計情報取得エラー:", error);
     return NextResponse.json(
       { error: "統計情報の取得中にエラーが発生しました" },

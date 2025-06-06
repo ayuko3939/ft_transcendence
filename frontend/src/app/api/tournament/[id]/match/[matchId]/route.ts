@@ -16,7 +16,7 @@ export async function GET(
       );
     }
 
-    const { id: tournamentId, matchId } = await params;
+    const { matchId } = await params;
 
     // バックエンドAPIを呼び出してマッチ詳細を取得
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001";

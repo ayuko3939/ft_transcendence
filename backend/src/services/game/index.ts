@@ -15,7 +15,7 @@ export const gameRooms = new Map<string, GameRoom>();
 export function handleGameConnection(
   connection: WebSocket,
   req: FastifyRequest,
-  fastify: FastifyInstance
+  fastify: FastifyInstance,
 ) {
   const { roomId, room } = findAvailableRoom(gameRooms);
   assignPlayerToRoom(connection, req, fastify, room, roomId);
@@ -24,7 +24,7 @@ export function handleGameConnection(
 export function handleGameConnectionWithRoomId(
   connection: WebSocket,
   req: FastifyRequest,
-  fastify: FastifyInstance
+  fastify: FastifyInstance,
 ) {
   const { roomId } = req.params as { roomId: string };
   if (!roomId) {
@@ -47,7 +47,7 @@ export function handleGameConnectionWithRoomId(
 export async function handleTournamentMatchConnection(
   connection: WebSocket,
   req: FastifyRequest,
-  fastify: FastifyInstance
+  fastify: FastifyInstance,
 ) {
   const { matchId } = req.params as { matchId: string };
   console.log(`[Tournament] WebSocket接続要求: matchId=${matchId}`);
@@ -60,7 +60,7 @@ export async function handleTournamentMatchConnection(
   const { TournamentService } = await import("../tournament/TournamentService");
   const tournamentService = new TournamentService();
   const matchDetails = await tournamentService.getMatchDetails(matchId);
-  
+
   if (!matchDetails) {
     connection.close(1003, "Tournament match not found");
     return;
@@ -89,7 +89,7 @@ function assignPlayerToRoom(
   req: FastifyRequest,
   fastify: FastifyInstance,
   room: GameRoom,
-  roomId: string
+  roomId: string,
 ) {
   let playerSide: PlayerSide;
 
@@ -108,10 +108,10 @@ function assignPlayerToRoom(
 
   // トーナメントマッチの場合、最初のメッセージでプレイヤー認証を待つ
   let isAuthenticated = room.state.gameType !== "tournament";
-  
+
   connection.on("message", (message: Buffer) => {
     gameHandlerService.handlePlayerMessage(message, playerSide);
-    
+
     // トーナメントの場合、authメッセージ後に認証フラグを立てる
     if (!isAuthenticated) {
       try {

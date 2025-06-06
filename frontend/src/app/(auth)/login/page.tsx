@@ -3,8 +3,12 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import {
+  clientLogError,
+  clientLogInfo,
+  logUserAction,
+} from "@/lib/clientLogger";
 import { signIn, useSession } from "next-auth/react";
-import { clientLogInfo, clientLogError, logUserAction } from "@/lib/clientLogger";
 
 import GoogleButton from "./components/GoogleButton/GoogleButton";
 import ToastRegisterSuccess from "./components/toast-register-success";
@@ -68,7 +72,7 @@ function LoginContent() {
         password,
         redirect: false,
       });
-      
+
       if (result?.error) {
         setError("メールアドレスまたはパスワードが間違っています。");
         clientLogError("ログイン失敗: 認証エラー", { method: "credentials" });
@@ -84,7 +88,7 @@ function LoginContent() {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div>
       <ToastRegisterSuccess isRegistered={isRegistered} />

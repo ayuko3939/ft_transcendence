@@ -4,16 +4,16 @@ import type { TournamentWithDetails } from "@ft-transcendence/shared";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { TournamentResult } from "@/(authed)/tournament/[id]/components/TournamentResult";
-import { useSession } from "next-auth/react";
-
 import { Button } from "@/(authed)/tournament/components/button";
 import { Card } from "@/(authed)/tournament/components/card";
+import { JoinTournamentModal } from "@/(authed)/tournament/components/JoinTournamentModal";
 import styles from "@/(authed)/tournament/tournament.module.css";
+import { useSession } from "next-auth/react";
 
 export default function TournamentDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const [tournament, setTournament] = useState<TournamentWithDetails | null>(
     null,
   );
@@ -22,6 +22,7 @@ export default function TournamentDetailPage() {
   const [joining, setJoining] = useState(false);
   const [starting, setStarting] = useState(false);
   const [showResultModal, setShowResultModal] = useState(true);
+  const [showJoinModal, setShowJoinModal] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
 
   // チャット機能用の状態
@@ -113,7 +114,12 @@ export default function TournamentDetailPage() {
     };
   }, [status, tournamentId, router]);
 
-  const handleTournamentWebSocketMessage = (data: any) => {
+  const handleTournamentWebSocketMessage = (data: {
+    type: string;
+    tournament?: TournamentWithDetails;
+    message?: string;
+    name?: string;
+  }) => {
     switch (data.type) {
       case "tournamentUpdate":
         // トーナメント情報の更新
@@ -127,8 +133,8 @@ export default function TournamentDetailPage() {
           ...prev,
           {
             id: crypto.randomUUID(),
-            text: data.message,
-            name: data.name,
+            text: data.message || "",
+            name: data.name || "",
           },
         ]);
         break;
@@ -137,11 +143,17 @@ export default function TournamentDetailPage() {
     }
   };
 
-  const handleJoinTournament = async () => {
+  const handleJoinTournament = () => {
+    setShowJoinModal(true);
+  };
+
+  const handleJoinTournamentAfterDisplayNameUpdate = async () => {
     if (!session?.user?.id || !tournament) return;
 
     try {
       setJoining(true);
+      setShowJoinModal(false); // モーダルを閉じる
+
       // WebSocket経由で参加通知を送信
       if (wsRef.current) {
         const joinData = {
@@ -150,6 +162,7 @@ export default function TournamentDetailPage() {
         };
         wsRef.current.send(JSON.stringify(joinData));
       }
+      await update();
     } catch (error) {
       console.error("トーナメント参加エラー:", error);
       alert(
@@ -193,7 +206,7 @@ export default function TournamentDetailPage() {
       // WebSocket経由でチャットメッセージを送信
       const chatData = {
         type: "chat",
-        name: session.user.name,
+        name: session.user.displayName,
         message: newMessage,
       };
 
@@ -298,7 +311,7 @@ export default function TournamentDetailPage() {
       </div>
     );
   }
-
+  console.log("セッション:", session);
   return (
     <div className="container mx-auto min-h-screen pt-18 pb-13">
       <div className={styles.tournamentContainer}>
@@ -593,9 +606,18 @@ export default function TournamentDetailPage() {
         )}
       </div>
       <TournamentResult
-        show={!!(tournament && tournament.status === "completed" && showResultModal)}
+        show={
+          !!(tournament && tournament.status === "completed" && showResultModal)
+        }
         winnerId={tournament.winnerId || ""}
         onClose={() => setShowResultModal(false)}
+      />
+      <JoinTournamentModal
+        show={showJoinModal}
+        initialDisplayname={session?.user?.displayName || ""}
+        onClose={() => setShowJoinModal(false)}
+        onJoinSuccess={handleJoinTournamentAfterDisplayNameUpdate}
+        tournamentId={tournamentId}
       />
     </div>
   );

@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
 import { logUserAction } from "@/lib/clientLogger";
+import { signOut, useSession } from "next-auth/react";
 
 import PasswordChangeModal from "./PasswordChangeModal";
 

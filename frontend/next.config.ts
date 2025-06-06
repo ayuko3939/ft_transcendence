@@ -1,8 +1,10 @@
-import type { NextConfig } from "next";
-import { dirname } from 'path';
 import { mkdirSync } from "node:fs";
+import { dirname } from "path";
+import type { NextConfig } from "next";
 
-mkdirSync(dirname(process.env.LOG_FILE_PATH || '/logs/frontend.log'), { recursive: true });
+mkdirSync(dirname(process.env.LOG_FILE_PATH || "/logs/frontend.log"), {
+  recursive: true,
+});
 
 const nextConfig: NextConfig = {
   webpack(config) {

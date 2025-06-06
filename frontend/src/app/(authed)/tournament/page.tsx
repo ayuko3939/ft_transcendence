@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import { TournamentLobby } from "./components/TournamentLobby";
-
 import styles from "./tournament.module.css";
 
 export default function TournamentPage() {
@@ -26,9 +25,7 @@ export default function TournamentPage() {
     );
   }
 
-  return (
-      <TournamentContent />
-  );
+  return <TournamentContent />;
 }
 
 function TournamentContent() {

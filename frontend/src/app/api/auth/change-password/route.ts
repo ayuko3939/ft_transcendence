@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { hashPassword, verifyPassword } from "@/api/auth/utils";
 import { client } from "@/api/db";
+import { logApiError, logApiRequest } from "@/lib/logger";
 import { userPassword } from "@ft-transcendence/shared";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 import { getServerSession } from "next-auth";
-import { logApiRequest, logApiError } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -96,7 +96,11 @@ export async function POST(req: NextRequest) {
       { status: 200 },
     );
   } catch (error) {
-    logApiError(req.method, req.nextUrl.pathname, error instanceof Error ? error : new Error(String(error)));
+    logApiError(
+      req.method,
+      req.nextUrl.pathname,
+      error instanceof Error ? error : new Error(String(error)),
+    );
     console.error("パスワード変更エラー:", error);
     return NextResponse.json(
       { error: "パスワード変更中にエラーが発生しました" },

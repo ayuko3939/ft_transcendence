@@ -2,10 +2,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { db } from "@/api/db";
+import { logApiError, logApiRequest } from "@/lib/logger";
 import { games, players, user } from "@ft-transcendence/shared";
 import { and, desc, eq, ne } from "drizzle-orm";
 import { getServerSession } from "next-auth";
-import { logApiRequest, logApiError } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         const opponentInfo = await db
           .select({
             score: players.score,
-            name: user.name,
+            name: user.displayName,
           })
           .from(players)
           .innerJoin(user, eq(players.userId, user.id))
@@ -80,7 +80,12 @@ export async function GET(request: NextRequest) {
       }),
     );
 
-    logApiRequest(request.method, request.nextUrl.pathname, 200, session.user.id);
+    logApiRequest(
+      request.method,
+      request.nextUrl.pathname,
+      200,
+      session.user.id,
+    );
     return NextResponse.json({
       matches: matchHistory,
       page,
@@ -88,7 +93,11 @@ export async function GET(request: NextRequest) {
       hasMore: matchHistory.length === limit,
     });
   } catch (error) {
-    logApiError(request.method, request.nextUrl.pathname, error instanceof Error ? error : new Error(String(error)));
+    logApiError(
+      request.method,
+      request.nextUrl.pathname,
+      error instanceof Error ? error : new Error(String(error)),
+    );
     console.error("対戦履歴取得エラー:", error);
     return NextResponse.json(
       { error: "対戦履歴の取得中にエラーが発生しました" },

@@ -4,8 +4,12 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/api/auth/api-client";
+import {
+  clientLogError,
+  clientLogInfo,
+  logUserAction,
+} from "@/lib/clientLogger";
 import { useSession } from "next-auth/react";
-import { clientLogInfo, clientLogError, logUserAction } from "@/lib/clientLogger";
 
 import styles from "./signup.module.css";
 
@@ -84,7 +88,9 @@ function SignupContent() {
       );
       if (response.error) {
         setError(response.error);
-        clientLogError("ユーザー登録失敗: API エラー", { error: response.error });
+        clientLogError("ユーザー登録失敗: API エラー", {
+          error: response.error,
+        });
         return;
       }
       logUserAction("ユーザー登録成功", email);

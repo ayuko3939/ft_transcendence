@@ -139,14 +139,29 @@ export async function authenticateUser(
   return hituser;
 }
 
-export async function getProvider(userId: string): Promise<string | null> {
-  const accounts = await db
-    .select()
-    .from(account)
-    .where(eq(account.userId, userId))
+export async function getUserProviderAndDisplayName(userId: string): Promise<{
+  provider: string | null;
+  displayName: string | null;
+}> {
+  const result = await db
+    .select({
+      provider: account.provider,
+      displayName: user.displayName,
+    })
+    .from(user)
+    .leftJoin(account, eq(user.id, account.userId))
+    .where(eq(user.id, userId))
     .limit(1);
-  if (accounts.length === 0) {
-    return null;
+
+  if (result.length === 0) {
+    return {
+      provider: null,
+      displayName: null,
+    };
   }
-  return accounts[0].provider || null;
+
+  return {
+    provider: result[0].provider || null,
+    displayName: result[0].displayName || null,
+  };
 }

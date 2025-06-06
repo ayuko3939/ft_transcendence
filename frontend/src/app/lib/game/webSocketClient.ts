@@ -58,8 +58,8 @@ export class PongSocketClient {
     this.ws.onclose = (event) => {
       if (event.code !== 1000) {
         console.log("WebSocket切断されました");
-        clientLogWarn("WebSocket接続が切断されました", { 
-          code: event.code.toString() 
+        clientLogWarn("WebSocket接続が切断されました", {
+          code: event.code.toString(),
         });
       }
     };
