@@ -14,6 +14,7 @@ export const CreateTournamentModal = ({
   onTournamentCreated,
 }: CreateTournamentModalProps) => {
   const [name, setName] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [maxParticipants, setMaxParticipants] = useState(4);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -26,6 +27,25 @@ export const CreateTournamentModal = ({
     setIsLoading(true);
 
     try {
+      // まずディスプレイネームを更新
+      const displayNameResponse = await fetch("/api/auth/change-displayname", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          displayName: displayName.trim(),
+        }),
+      });
+
+      if (!displayNameResponse.ok) {
+        const displayNameData = await displayNameResponse.json();
+        throw new Error(
+          displayNameData.error || "ディスプレイネームの更新に失敗しました",
+        );
+      }
+
+      // 次にトーナメントを作成
       const response = await fetch("/api/tournament", {
         method: "POST",
         headers: {
@@ -45,6 +65,7 @@ export const CreateTournamentModal = ({
 
       onTournamentCreated(data.tournament);
       setName("");
+      setDisplayName("");
       setMaxParticipants(4);
       onClose();
     } catch (error) {
@@ -61,6 +82,7 @@ export const CreateTournamentModal = ({
 
   const handleClose = () => {
     setName("");
+    setDisplayName("");
     setMaxParticipants(4);
     setError("");
     onClose();
@@ -90,6 +112,23 @@ export const CreateTournamentModal = ({
               onChange={(e) => setName(e.target.value)}
               className={styles.formInput}
               placeholder="トーナメント名を入力"
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="displayName" className={styles.formLabel}>
+              ニックネーム
+            </label>
+            <input
+              id="displayName"
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className={styles.formInput}
+              placeholder="トーナメント内でのみ有効な名前を入力"
+              maxLength={17}
               required
               disabled={isLoading}
             />
