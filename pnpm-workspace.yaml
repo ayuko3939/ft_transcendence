@@ -1,6 +1,6 @@
 packages:
-  - 'shared'
-  - 'database'
-  - 'frontend'
-  - 'backend'
-  - 'cli'
+  - shared
+  - database
+  - frontend
+  - backend
+  - cli

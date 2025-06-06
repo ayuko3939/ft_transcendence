@@ -13,9 +13,10 @@ import type { UserSession, CLIConfig, AuthCredentials } from "./types";
 class PongCLI {
   private config: CLIConfig;
   private authClient: AuthClient;
-  private session: UserSession | null = null;
+  private userSession: UserSession | null = null;
   private gameClient: GameClient | null = null;
   private gameUI: GameUI | null = null;
+  private gameEndTimer: NodeJS.Timeout | null = null;
 
   constructor(config: CLIConfig) {
     this.config = config;
@@ -26,32 +27,33 @@ class PongCLI {
    * CLI アプリケーションのメインエントリーポイント
    */
   public async run(): Promise<void> {
+    this.userSession = null;
     try {
-      console.log(colors.bold(colors.cyan("🏓 Pong CLI Game へようこそ！")));
-      console.log(colors.gray(`サーバー: ${this.config.serverUrl}`));
-      console.log();
-
-      // ログイン処理
-      await this.login();
-
-      if (!this.session) {
-        console.log(colors.red("❌ ログインに失敗しました"));
-        return;
-      }
-
-      console.log(colors.green(`✅ ログイン成功: ${this.session.username}`));
-      console.log();
-
       // メインメニュー
       while (true) {
+        process.stdout.write("\x1b[2J\x1b[0f"); // ANSI escape sequences
+        console.clear();
+        console.log(colors.bold(colors.cyan("🏓 Pong CLI Game へようこそ！")));
+        console.log(colors.gray(`サーバー: ${this.config.serverUrl}`));
+        console.log();
+
+        if (!this.userSession) {
+          this.userSession = await this.login();
+          if (!this.userSession) {
+            console.log(colors.red("❌ ログインに失敗しました"));
+            return;
+          }
+          console.log(
+            colors.green(`✅ ログイン成功: ${this.userSession.username}`)
+          );
+        }
+        console.log();
+
         const action = await this.showMainMenu();
         switch (action) {
           case "random":
             await this.joinRandomGame();
             break;
-          case "logout":
-            await this.logout();
-            return;
           case "exit":
             await this.cleanup();
             return;
@@ -66,12 +68,13 @@ class PongCLI {
   /**
    * ログイン処理
    */
-  private async login(): Promise<void> {
+  private async login(): Promise<UserSession> {
     const credentials = await this.getCredentials();
 
     try {
       console.log(colors.yellow("🔐 認証中..."));
-      this.session = await this.authClient.login(credentials);
+      const fetchedSession = await this.authClient.login(credentials);
+      return fetchedSession;
     } catch (error) {
       throw new Error(`認証エラー: ${error}`);
     }
@@ -114,19 +117,26 @@ class PongCLI {
    * メインメニュー
    */
   private async showMainMenu(): Promise<string> {
-    const answer = await inquirer.prompt([
-      {
-        type: "list",
-        name: "action",
-        message: "何をしますか？",
-        choices: [
-          { name: "🎮 ランダムマッチに参加", value: "random" },
-          { name: "🚪 ログアウト", value: "logout" },
-          { name: "❌ 終了", value: "exit" },
-        ],
-      },
-    ]);
-    return answer.action;
+    try {
+      const answer = await inquirer.prompt([
+        {
+          type: "list",
+          name: "action",
+          message: "何をしますか？",
+          choices: [
+            { name: "🎮 ランダムマッチに参加", value: "random" },
+            { name: "❌ 終了", value: "exit" },
+          ],
+        },
+      ]);
+      return answer.action;
+    } catch (error: any) {
+      // ExitPromptErrorの場合は正常終了として扱う
+      if (error?.name === "ExitPromptError") {
+        return "exit";
+      }
+      throw error;
+    }
   }
 
   /**
@@ -141,13 +151,13 @@ class PongCLI {
    * ゲームを開始
    */
   private async startGame(roomId?: string): Promise<void> {
-    if (!this.session) {
+    if (!this.userSession) {
       console.log(colors.red("❌ セッションが無効です"));
       return;
     }
 
     // session の型安全性を確保
-    const session = this.session;
+    const session = this.userSession;
 
     // ゲーム終了を待機するためのPromise
     return new Promise<void>((resolve, reject) => {
@@ -175,8 +185,9 @@ class PongCLI {
           },
           onGameOver: (result) => {
             this.gameUI?.onGameOver(result);
-            // 5秒後にゲーム終了処理とPromise解決
-            setTimeout(() => {
+            // 5秒後にゲーム終了処理とPromise解決（タイマー管理）
+            this.gameEndTimer = setTimeout(() => {
+              this.clearGameEndTimer();
               this.endGame();
               resolve(); // ここでPromiseを解決
             }, 5000);
@@ -186,12 +197,14 @@ class PongCLI {
           },
           onError: (error) => {
             this.gameUI?.showError(error);
+            this.clearGameEndTimer();
             setTimeout(() => {
               this.endGame();
               reject(new Error(error)); // エラーの場合はreject
             }, 2000);
           },
           onDisconnected: () => {
+            this.clearGameEndTimer();
             setTimeout(() => {
               this.endGame();
               resolve(); // 切断時もPromiseを解決
@@ -205,6 +218,7 @@ class PongCLI {
         };
 
         this.gameUI.onQuit = () => {
+          this.clearGameEndTimer();
           this.endGame();
           resolve(); // 手動終了時もPromiseを解決
         };
@@ -222,10 +236,11 @@ class PongCLI {
       } catch (error) {
         console.error(
           colors.red("🚨 接続に失敗しました:"),
-          (error as Error).message,
+          (error as Error).message
         );
 
         // エラーメッセージを表示して待機
+        this.clearGameEndTimer();
         setTimeout(() => {
           this.endGame();
           reject(error);
@@ -233,36 +248,86 @@ class PongCLI {
       }
     });
   }
+
+  /**
+   * ゲーム終了タイマーをクリア
+   */
+  private clearGameEndTimer(): void {
+    if (this.gameEndTimer) {
+      clearTimeout(this.gameEndTimer);
+      this.gameEndTimer = null;
+    }
+  }
+
   /**
    * ゲームを終了してメニューに戻る
    */
   private endGame(): void {
+    // タイマーをクリア（念のため）
+    this.clearGameEndTimer();
+
+    // GameClientを安全に切断
     if (this.gameClient) {
-      this.gameClient.disconnect();
+      try {
+        this.gameClient.disconnect();
+      } catch (error) {
+        console.error("GameClient disconnect error:", error);
+      }
       this.gameClient = null;
     }
 
+    // GameUIを安全に破棄
     if (this.gameUI) {
-      this.gameUI.destroy();
+      try {
+        this.gameUI.destroy();
+      } catch (error) {
+        console.error("GameUI destroy error:", error);
+      }
       this.gameUI = null;
     }
 
-    console.clear();
+    // ターミナルの状態を完全にリセット
+    try {
+      this.resetTerminal();
+    } catch (error) {
+      console.error("Terminal reset error:", error);
+    }
+    
     console.log(colors.cyan("🏓 メインメニューに戻ります..."));
   }
 
   /**
-   * ログアウト
+   * ターミナル状態をリセット
    */
-  private async logout(): Promise<void> {
-    if (this.session) {
-      try {
-        await this.authClient.logout(this.session.sessionToken);
-        console.log(colors.green("✅ ログアウトしました"));
-      } catch (error) {
-        console.log(colors.yellow("⚠️  ログアウト時にエラーが発生しました"));
+  private resetTerminal(): void {
+    try {
+      // 標準入力を通常モードに戻す
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false);
       }
-      this.session = null;
+    } catch (error) {
+      console.error("Failed to reset raw mode:", error);
+    }
+
+    try {
+      // カーソルを表示
+      process.stdout.write('\x1b[?25h');
+    } catch (error) {
+      console.error("Failed to show cursor:", error);
+    }
+
+    try {
+      // 通常のスクリーンバッファに戻る
+      process.stdout.write('\x1b[?1049l');
+    } catch (error) {
+      console.error("Failed to restore screen buffer:", error);
+    }
+
+    try {
+      // 画面をクリア
+      console.clear();
+    } catch (error) {
+      console.error("Failed to clear screen:", error);
     }
   }
 
@@ -270,8 +335,17 @@ class PongCLI {
    * リソースをクリーンアップ
    */
   private async cleanup(): Promise<void> {
-    this.endGame();
-    await this.logout();
+    try {
+      this.endGame();
+    } catch (error) {
+      console.error("Error during game cleanup:", error);
+    }
+    try {
+      this.resetTerminal();
+    } catch (error) {
+      console.error("Error during terminal reset:", error);
+    }
+
     console.log(colors.cyan("👋 ご利用ありがとうございました！"));
   }
 }
@@ -351,7 +425,7 @@ process.on("unhandledRejection", (reason, promise) => {
     colors.red("🚨 Unhandled Rejection at:"),
     promise,
     colors.red("reason:"),
-    reason,
+    reason
   );
   process.exit(1);
 });
@@ -367,6 +441,16 @@ process.on("uncaughtException", (error) => {
 
 // Ctrl+C での正常終了
 process.on("SIGINT", () => {
+  try {
+    // ターミナル状態をリセット
+    if (process.stdin.isTTY) {
+      process.stdin.setRawMode(false);
+    }
+    process.stdout.write('\x1b[?25h'); // カーソル表示
+    process.stdout.write('\x1b[?1049l'); // 通常スクリーンバッファ
+  } catch (error) {
+    console.error("Error during SIGINT cleanup:", error);
+  }
   console.log("\n👋 CLIを終了します...");
   process.exit(0);
 });

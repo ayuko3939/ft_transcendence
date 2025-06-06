@@ -60,7 +60,7 @@ export interface GameResult {
 
 // WebSocket通信メッセージ
 export type ClientMessage =
-  | { type: "auth"; sessionToken: string }
+  | { type: "auth"; sessionToken: string; userId: string }
   | { type: "paddleMove"; y: number; playerSide?: PlayerSide }
   | { type: "chat"; name: string; message: string }
   | { type: "surrender" }

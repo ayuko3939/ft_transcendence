@@ -327,7 +327,11 @@ export class GameUI {
    * UI をクリーンアップ
    */
   public destroy(): void {
-    this.screen.destroy();
+    try {
+      this.screen.destroy();
+    } catch (error) {
+      console.error("UI cleanup error:", error);
+    }
   }
 
   /**

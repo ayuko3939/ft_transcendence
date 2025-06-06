@@ -1,11 +1,21 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
+import { CookieJar } from "tough-cookie";
+import axiosCookieJarSupport from "axios-cookiejar-support";
 import type { AuthCredentials, UserSession, CLIConfig } from "./types";
 
 export class AuthClient {
   private config: CLIConfig;
+  private cookieJar: CookieJar;
+  private axios: AxiosInstance;
 
   constructor(config: CLIConfig) {
     this.config = config;
+    this.cookieJar = new CookieJar();
+    
+    // axiosにクッキーサポートを追加
+    this.axios = axiosCookieJarSupport.wrapper(axios.create());
+    (this.axios.defaults as any).jar = this.cookieJar;
+    this.axios.defaults.withCredentials = true;
   }
 
   /**
@@ -13,7 +23,7 @@ export class AuthClient {
    */
   async login(credentials: AuthCredentials): Promise<UserSession> {
     try {
-      const response = await axios.post(
+      const response = await this.axios.post(
         `${this.config.authUrl}/login`,
         {
           username: credentials.email,
@@ -32,9 +42,21 @@ export class AuthClient {
         response.data.sessionToken
       ) {
         const user = response.data.user;
+        const sessionToken = response.data.sessionToken;
+
+        // NextAuthのセッショントークンをクッキーとして設定
+        await this.cookieJar.setCookie(
+          `next-auth.session-token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax`,
+          this.config.authUrl,
+        );
+
+        // デバッグ: クッキーが正しく設定されたか確認
+        console.log(`🍪 クッキー設定完了: next-auth.session-token=${sessionToken.substring(0, 8)}...`);
+        const cookies = this.cookieJar.getCookiesSync(this.config.authUrl);
+        console.log(`🍪 保存されたクッキー数: ${cookies.length}`);
 
         return {
-          sessionToken: response.data.sessionToken,
+          sessionToken: sessionToken,
           userId: user.id,
           username: user.name || user.email,
         };
@@ -60,13 +82,17 @@ export class AuthClient {
   /**
    * セッションの有効性を確認
    */
-  async validateSession(sessionToken: string): Promise<boolean> {
+  async validateSession(sessionToken?: string): Promise<boolean> {
     try {
-      const response = await axios.get(`${this.config.authUrl}/check`, {
-        headers: {
-          Cookie: `authjs.session-token=${sessionToken}`,
-        },
-      });
+      // セッショントークンが明示的に渡された場合はクッキーとして設定
+      if (sessionToken) {
+        await this.cookieJar.setCookie(
+          `next-auth.session-token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax`,
+          this.config.authUrl,
+        );
+      }
+
+      const response = await this.axios.get(`${this.config.authUrl}/check`);
       return response.status === 200;
     } catch (error) {
       return false;
@@ -74,22 +100,17 @@ export class AuthClient {
   }
 
   /**
-   * ログアウト（セッションの無効化）
+   * 保存されたクッキーを取得
    */
-  async logout(sessionToken: string): Promise<void> {
-    try {
-      await axios.post(
-        `${this.config.authUrl}/logout`,
-        {},
-        {
-          headers: {
-            Cookie: `authjs.session-token=${sessionToken}`,
-          },
-        },
-      );
-    } catch (error) {
-      // ログアウトエラーは無視（サーバーの状態に関わらずクライアント側でセッションを削除）
-      console.warn("ログアウト時にエラーが発生しましたが、処理を継続します");
-    }
+  getCookies(): string {
+    const cookies = this.cookieJar.getCookiesSync(this.config.authUrl);
+    return cookies.map(cookie => cookie.toString()).join('; ');
+  }
+
+  /**
+   * クッキージャーを取得（ゲームクライアント等で使用）
+   */
+  getCookieJar(): CookieJar {
+    return this.cookieJar;
   }
 }

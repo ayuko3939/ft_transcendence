@@ -124,7 +124,8 @@ export class GameClient {
   private sendAuth(): void {
     const authMessage: ClientMessage = {
       type: "auth",
-      sessionToken: this.session.sessionToken,
+      sessionToken: this.session.userId,
+      userId: this.session.userId,
     };
     this.sendMessage(authMessage);
   }
