@@ -126,6 +126,8 @@ services:
       retries: 120
     env_file:
       - .env
+    networks:
+      - app-network
 
   elastic-search:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
@@ -202,6 +204,29 @@ services:
     networks:
       - app-network
 
+  log-archiver:
+    image: ft_transcendence_logarchiver:${COMMIT_HASH:-latest}
+    build:
+      context: ./internal/archive
+      dockerfile: Dockerfile
+    container_name: ft_transcendence_log_archiver
+    environment:
+      - ELASTIC_USER=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_HOST=elastic-search:9200
+    volumes:
+      - certs:/certs:ro
+      - archive-data:/archive
+    networks:
+      - app-network
+    depends_on:
+      elastic-search:
+        condition: service_healthy
+    restart: "no"
+    mem_limit: 128m
+    labels:
+      - "co.elastic.logs/enabled=false"
+
   logstash:
     depends_on:
       elastic-search:
@@ -257,6 +282,8 @@ volumes:
   nginx_ssl:
     driver: local
   miniodir:
+    driver: local
+  archive-data:
     driver: local
 
 networks:
