@@ -215,7 +215,7 @@ const TournamentPongGame = ({
         show={true}
         messages={chatMessages}
         socketClient={socketClientRef.current}
-        senderName={session?.user?.name || "undefined"}
+        senderName={session?.user?.displayName || "undefined"}
       />
 
       <ConfirmDialog

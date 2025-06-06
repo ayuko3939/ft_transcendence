@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         const opponentInfo = await db
           .select({
             score: players.score,
-            name: user.name,
+            name: user.displayName,
           })
           .from(players)
           .innerJoin(user, eq(players.userId, user.id))

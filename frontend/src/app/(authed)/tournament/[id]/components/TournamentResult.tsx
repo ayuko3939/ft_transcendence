@@ -99,7 +99,7 @@ export const TournamentResult = ({
                   <div className={styles.trophy}>🏆</div>
                 )}
                 <div className={styles.winnerName}>
-                  {winnerData.name || "Unknown Player"}
+                  {winnerData.displayName || "Unknown Player"}
                 </div>
               </>
             )}

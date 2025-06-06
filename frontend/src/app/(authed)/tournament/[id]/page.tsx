@@ -13,7 +13,7 @@ import { useSession } from "next-auth/react";
 export default function TournamentDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const [tournament, setTournament] = useState<TournamentWithDetails | null>(
     null,
   );
@@ -162,6 +162,7 @@ export default function TournamentDetailPage() {
         };
         wsRef.current.send(JSON.stringify(joinData));
       }
+      await update();
     } catch (error) {
       console.error("トーナメント参加エラー:", error);
       alert(
@@ -205,7 +206,7 @@ export default function TournamentDetailPage() {
       // WebSocket経由でチャットメッセージを送信
       const chatData = {
         type: "chat",
-        name: session.user.name,
+        name: session.user.displayName,
         message: newMessage,
       };
 
@@ -310,7 +311,7 @@ export default function TournamentDetailPage() {
       </div>
     );
   }
-
+  console.log("セッション:", session);
   return (
     <div className="container mx-auto min-h-screen pt-18 pb-13">
       <div className={styles.tournamentContainer}>

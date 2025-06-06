@@ -91,7 +91,7 @@ export default function UserInfoContainer() {
       }
     }
   };
-
+  console.log("session", session);
   return (
     <div className={styles.userInfoContainer}>
       <input
@@ -154,7 +154,11 @@ export default function UserInfoContainer() {
             <div className={styles.userIdTooltip}>{session.user.id}</div>
           )}
         </div>
-
+        {session?.user?.displayName && (
+          <div className={styles.userDisplayName}>
+            ({session.user.displayName})
+          </div>
+        )}
         <p className={styles.userEmail}>{session?.user?.email || null}</p>
       </div>
     </div>

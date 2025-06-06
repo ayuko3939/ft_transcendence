@@ -554,12 +554,12 @@ export class TournamentService {
     // プレイヤー名を取得
     const [player1, player2] = await Promise.all([
       db
-        .select({ name: user.name })
+        .select({ displayName: user.displayName })
         .from(user)
         .where(eq(user.id, match.player1Id))
         .limit(1),
       db
-        .select({ name: user.name })
+        .select({ displayName: user.displayName })
         .from(user)
         .where(eq(user.id, match.player2Id))
         .limit(1),
@@ -572,8 +572,8 @@ export class TournamentService {
       matchNumber: match.matchNumber,
       player1Id: match.player1Id,
       player2Id: match.player2Id,
-      player1Name: player1[0]?.name || "Unknown Player",
-      player2Name: player2[0]?.name || "Unknown Player",
+      player1Name: player1[0]?.displayName || "Unknown Player",
+      player2Name: player2[0]?.displayName || "Unknown Player",
       status: match.status as "pending" | "in_progress" | "completed",
     };
   }
