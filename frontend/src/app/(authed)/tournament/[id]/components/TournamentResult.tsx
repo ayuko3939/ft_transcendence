@@ -88,7 +88,7 @@ export const TournamentResult = ({
                   <div className={styles.winnerImageContainer}>
                     <Image
                       src={winnerData.image}
-                      alt={winnerData.name || "Winner"}
+                      alt={winnerData.displayName || "Winner"}
                       width={100}
                       height={100}
                       className={styles.winnerImage}

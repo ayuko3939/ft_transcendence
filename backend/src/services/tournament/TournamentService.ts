@@ -343,7 +343,7 @@ export class TournamentService {
         status: tournamentParticipants.status,
         eliminatedRound: tournamentParticipants.eliminatedRound,
         joinedAt: tournamentParticipants.joinedAt,
-        userName: user.name,
+        userName: user.displayName,
       })
       .from(tournamentParticipants)
       .innerJoin(user, eq(tournamentParticipants.userId, user.id))

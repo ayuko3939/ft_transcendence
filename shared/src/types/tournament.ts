@@ -38,7 +38,7 @@ export interface TournamentMatch {
 }
 
 export interface TournamentWithDetails extends Tournament {
-  participants: Array<TournamentParticipant & { userName: string }>; // TODO: { userName: string } これを無くす
+  participants: Array<TournamentParticipant & { userName: string }>;
   currentMatches?: TournamentMatch[];
 }
 
