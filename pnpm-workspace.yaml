@@ -3,3 +3,4 @@ packages:
   - 'database'
   - 'frontend'
   - 'backend'
+  - 'cli'

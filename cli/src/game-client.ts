@@ -33,7 +33,7 @@ export class GameClient {
   constructor(
     config: CLIConfig,
     session: UserSession,
-    handlers: GameEventHandlers
+    handlers: GameEventHandlers,
   ) {
     this.config = config;
     this.session = session;

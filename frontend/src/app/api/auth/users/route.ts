@@ -6,7 +6,7 @@ import { logApiError, logApiRequest } from "@/lib/logger";
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await req.json();
-    
+
     if (!userId) {
       logApiRequest(req.method, req.nextUrl.pathname, 400);
       return NextResponse.json(
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     // セッショントークンを更新/作成
     const sessionData = await updateSession(userId);
-    
+
     if (!sessionData) {
       logApiRequest(req.method, req.nextUrl.pathname, 500);
       return NextResponse.json(
@@ -27,12 +27,14 @@ export async function POST(req: NextRequest) {
     }
 
     logApiRequest(req.method, req.nextUrl.pathname, 200, userId);
-    return NextResponse.json({
-      sessionToken: sessionData.sessionToken,
-      expires: sessionData.expires,
-      userId: sessionData.userId
-    }, { status: 200 });
-    
+    return NextResponse.json(
+      {
+        sessionToken: sessionData.sessionToken,
+        expires: sessionData.expires,
+        userId: sessionData.userId,
+      },
+      { status: 200 },
+    );
   } catch (error) {
     logApiError(
       req.method,

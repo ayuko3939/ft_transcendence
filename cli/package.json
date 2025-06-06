@@ -1,5 +1,5 @@
 {
-  "name": "ft-transcendence-cli",
+  "name": "cli",
   "version": "1.0.0",
   "description": "CLI client for ft_transcendence Pong game",
   "main": "dist/index.js",

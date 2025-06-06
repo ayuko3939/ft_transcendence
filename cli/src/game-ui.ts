@@ -133,8 +133,8 @@ export class GameUI {
       0,
       Math.min(
         this.GAME_HEIGHT - this.GAME_PADDLE_HEIGHT,
-        paddle.y + moveAmount
-      )
+        paddle.y + moveAmount,
+      ),
     );
 
     if (this.onPaddleMove) {
@@ -171,7 +171,7 @@ export class GameUI {
    */
   public onCountdown(count: number): void {
     this.updateStatus(
-      `{center}{bold}{yellow-fg}${count}{/yellow-fg}{/bold}{/center}`
+      `{center}{bold}{yellow-fg}${count}{/yellow-fg}{/bold}{/center}`,
     );
     this.screen.render();
   }
@@ -186,7 +186,7 @@ export class GameUI {
       `{center}{bold}GAME OVER{/bold}{/center}\n\n` +
         `{center}${isWinner ? "{green-fg}{bold}YOU WIN!{/bold}{/green-fg}" : "{red-fg}{bold}YOU LOSE{/bold}{/red-fg}"}{/center}\n\n` +
         `{center}Final Score{/center}\n` +
-        `{center}${result.finalScore.left} - ${result.finalScore.right}{/center}`
+        `{center}${result.finalScore.left} - ${result.finalScore.right}{/center}`,
     );
 
     this.screen.render();
@@ -269,12 +269,12 @@ export class GameUI {
     field: string[][],
     paddle: any,
     x: number,
-    char: string
+    char: string,
   ): void {
     const paddleY =
       Math.round((paddle.y / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2)) + 1;
     const paddleHeight = Math.round(
-      (this.GAME_PADDLE_HEIGHT / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2)
+      (this.GAME_PADDLE_HEIGHT / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2),
     );
 
     for (
@@ -296,7 +296,7 @@ export class GameUI {
       `{center}You{/center}\n` +
         `{center}{bold}{green-fg}${myScore}{/green-fg}{/bold}{/center}\n\n` +
         `{center}${this.opponentName}{/center}\n` +
-        `{center}{bold}{red-fg}${opponentScore}{/red-fg}{/bold}{/center}`
+        `{center}{bold}{red-fg}${opponentScore}{/red-fg}{/bold}{/center}`,
     );
   }
 

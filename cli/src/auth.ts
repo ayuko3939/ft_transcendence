@@ -23,7 +23,7 @@ export class AuthClient {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (
@@ -50,7 +50,7 @@ export class AuthClient {
           throw new Error("メールアドレスとパスワードを入力してください");
         }
         throw new Error(
-          `認証エラー: ${error.response?.data?.error || error.message}`
+          `認証エラー: ${error.response?.data?.error || error.message}`,
         );
       }
       throw new Error(`ネットワークエラー: ${error}`);
@@ -85,7 +85,7 @@ export class AuthClient {
           headers: {
             Cookie: `authjs.session-token=${sessionToken}`,
           },
-        }
+        },
       );
     } catch (error) {
       // ログアウトエラーは無視（サーバーの状態に関わらずクライアント側でセッションを削除）

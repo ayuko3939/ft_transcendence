@@ -42,8 +42,8 @@ class PongCLI {
       console.log(colors.green(`✅ ログイン成功: ${this.session.username}`));
       console.log();
 
+      // メインメニュー
       while (true) {
-        // メインメニュー
         const action = await this.showMainMenu();
         switch (action) {
           case "random":
@@ -114,21 +114,19 @@ class PongCLI {
    * メインメニュー
    */
   private async showMainMenu(): Promise<string> {
-    while (true) {
-      const answer = await inquirer.prompt([
-        {
-          type: "list",
-          name: "action",
-          message: "何をしますか？",
-          choices: [
-            { name: "🎮 ランダムマッチに参加", value: "random" },
-            { name: "🚪 ログアウト", value: "logout" },
-            { name: "❌ 終了", value: "exit" },
-          ],
-        },
-      ]);
-      return answer.action;
-    }
+    const answer = await inquirer.prompt([
+      {
+        type: "list",
+        name: "action",
+        message: "何をしますか？",
+        choices: [
+          { name: "🎮 ランダムマッチに参加", value: "random" },
+          { name: "🚪 ログアウト", value: "logout" },
+          { name: "❌ 終了", value: "exit" },
+        ],
+      },
+    ]);
+    return answer.action;
   }
 
   /**
@@ -148,75 +146,93 @@ class PongCLI {
       return;
     }
 
-    try {
-      // 画面を完全にクリアしてメニューを消去
-      process.stdout.write("\x1b[2J\x1b[0f"); // ANSI escape sequences
-      console.clear();
+    // session の型安全性を確保
+    const session = this.session;
 
-      // UI を初期化
-      this.gameUI = new GameUI();
+    // ゲーム終了を待機するためのPromise
+    return new Promise<void>((resolve, reject) => {
+      try {
+        // 画面を完全にクリアしてメニューを消去
+        process.stdout.write("\x1b[2J\x1b[0f");
+        console.clear();
 
-      // ゲームクライアントを初期化
-      this.gameClient = new GameClient(this.config, this.session, {
-        onInit: (side, state, roomId) => {
-          this.gameUI?.onGameInit(side, state, roomId);
-        },
-        onGameState: (state) => {
-          this.gameUI?.onGameStateUpdate(state);
-        },
-        onCountdown: (count) => {
-          this.gameUI?.onCountdown(count);
-        },
-        onGameStart: (state) => {
-          this.gameUI?.onGameStateUpdate(state);
-        },
-        onGameOver: (result) => {
-          this.gameUI?.onGameOver(result);
-          // 5秒後にメニューに戻る
-          setTimeout(() => {
-            this.endGame();
-          }, 5000);
-        },
-        onWaitingForPlayer: () => {
-          this.gameUI?.onWaitingForPlayer();
-        },
-        onError: (error) => {
-          this.gameUI?.showError(error);
-        },
-        onDisconnected: () => {
-          setTimeout(() => {
-            this.endGame();
-          }, 1000); // 1秒待ってからメニューに戻る
-        },
-      });
+        // UI を初期化
+        this.gameUI = new GameUI();
 
-      // UI イベントハンドラーを設定
-      this.gameUI.onPaddleMove = (y) => {
-        this.gameClient?.movePaddle(y);
-      };
+        // ゲームクライアントを初期化
+        this.gameClient = new GameClient(this.config, session, {
+          onInit: (side, state, roomId) => {
+            this.gameUI?.onGameInit(side, state, roomId);
+          },
+          onGameState: (state) => {
+            this.gameUI?.onGameStateUpdate(state);
+          },
+          onCountdown: (count) => {
+            this.gameUI?.onCountdown(count);
+          },
+          onGameStart: (state) => {
+            this.gameUI?.onGameStateUpdate(state);
+          },
+          onGameOver: (result) => {
+            this.gameUI?.onGameOver(result);
+            // 5秒後にゲーム終了処理とPromise解決
+            setTimeout(() => {
+              this.endGame();
+              resolve(); // ここでPromiseを解決
+            }, 5000);
+          },
+          onWaitingForPlayer: () => {
+            this.gameUI?.onWaitingForPlayer();
+          },
+          onError: (error) => {
+            this.gameUI?.showError(error);
+            setTimeout(() => {
+              this.endGame();
+              reject(new Error(error)); // エラーの場合はreject
+            }, 2000);
+          },
+          onDisconnected: () => {
+            setTimeout(() => {
+              this.endGame();
+              resolve(); // 切断時もPromiseを解決
+            }, 1000);
+          },
+        });
 
-      this.gameUI.onQuit = () => {
-        this.endGame();
-      };
+        // UI イベントハンドラーを設定
+        this.gameUI.onPaddleMove = (y) => {
+          this.gameClient?.movePaddle(y);
+        };
 
-      // WebSocket 接続
-      await this.gameClient.connect(roomId);
+        this.gameUI.onQuit = () => {
+          this.endGame();
+          resolve(); // 手動終了時もPromiseを解決
+        };
 
-      // UIレンダリング開始
-      this.gameUI.render();
-    } catch (error) {
-      console.error(
-        colors.red("🚨 接続に失敗しました:"),
-        (error as Error).message
-      );
+        // WebSocket 接続（非同期）
+        this.gameClient
+          .connect(roomId)
+          .then(() => {
+            // UIレンダリング開始
+            this.gameUI?.render();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      } catch (error) {
+        console.error(
+          colors.red("🚨 接続に失敗しました:"),
+          (error as Error).message,
+        );
 
-      // エラーメッセージを表示して待機
-      setTimeout(() => {
-        this.endGame();
-      }, 2000);
-    }
+        // エラーメッセージを表示して待機
+        setTimeout(() => {
+          this.endGame();
+          reject(error);
+        }, 2000);
+      }
+    });
   }
-
   /**
    * ゲームを終了してメニューに戻る
    */
@@ -335,7 +351,7 @@ process.on("unhandledRejection", (reason, promise) => {
     colors.red("🚨 Unhandled Rejection at:"),
     promise,
     colors.red("reason:"),
-    reason
+    reason,
   );
   process.exit(1);
 });
