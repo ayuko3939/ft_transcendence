@@ -58,7 +58,7 @@ export class LocalPongSocketClient {
       if (event.code !== 1000) {
         console.log("ローカル対戦WebSocket切断されました");
         clientLogWarn("ローカル対戦WebSocket接続が切断されました", {
-          code: event.code.toString()
+          code: event.code.toString(),
         });
       }
     };

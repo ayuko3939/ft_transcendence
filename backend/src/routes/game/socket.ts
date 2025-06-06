@@ -22,6 +22,6 @@ export default async function gameIdRoute(fastify: FastifyInstance) {
     { websocket: true },
     async (connection, req) => {
       await handleTournamentMatchConnection(connection, req, fastify);
-    }
+    },
   );
 }

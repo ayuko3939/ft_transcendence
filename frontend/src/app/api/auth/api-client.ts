@@ -21,9 +21,9 @@ export async function registerUser(
     });
     const data = await response.json();
     if (!response.ok) {
-      clientLogError("ユーザー登録API エラー", { 
+      clientLogError("ユーザー登録API エラー", {
         statusCode: response.status,
-        error: data.error 
+        error: data.error,
       });
       return { error: data.error || "ユーザー登録に失敗しました" };
     }

@@ -1,12 +1,16 @@
 import type { NextAuthOptions } from "next-auth";
-import { authenticateUser, getUserProviderAndDisplayName, updateSession } from "@/api/auth/users";
+import { updateLastActivity } from "@/api/auth/lastActivityService";
+import {
+  authenticateUser,
+  getUserProviderAndDisplayName,
+  updateSession,
+} from "@/api/auth/users";
 import { db } from "@/api/db";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import * as jwt from "next-auth/jwt";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { updateLastActivity } from "@/api/auth/lastActivityService";
 
 export const authOptions: NextAuthOptions = {
   debug: true,
@@ -61,7 +65,9 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, user }) {
       if (session.user) {
-        const { provider, displayName } = await getUserProviderAndDisplayName(user.id);
+        const { provider, displayName } = await getUserProviderAndDisplayName(
+          user.id,
+        );
         session.user.id = user.id;
         session.user.provider = provider ?? "credentials";
         await updateLastActivity(user.id);

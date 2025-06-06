@@ -9,11 +9,15 @@ import type {
 } from "@ft-transcendence/shared";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  clientLogInfo,
+  logButtonClick,
+  logUserAction,
+} from "@/lib/clientLogger";
 import { PongController } from "@/lib/game/gameController";
 import { PongSocketClient } from "@/lib/game/webSocketClient";
 import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
 import { useSession } from "next-auth/react";
-import { clientLogInfo, logUserAction, logButtonClick } from "@/lib/clientLogger";
 
 import ConfirmDialog from "./ConfirmDialog";
 import styles from "./game.module.css";
@@ -87,7 +91,7 @@ const PongGame = () => {
       onInit: (side, state) => {
         setPlayerSide(side);
         setGameState(state);
-        clientLogInfo("ゲーム接続完了", { userId, playerSide: side as string});
+        clientLogInfo("ゲーム接続完了", { userId, playerSide: side as string });
       },
       onGameState: setGameState,
       onChatMessages: setChatMessages,
@@ -110,12 +114,12 @@ const PongGame = () => {
           status: "finished",
           winner: result.winner,
         }));
-        
+
         const isWinner = playerSide === result.winner;
         const finalScore = `${result.finalScore.left}-${result.finalScore.right}`;
         logUserAction(
-          `ゲーム終了: ${isWinner ? "勝利" : "敗北"} (${finalScore})`, 
-          userId
+          `ゲーム終了: ${isWinner ? "勝利" : "敗北"} (${finalScore})`,
+          userId,
         );
       },
       onWaitingForPlayer: () => {

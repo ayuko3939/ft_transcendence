@@ -9,11 +9,15 @@ import type {
 } from "@ft-transcendence/shared";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  clientLogInfo,
+  logButtonClick,
+  logUserAction,
+} from "@/lib/clientLogger";
 import { LocalPongController } from "@/lib/game/gameController_local";
 import { LocalPongSocketClient } from "@/lib/game/webSocketClient_local";
 import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
 import { useSession } from "next-auth/react";
-import { clientLogInfo, logUserAction, logButtonClick } from "@/lib/clientLogger";
 
 import ConfirmDialog from "../../game/_components/ConfirmDialog";
 import styles from "../../game/_components/game.module.css";
@@ -109,7 +113,7 @@ const LocalPongGame = () => {
           status: "finished",
           winner: result.winner,
         }));
-        
+
         const finalScore = `${result.finalScore.left}-${result.finalScore.right}`;
         logUserAction(`ローカルゲーム終了 (${finalScore})`, userId);
       },

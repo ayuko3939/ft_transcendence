@@ -2,11 +2,11 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/api/auth/[...nextauth]/route";
 import { BUCKET_NAME, s3Client } from "@/api/storage";
+import { logApiError, logApiRequest } from "@/lib/logger";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { getServerSession } from "next-auth";
 import { v4 as uuidv4 } from "uuid";
-import { logApiRequest, logApiError } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +24,12 @@ export async function POST(request: NextRequest) {
     const fileType = formData.get("fileType") as string;
 
     if (!fileType) {
-      logApiRequest(request.method, request.nextUrl.pathname, 400, session.user.id);
+      logApiRequest(
+        request.method,
+        request.nextUrl.pathname,
+        400,
+        session.user.id,
+      );
       return NextResponse.json(
         { error: "ファイルタイプが提供されていません" },
         { status: 400 },
@@ -33,7 +38,12 @@ export async function POST(request: NextRequest) {
 
     const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(fileType)) {
-      logApiRequest(request.method, request.nextUrl.pathname, 400, session.user.id);
+      logApiRequest(
+        request.method,
+        request.nextUrl.pathname,
+        400,
+        session.user.id,
+      );
       return NextResponse.json(
         {
           error:
@@ -59,7 +69,12 @@ export async function POST(request: NextRequest) {
       process.env.AWS_ENDPOINT || "http://localhost:9000";
     const publicUrl = `${minioPublicEndpoint}/${BUCKET_NAME}/${objectKey}`;
 
-    logApiRequest(request.method, request.nextUrl.pathname, 200, session.user.id);
+    logApiRequest(
+      request.method,
+      request.nextUrl.pathname,
+      200,
+      session.user.id,
+    );
     return NextResponse.json({
       success: true,
       signedUrl: signedUrl,
@@ -67,7 +82,11 @@ export async function POST(request: NextRequest) {
       publicUrl: publicUrl,
     });
   } catch (error) {
-    logApiError(request.method, request.nextUrl.pathname, error instanceof Error ? error : new Error(String(error)));
+    logApiError(
+      request.method,
+      request.nextUrl.pathname,
+      error instanceof Error ? error : new Error(String(error)),
+    );
     console.error("署名付きURL生成エラー:", error);
     return NextResponse.json(
       { error: "署名付きURLの生成中にエラーが発生しました" },
