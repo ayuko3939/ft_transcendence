@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { authenticateUser } from "@/api/auth/users";
+import { authenticateUser, updateSession } from "@/api/auth/users";
 import { logApiError, logApiRequest } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
@@ -21,8 +21,16 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
+    
+    // CLIクライアント用にセッショントークンも作成
+    const sessionData = await updateSession(user.id);
+    
     logApiRequest(req.method, req.nextUrl.pathname, 200, user.id);
-    return NextResponse.json({ user }, { status: 200 });
+    return NextResponse.json({ 
+      user,
+      sessionToken: sessionData.sessionToken,
+      expires: sessionData.expires
+    }, { status: 200 });
   } catch (error) {
     logApiError(
       req.method,
