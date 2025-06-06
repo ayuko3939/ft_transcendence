@@ -4,17 +4,19 @@ import styles from "./CreateTournamentModal.module.css";
 
 interface CreateTournamentModalProps {
   show: boolean;
+  initialDisplayname?: string;
   onClose: () => void;
   onTournamentCreated: (tournament: any) => void;
 }
 
 export const CreateTournamentModal = ({
   show,
+  initialDisplayname,
   onClose,
   onTournamentCreated,
 }: CreateTournamentModalProps) => {
   const [name, setName] = useState("");
-  const [displayName, setDisplayName] = useState("");
+  const [displayName, setDisplayName] = useState(initialDisplayname ?? "");
   const [maxParticipants, setMaxParticipants] = useState(4);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -82,7 +84,6 @@ export const CreateTournamentModal = ({
 
   const handleClose = () => {
     setName("");
-    setDisplayName("");
     setMaxParticipants(4);
     setError("");
     onClose();

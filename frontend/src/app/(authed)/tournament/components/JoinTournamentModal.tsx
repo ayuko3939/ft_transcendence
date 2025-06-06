@@ -4,6 +4,7 @@ import styles from "./CreateTournamentModal.module.css";
 
 interface JoinTournamentModalProps {
   show: boolean;
+  initialDisplayname?: string;
   onClose: () => void;
   onJoinSuccess: () => void;
   tournamentId: string;
@@ -11,10 +12,11 @@ interface JoinTournamentModalProps {
 
 export const JoinTournamentModal = ({
   show,
+  initialDisplayname,
   onClose,
   onJoinSuccess,
 }: JoinTournamentModalProps) => {
-  const [displayName, setDisplayName] = useState("");
+  const [displayName, setDisplayName] = useState(initialDisplayname ?? "");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 

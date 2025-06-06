@@ -161,16 +161,17 @@ export const TournamentLobby = () => {
           </div>
         )}
       </div>
-      <div className="flex justify-center mt-6">
+      <div className="mt-6 flex justify-center">
         <Button
           onClick={refetch}
-          className="justify-center items-center rounded-md border-2 border-cyan-400 bg-transparent px-4 py-2 font-bold text-cyan-400 transition-colors hover:bg-cyan-900/50"
+          className="items-center justify-center rounded-md border-2 border-cyan-400 bg-transparent px-4 py-2 font-bold text-cyan-400 transition-colors hover:bg-cyan-900/50"
         >
           再読み込み
         </Button>
       </div>
       <CreateTournamentModal
         show={showCreateModal}
+        initialDisplayname={session?.user?.displayName || ""}
         onClose={() => setShowCreateModal(false)}
         onTournamentCreated={handleTournamentCreated}
       />

@@ -614,6 +614,7 @@ export default function TournamentDetailPage() {
       />
       <JoinTournamentModal
         show={showJoinModal}
+        initialDisplayname={session?.user?.displayName || ""}
         onClose={() => setShowJoinModal(false)}
         onJoinSuccess={handleJoinTournamentAfterDisplayNameUpdate}
         tournamentId={tournamentId}
