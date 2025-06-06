@@ -1,35 +1,35 @@
-import blessed from 'blessed';
-import type { GameState, PlayerSide, ChatMessage, GameResult } from './types';
+import blessed from "blessed";
+import type { GameState, PlayerSide, ChatMessage, GameResult } from "./types";
 
 export class GameUI {
   private screen: any;
   private gameBox: any;
-  private statusBox: any;
-  private chatBox: any;
-  private chatInput: any;
   private scoreBox: any;
-  private infoBox: any;
-  
+  private statusBox: any;
+
   private currentState: GameState | null = null;
   private playerSide: PlayerSide = null;
-  private roomId?: string;
-  private chatMessages: ChatMessage[] = [];
-  
+  private opponentName: string = "Opponent";
+
   // ゲームフィールドの定数
   private readonly FIELD_WIDTH = 80;
   private readonly FIELD_HEIGHT = 20;
   private readonly PADDLE_HEIGHT = 4;
 
+  // 実際のゲーム座標系（Web版と同じ）
+  private readonly GAME_WIDTH = 800;
+  private readonly GAME_HEIGHT = 600;
+  private readonly GAME_PADDLE_HEIGHT = 100;
+  private readonly PADDLE_MOVE_SPEED = 10;
+
   // イベントハンドラー
   public onPaddleMove?: (y: number) => void;
-  public onSendChat?: (message: string) => void;
-  public onSurrender?: () => void;
   public onQuit?: () => void;
 
   constructor() {
     this.screen = blessed.screen({
       smartCSR: true,
-      title: 'Pong CLI Game'
+      title: "Pong CLI Game",
     });
 
     this.setupUI();
@@ -37,198 +37,109 @@ export class GameUI {
   }
 
   private setupUI(): void {
-    // メインゲームエリア
+    // メインゲームエリア（画面全体の80%）
     this.gameBox = blessed.box({
       parent: this.screen,
       top: 0,
       left: 0,
-      width: '70%',
-      height: '70%',
+      width: "80%",
+      height: "40%",
       border: {
-        type: 'line'
+        type: "line",
       },
       style: {
         border: {
-          fg: 'cyan'
-        }
+          fg: "cyan",
+        },
       },
-      label: ' ゲームフィールド ',
-      content: ''
+      label: " PONG ",
+      content: "",
     });
 
     // スコア表示エリア
     this.scoreBox = blessed.box({
       parent: this.screen,
       top: 0,
-      left: '70%',
-      width: '30%',
-      height: '30%',
+      left: "80%",
+      width: "20%",
+      height: "20%",
       border: {
-        type: 'line'
+        type: "line",
       },
       style: {
         border: {
-          fg: 'yellow'
-        }
+          fg: "yellow",
+        },
       },
-      label: ' スコア ',
-      content: '左: 0  右: 0'
+      label: " SCORE ",
+      content: "You: 0\nOpponent: 0",
+      tags: true,
     });
 
-    // ステータス表示エリア
+    // ステータス表示エリア（カウントダウンなど）
     this.statusBox = blessed.box({
       parent: this.screen,
-      top: '30%',
-      left: '70%',
-      width: '30%',
-      height: '40%',
+      top: "20%",
+      left: "80%",
+      width: "20%",
+      height: "20%",
       border: {
-        type: 'line'
+        type: "line",
       },
       style: {
         border: {
-          fg: 'green'
-        }
+          fg: "green",
+        },
       },
-      label: ' ステータス ',
-      content: '接続中...'
-    });
-
-    // チャット表示エリア
-    this.chatBox = blessed.box({
-      parent: this.screen,
-      top: '70%',
-      left: 0,
-      width: '70%',
-      height: '20%',
-      border: {
-        type: 'line'
-      },
-      style: {
-        border: {
-          fg: 'magenta'
-        }
-      },
-      label: ' チャット ',
-      content: '',
-      scrollable: true,
-      alwaysScroll: true,
-      scrollbar: {
-        style: {
-          bg: 'yellow'
-        }
-      }
-    });
-
-    // チャット入力エリア
-    this.chatInput = blessed.textbox({
-      parent: this.screen,
-      bottom: 0,
-      left: 0,
-      width: '70%',
-      height: 3,
-      border: {
-        type: 'line'
-      },
-      style: {
-        border: {
-          fg: 'white'
-        }
-      },
-      label: ' チャット入力 (Enter: 送信, Esc: ゲームに戻る) ',
-      input: true,
-      keys: true,
-      mouse: true
-    });
-
-    // 情報表示エリア
-    this.infoBox = blessed.box({
-      parent: this.screen,
-      top: '70%',
-      left: '70%',
-      width: '30%',
-      height: '30%',
-      border: {
-        type: 'line'
-      },
-      style: {
-        border: {
-          fg: 'blue'
-        }
-      },
-      label: ' 操作方法 ',
-      content: 'W/S: パドル移動\n' +
-               'C: チャット\n' +
-               'Q: 中断\n' +
-               'Ctrl+C: 終了'
+      label: " STATUS ",
+      content:
+        "Connecting...\n\n{center}W/S: Move{/center}\n{center}Ctrl+C: Quit{/center}",
+      tags: true,
     });
 
     this.screen.render();
   }
 
   private setupKeyHandlers(): void {
-    // パドル移動とゲーム操作
-    this.screen.key(['w', 'up'], () => {
+    // パドル移動
+    this.screen.key(["w", "up"], () => {
       this.movePaddle(-1);
     });
 
-    this.screen.key(['s', 'down'], () => {
+    this.screen.key(["s", "down"], () => {
       this.movePaddle(1);
     });
 
-    this.screen.key(['c'], () => {
-      this.focusChat();
-    });
-
-    this.screen.key(['q'], () => {
-      if (this.onSurrender) {
-        this.onSurrender();
-      }
-    });
-
-    this.screen.key(['C-c'], () => {
+    // 終了
+    this.screen.key(["C-c"], () => {
       if (this.onQuit) {
         this.onQuit();
       }
       process.exit(0);
-    });
-
-    // チャット入力のハンドリング
-    this.chatInput.on('submit', (text: string) => {
-      if (text.trim() && this.onSendChat) {
-        this.onSendChat(text.trim());
-      }
-      this.chatInput.clearValue();
-      this.chatInput.cancel();
-      this.screen.render();
-    });
-
-    this.chatInput.key(['escape'], () => {
-      this.chatInput.cancel();
-      this.screen.render();
     });
   }
 
   private movePaddle(direction: number): void {
     if (!this.currentState || !this.playerSide) return;
 
-    const paddle = this.playerSide === 'left' ? 
-      this.currentState.paddleLeft : 
-      this.currentState.paddleRight;
+    const paddle =
+      this.playerSide === "left"
+        ? this.currentState.paddleLeft
+        : this.currentState.paddleRight;
 
-    const newY = Math.max(0, Math.min(
-      this.FIELD_HEIGHT - this.PADDLE_HEIGHT,
-      paddle.y + direction
-    ));
+    // Web版と同じ座標系で動作
+    const moveAmount = direction * this.PADDLE_MOVE_SPEED;
+    const newY = Math.max(
+      0,
+      Math.min(
+        this.GAME_HEIGHT - this.GAME_PADDLE_HEIGHT,
+        paddle.y + moveAmount
+      )
+    );
 
     if (this.onPaddleMove) {
       this.onPaddleMove(newY);
     }
-  }
-
-  private focusChat(): void {
-    this.chatInput.focus();
-    this.screen.render();
   }
 
   /**
@@ -237,17 +148,11 @@ export class GameUI {
   public onGameInit(side: PlayerSide, state: GameState, roomId?: string): void {
     this.playerSide = side;
     this.currentState = state;
-    this.roomId = roomId;
 
-    const sideText = side === 'left' ? '左' : side === 'right' ? '右' : '観戦';
-    this.updateStatus(`あなた: ${sideText}側プレイヤー\n` +
-                     `状態: ${this.getStatusText(state.status)}`);
-    
+    this.updateStatus(`${this.getStatusText(state.status)}`);
+    this.updateScore(state.score);
     this.updateGameField();
     this.screen.render();
-    
-    // ステータス通知をコンソールに表示（UIの上に）
-    process.stdout.write(`\n🎮 ${sideText}側プレイヤーとして参加しました\n`);
   }
 
   /**
@@ -257,12 +162,7 @@ export class GameUI {
     this.currentState = state;
     this.updateGameField();
     this.updateScore(state.score);
-    
-    const sideText = this.playerSide === 'left' ? '左' : 
-                     this.playerSide === 'right' ? '右' : '観戦';
-    this.updateStatus(`あなた: ${sideText}側プレイヤー\n` +
-                     `状態: ${this.getStatusText(state.status)}`);
-    
+    this.updateStatus(this.getStatusText(state.status));
     this.screen.render();
   }
 
@@ -270,10 +170,9 @@ export class GameUI {
    * カウントダウン表示
    */
   public onCountdown(count: number): void {
-    const sideText = this.playerSide === 'left' ? '左' : 
-                     this.playerSide === 'right' ? '右' : '観戦';
-    this.updateStatus(`あなた: ${sideText}側プレイヤー\n` +
-                     `開始まで: ${count}秒`);
+    this.updateStatus(
+      `{center}{bold}{yellow-fg}${count}{/yellow-fg}{/bold}{/center}`
+    );
     this.screen.render();
   }
 
@@ -281,31 +180,15 @@ export class GameUI {
    * ゲーム終了時の表示
    */
   public onGameOver(result: GameResult): void {
-    const winner = result.winner === 'left' ? '左' : '右';
     const isWinner = result.winner === this.playerSide;
-    
-    this.updateStatus(`🏁 ゲーム終了!\n` +
-                     `結果: ${isWinner ? '🎉 勝利!' : '😔 敗北'}\n` +
-                     `スコア: ${result.finalScore.left} - ${result.finalScore.right}\n` +
-                     `まもなくメニューに戻ります...`);
-    
-    this.screen.render();
-    
-    // 結果をコンソールにも表示
-    process.stdout.write(`\n🏁 ゲーム終了: ${isWinner ? '勝利!' : '敗北'} (${result.finalScore.left}-${result.finalScore.right})\n`);
-  }
 
-  /**
-   * チャット更新
-   */
-  public onChatUpdate(messages: ChatMessage[]): void {
-    this.chatMessages = messages;
-    const chatContent = messages
-      .map(msg => `${msg.name}: ${msg.message}`)
-      .join('\n');
-    
-    this.chatBox.setContent(chatContent);
-    this.chatBox.setScrollPerc(100); // 最下部にスクロール
+    this.updateStatus(
+      `{center}{bold}GAME OVER{/bold}{/center}\n\n` +
+        `{center}${isWinner ? "{green-fg}{bold}YOU WIN!{/bold}{/green-fg}" : "{red-fg}{bold}YOU LOSE{/bold}{/red-fg}"}{/center}\n\n` +
+        `{center}Final Score{/center}\n` +
+        `{center}${result.finalScore.left} - ${result.finalScore.right}{/center}`
+    );
+
     this.screen.render();
   }
 
@@ -313,10 +196,7 @@ export class GameUI {
    * 待機状態の表示
    */
   public onWaitingForPlayer(): void {
-    const sideText = this.playerSide === 'left' ? '左' : 
-                     this.playerSide === 'right' ? '右' : '観戦';
-    this.updateStatus(`あなた: ${sideText}側プレイヤー\n` +
-                     `⏳ 相手を待機中...`);
+    this.updateStatus(`{center}Waiting for opponent...{/center}`);
     this.screen.render();
   }
 
@@ -324,7 +204,7 @@ export class GameUI {
    * エラー表示
    */
   public showError(message: string): void {
-    this.updateStatus(`❌ エラー: ${message}`);
+    this.updateStatus(`{center}{red-fg}ERROR: ${message}{/red-fg}{/center}`);
     this.screen.render();
   }
 
@@ -333,57 +213,75 @@ export class GameUI {
    */
   private updateGameField(): void {
     if (!this.currentState) {
-      this.gameBox.setContent('ゲーム状態を読み込み中...');
+      this.gameBox.setContent("ゲーム状態を読み込み中...");
       return;
     }
 
     const { ball, paddleLeft, paddleRight } = this.currentState;
-    
+
     // フィールドを空白で初期化
     const field: string[][] = [];
     for (let y = 0; y < this.FIELD_HEIGHT; y++) {
-      field[y] = new Array(this.FIELD_WIDTH).fill(' ');
+      field[y] = new Array(this.FIELD_WIDTH).fill(" ");
     }
 
     // 境界線を描画
     for (let x = 0; x < this.FIELD_WIDTH; x++) {
-      field[0][x] = '-';
-      field[this.FIELD_HEIGHT - 1][x] = '-';
+      field[0][x] = "-";
+      field[this.FIELD_HEIGHT - 1][x] = "-";
     }
     for (let y = 0; y < this.FIELD_HEIGHT; y++) {
-      field[y][0] = '|';
-      field[y][this.FIELD_WIDTH - 1] = '|';
+      field[y][0] = "|";
+      field[y][this.FIELD_WIDTH - 1] = "|";
     }
 
     // 中央線を描画
     const centerX = Math.floor(this.FIELD_WIDTH / 2);
     for (let y = 1; y < this.FIELD_HEIGHT - 1; y++) {
-      field[y][centerX] = y % 2 === 0 ? '|' : ' ';
+      field[y][centerX] = y % 2 === 0 ? "|" : " ";
     }
 
     // パドルを描画
-    this.drawPaddle(field, paddleLeft, 2, '█');
-    this.drawPaddle(field, paddleRight, this.FIELD_WIDTH - 3, '█');
+    this.drawPaddle(field, paddleLeft, 2, "█");
+    this.drawPaddle(field, paddleRight, this.FIELD_WIDTH - 3, "█");
 
     // ボールを描画
-    const ballX = Math.round((ball.x / 800) * (this.FIELD_WIDTH - 2)) + 1;
-    const ballY = Math.round((ball.y / 400) * (this.FIELD_HEIGHT - 2)) + 1;
-    
-    if (ballX > 0 && ballX < this.FIELD_WIDTH - 1 && 
-        ballY > 0 && ballY < this.FIELD_HEIGHT - 1) {
-      field[ballY][ballX] = '●';
+    const ballX =
+      Math.round((ball.x / this.GAME_WIDTH) * (this.FIELD_WIDTH - 2)) + 1;
+    const ballY =
+      Math.round((ball.y / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2)) + 1;
+
+    if (
+      ballX > 0 &&
+      ballX < this.FIELD_WIDTH - 1 &&
+      ballY > 0 &&
+      ballY < this.FIELD_HEIGHT - 1
+    ) {
+      field[ballY][ballX] = "●";
     }
 
     // フィールドを文字列に変換
-    const fieldContent = field.map(row => row.join('')).join('\n');
+    const fieldContent = field.map((row) => row.join("")).join("\n");
     this.gameBox.setContent(fieldContent);
   }
 
-  private drawPaddle(field: string[][], paddle: any, x: number, char: string): void {
-    const paddleY = Math.round((paddle.y / 400) * (this.FIELD_HEIGHT - 2)) + 1;
-    const paddleHeight = Math.round((this.PADDLE_HEIGHT / 400) * this.FIELD_HEIGHT);
-    
-    for (let i = 0; i < paddleHeight && paddleY + i < this.FIELD_HEIGHT - 1; i++) {
+  private drawPaddle(
+    field: string[][],
+    paddle: any,
+    x: number,
+    char: string
+  ): void {
+    const paddleY =
+      Math.round((paddle.y / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2)) + 1;
+    const paddleHeight = Math.round(
+      (this.GAME_PADDLE_HEIGHT / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2)
+    );
+
+    for (
+      let i = 0;
+      i < paddleHeight && paddleY + i < this.FIELD_HEIGHT - 1;
+      i++
+    ) {
       if (paddleY + i > 0) {
         field[paddleY + i][x] = char;
       }
@@ -391,7 +289,15 @@ export class GameUI {
   }
 
   private updateScore(score: { left: number; right: number }): void {
-    this.scoreBox.setContent(`左: ${score.left}  右: ${score.right}`);
+    const myScore = this.playerSide === "left" ? score.left : score.right;
+    const opponentScore = this.playerSide === "left" ? score.right : score.left;
+
+    this.scoreBox.setContent(
+      `{center}You{/center}\n` +
+        `{center}{bold}{green-fg}${myScore}{/green-fg}{/bold}{/center}\n\n` +
+        `{center}${this.opponentName}{/center}\n` +
+        `{center}{bold}{red-fg}${opponentScore}{/red-fg}{/bold}{/center}`
+    );
   }
 
   private updateStatus(text: string): void {
@@ -400,13 +306,20 @@ export class GameUI {
 
   private getStatusText(status: string): string {
     switch (status) {
-      case 'connecting': return '接続中';
-      case 'setup': return 'セットアップ';
-      case 'waiting': return '待機中';
-      case 'countdown': return 'カウントダウン';
-      case 'playing': return 'プレイ中';
-      case 'finished': return '終了';
-      default: return status;
+      case "connecting":
+        return "{center}Connecting...{/center}";
+      case "setup":
+        return "{center}Setting up...{/center}";
+      case "waiting":
+        return "{center}Preparing...{/center}";
+      case "countdown":
+        return "{center}Starting soon...{/center}";
+      case "playing":
+        return "{center}{green-fg}{bold}PLAYING{/bold}{/green-fg}{/center}\n\n{center}W/S: Move{/center}\n{center}Ctrl+C: Quit{/center}";
+      case "finished":
+        return "{center}Finished{/center}";
+      default:
+        return `{center}${status}{/center}`;
     }
   }
 

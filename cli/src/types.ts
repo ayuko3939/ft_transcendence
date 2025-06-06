@@ -20,7 +20,13 @@ export interface Score {
   right: number;
 }
 
-export type GameStatus = 'connecting' | 'setup' | 'waiting' | 'countdown' | 'playing' | 'finished';
+export type GameStatus =
+  | "connecting"
+  | "setup"
+  | "waiting"
+  | "countdown"
+  | "playing"
+  | "finished";
 export type PlayerSide = "left" | "right" | null;
 export type GameType = "online" | "local" | "tournament";
 
