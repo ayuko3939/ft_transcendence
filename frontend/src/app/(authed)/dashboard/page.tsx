@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { logButtonClick } from "@/lib/clientLogger";
+import { useSession } from "next-auth/react";
 
 import AvatorCard from "./components/AvatorContainer";
+import { DisplayNameModal } from "./components/DisplayNameModal";
 import styles from "./dashboard.module.css";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { status, data: session } = useSession();
+  const [showDisplayNameModal, setShowDisplayNameModal] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -21,6 +23,10 @@ export default function DashboardPage() {
   const handleOnlineGame = () => {
     const userId = session?.user?.id;
     logButtonClick("オンライン対戦", userId);
+    setShowDisplayNameModal(true);
+  };
+
+  const handleDisplayNameSuccess = () => {
     router.push("/game");
   };
 
@@ -43,6 +49,7 @@ export default function DashboardPage() {
       </div>
     );
   }
+
   return (
     <div className={styles.container}>
       <div className="cyber-container glow-animation">
@@ -74,6 +81,14 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
+
+      <DisplayNameModal
+        show={showDisplayNameModal}
+        initialDisplayname={session?.user?.displayName}
+        onClose={() => setShowDisplayNameModal(false)}
+        onSuccess={handleDisplayNameSuccess}
+        submitText="Start"
+      />
     </div>
   );
 }
