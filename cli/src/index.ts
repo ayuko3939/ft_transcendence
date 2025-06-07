@@ -291,7 +291,7 @@ class PongCLI {
             this.gameUI?.showDisconnected();
             // タイマーは使用せず、ユーザー入力を待つ
           },
-        });
+        }, this.authClient.getCookieJar());
 
         // UI イベントハンドラーを設定
         this.gameUI.onPaddleMove = (y) => {
