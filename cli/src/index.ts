@@ -315,7 +315,7 @@ class PongCLI {
         };
 
         // WebSocket 接続（非同期）
-        this.gameClient
+        this.gameClient!
           .connect(roomId)
           .then(() => {
             // UIレンダリング開始

@@ -68,6 +68,9 @@ export class GameClient {
           }
         }
 
+        // 自己証明書を許可
+        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+
         this.ws = new WebSocket(wsUrl, { headers });
         this.roomId = roomId;
 
@@ -101,7 +104,15 @@ export class GameClient {
         });
 
         this.ws.on("error", (error) => {
-          console.error("🚨 接続エラー:", error.message);
+          console.error("🚨 WebSocket接続エラー:", error);
+          console.error("🚨 エラー詳細:", {
+            message: error.message,
+            code: (error as any).code,
+            errno: (error as any).errno,
+            syscall: (error as any).syscall,
+            address: (error as any).address,
+            port: (error as any).port
+          });
 
           if (this.handlers.onError) {
             this.handlers.onError(error.message);

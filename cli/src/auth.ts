@@ -49,14 +49,19 @@ export class AuthClient {
         const sessionToken = response.data.sessionToken;
 
         // NextAuthのセッショントークンをクッキーとして設定
+        // HTTPSの場合は__Secure-プレフィックスを使用
+        const cookieName = this.config.authUrl.startsWith('https') 
+          ? '__Secure-next-auth.session-token' 
+          : 'next-auth.session-token';
+        
         await this.cookieJar.setCookie(
-          `next-auth.session-token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax`,
+          `${cookieName}=${sessionToken}; Path=/; HttpOnly; SameSite=Lax${this.config.authUrl.startsWith('https') ? '; Secure' : ''}`,
           this.config.authUrl,
         );
 
         // デバッグ: クッキーが正しく設定されたか確認
         console.log(
-          `🍪 クッキー設定完了: next-auth.session-token=${sessionToken.substring(0, 8)}...`,
+          `🍪 クッキー設定完了: ${cookieName}=${sessionToken.substring(0, 8)}...`,
         );
         const cookies = this.cookieJar.getCookiesSync(this.config.authUrl);
         console.log(`🍪 保存されたクッキー数: ${cookies.length}`);
@@ -119,4 +124,5 @@ export class AuthClient {
   getCookieJar(): CookieJar {
     return this.cookieJar;
   }
+
 }
