@@ -11,7 +11,7 @@ export class AuthClient {
   constructor(config: CLIConfig) {
     this.config = config;
     this.cookieJar = new CookieJar();
-    
+
     // axiosにクッキーサポートを追加
     this.axios = axiosCookieJarSupport.wrapper(axios.create());
     (this.axios.defaults as any).jar = this.cookieJar;
@@ -51,7 +51,9 @@ export class AuthClient {
         );
 
         // デバッグ: クッキーが正しく設定されたか確認
-        console.log(`🍪 クッキー設定完了: next-auth.session-token=${sessionToken.substring(0, 8)}...`);
+        console.log(
+          `🍪 クッキー設定完了: next-auth.session-token=${sessionToken.substring(0, 8)}...`,
+        );
         const cookies = this.cookieJar.getCookiesSync(this.config.authUrl);
         console.log(`🍪 保存されたクッキー数: ${cookies.length}`);
 
@@ -104,7 +106,7 @@ export class AuthClient {
    */
   getCookies(): string {
     const cookies = this.cookieJar.getCookiesSync(this.config.authUrl);
-    return cookies.map(cookie => cookie.toString()).join('; ');
+    return cookies.map((cookie) => cookie.toString()).join("; ");
   }
 
   /**

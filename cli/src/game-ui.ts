@@ -156,8 +156,8 @@ export class GameUI {
       0,
       Math.min(
         this.GAME_HEIGHT - this.GAME_PADDLE_HEIGHT,
-        paddle.y + moveAmount
-      )
+        paddle.y + moveAmount,
+      ),
     );
 
     if (this.onPaddleMove) {
@@ -194,7 +194,7 @@ export class GameUI {
    */
   public onCountdown(count: number): void {
     this.updateStatus(
-      `{center}{bold}{yellow-fg}${count}{/yellow-fg}{/bold}{/center}`
+      `{center}{bold}{yellow-fg}${count}{/yellow-fg}{/bold}{/center}`,
     );
     this.screen.render();
   }
@@ -212,7 +212,7 @@ export class GameUI {
         `{center}Final Score{/center}\n` +
         `{center}${result.finalScore.left} - ${result.finalScore.right}{/center}\n\n` +
         `{center}{yellow-fg}ENTER: Return to Menu{/yellow-fg}{/center}\n` +
-        `{center}Ctrl+C: Quit{/center}`
+        `{center}Ctrl+C: Quit{/center}`,
     );
 
     this.screen.render();
@@ -234,7 +234,7 @@ export class GameUI {
     this.updateStatus(
       `{center}{red-fg}ERROR: ${message}{/red-fg}{/center}\n\n` +
         `{center}{yellow-fg}ENTER: Return to Menu{/yellow-fg}{/center}\n` +
-        `{center}Ctrl+C: Quit{/center}`
+        `{center}Ctrl+C: Quit{/center}`,
     );
     this.screen.render();
   }
@@ -248,7 +248,7 @@ export class GameUI {
       `{center}{red-fg}CONNECTION LOST{/red-fg}{/center}\n\n` +
         `{center}Server disconnected{/center}\n\n` +
         `{center}{yellow-fg}ENTER: Return to Menu{/yellow-fg}{/center}\n` +
-        `{center}Ctrl+C: Quit{/center}`
+        `{center}Ctrl+C: Quit{/center}`,
     );
     this.screen.render();
   }
@@ -314,12 +314,12 @@ export class GameUI {
     field: string[][],
     paddle: any,
     x: number,
-    char: string
+    char: string,
   ): void {
     const paddleY =
       Math.round((paddle.y / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2)) + 1;
     const paddleHeight = Math.round(
-      (this.GAME_PADDLE_HEIGHT / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2)
+      (this.GAME_PADDLE_HEIGHT / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2),
     );
 
     for (
@@ -341,7 +341,7 @@ export class GameUI {
       `{center}You{/center}\n` +
         `{center}{bold}{green-fg}${myScore}{/green-fg}{/bold}{/center}\n\n` +
         `{center}${this.opponentName}{/center}\n` +
-        `{center}{bold}{red-fg}${opponentScore}{/red-fg}{/bold}{/center}`
+        `{center}{bold}{red-fg}${opponentScore}{/red-fg}{/bold}{/center}`,
     );
   }
 
@@ -515,7 +515,7 @@ export class GameUI {
       if (this.settingsModal._keyHandler) {
         this.settingsModal.removeListener(
           "keypress",
-          this.settingsModal._keyHandler
+          this.settingsModal._keyHandler,
         );
       }
       this.settingsModal.destroy();

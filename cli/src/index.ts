@@ -43,7 +43,7 @@ class PongCLI {
         colors.red("🚨 Unhandled Rejection at:"),
         promise,
         colors.red("reason:"),
-        reason
+        reason,
       );
       this.cleanupAndExit(1);
     };
@@ -86,7 +86,7 @@ class PongCLI {
             return;
           }
           console.log(
-            colors.green(`✅ ログイン成功: ${this.userSession.username}`)
+            colors.green(`✅ ログイン成功: ${this.userSession.username}`),
           );
         }
         console.log();
@@ -138,7 +138,7 @@ class PongCLI {
     }
     process.exit(code);
   }
-  
+
   /**
    * ログイン処理
    */
@@ -197,9 +197,9 @@ class PongCLI {
         process.stdin.setRawMode(false);
         process.stdin.resume();
       }
-      
+
       // 通常のラインモードに戻す
-      process.stdout.write('\x1b[?1l\x1b>');
+      process.stdout.write("\x1b[?1l\x1b>");
     } catch (error) {
       console.error("Failed to initialize terminal for menu:", error);
     }
@@ -210,7 +210,6 @@ class PongCLI {
    */
   private async showMainMenu(): Promise<string> {
     try {
-      
       const answer = await inquirer.prompt([
         {
           type: "list",
@@ -328,7 +327,7 @@ class PongCLI {
       } catch (error) {
         console.error(
           colors.red("🚨 接続に失敗しました:"),
-          (error as Error).message
+          (error as Error).message,
         );
 
         // エラーメッセージを表示してユーザー入力を待つ
@@ -383,7 +382,7 @@ class PongCLI {
     }
 
     console.log(colors.cyan("🏓 メインメニューに戻ります..."));
-    
+
     // ライブラリ間の切り替えのため少し待機
     setTimeout(() => {}, 100);
   }
@@ -403,8 +402,8 @@ class PongCLI {
 
     try {
       // 残留イベントリスナーをクリア
-      process.stdin.removeAllListeners('keypress');
-      process.stdin.removeAllListeners('data');
+      process.stdin.removeAllListeners("keypress");
+      process.stdin.removeAllListeners("data");
     } catch (error) {
       console.error("Failed to remove listeners:", error);
     }
