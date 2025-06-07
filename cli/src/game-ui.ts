@@ -12,6 +12,7 @@ export class GameUI {
   private playerSide: PlayerSide = null;
   private opponentName: string = "Opponent";
   private isSettingsModalOpen: boolean = false;
+  private isGameEnded: boolean = false;
 
   // ゲームフィールドの定数
   private readonly FIELD_WIDTH = 80;
@@ -28,6 +29,7 @@ export class GameUI {
   public onPaddleMove?: (y: number) => void;
   public onQuit?: () => void;
   public onGameSettings?: (ballSpeed: number, winningScore: number) => void;
+  public onReturnToMenu?: () => void;
 
   constructor() {
     this.screen = blessed.screen({
@@ -124,6 +126,13 @@ export class GameUI {
       }
     });
 
+    // ゲーム終了時のメニュー復帰（ENTERキー）
+    this.screen.key(["enter"], () => {
+      if (this.isGameEnded && this.onReturnToMenu) {
+        this.onReturnToMenu();
+      }
+    });
+
     // 終了
     this.screen.key(["C-c"], () => {
       if (this.onQuit) {
@@ -195,12 +204,15 @@ export class GameUI {
    */
   public onGameOver(result: GameResult): void {
     const isWinner = result.winner === this.playerSide;
+    this.isGameEnded = true;
 
     this.updateStatus(
       `{center}{bold}GAME OVER{/bold}{/center}\n\n` +
         `{center}${isWinner ? "{green-fg}{bold}YOU WIN!{/bold}{/green-fg}" : "{red-fg}{bold}YOU LOSE{/bold}{/red-fg}"}{/center}\n\n` +
         `{center}Final Score{/center}\n` +
-        `{center}${result.finalScore.left} - ${result.finalScore.right}{/center}`
+        `{center}${result.finalScore.left} - ${result.finalScore.right}{/center}\n\n` +
+        `{center}{yellow-fg}ENTER: Return to Menu{/yellow-fg}{/center}\n` +
+        `{center}Ctrl+C: Quit{/center}`
     );
 
     this.screen.render();
@@ -218,7 +230,26 @@ export class GameUI {
    * エラー表示
    */
   public showError(message: string): void {
-    this.updateStatus(`{center}{red-fg}ERROR: ${message}{/red-fg}{/center}`);
+    this.isGameEnded = true;
+    this.updateStatus(
+      `{center}{red-fg}ERROR: ${message}{/red-fg}{/center}\n\n` +
+        `{center}{yellow-fg}ENTER: Return to Menu{/yellow-fg}{/center}\n` +
+        `{center}Ctrl+C: Quit{/center}`
+    );
+    this.screen.render();
+  }
+
+  /**
+   * 切断状態の表示
+   */
+  public showDisconnected(): void {
+    this.isGameEnded = true;
+    this.updateStatus(
+      `{center}{red-fg}CONNECTION LOST{/red-fg}{/center}\n\n` +
+        `{center}Server disconnected{/center}\n\n` +
+        `{center}{yellow-fg}ENTER: Return to Menu{/yellow-fg}{/center}\n` +
+        `{center}Ctrl+C: Quit{/center}`
+    );
     this.screen.render();
   }
 

@@ -91,6 +91,8 @@ class PongCLI {
         }
         console.log();
 
+        // ターミナル状態を確実に初期化してからメニュー表示
+        this.initializeTerminalForMenu();
         const action = await this.showMainMenu();
         switch (action) {
           case "random":
@@ -186,10 +188,29 @@ class PongCLI {
   }
 
   /**
+   * メニュー表示前の初期化
+   */
+  private initializeTerminalForMenu(): void {
+    try {
+      // TTYの設定を明示的にリセット
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false);
+        process.stdin.resume();
+      }
+      
+      // 通常のラインモードに戻す
+      process.stdout.write('\x1b[?1l\x1b>');
+    } catch (error) {
+      console.error("Failed to initialize terminal for menu:", error);
+    }
+  }
+
+  /**
    * メインメニュー
    */
   private async showMainMenu(): Promise<string> {
     try {
+      
       const answer = await inquirer.prompt([
         {
           type: "list",
@@ -256,12 +277,7 @@ class PongCLI {
           },
           onGameOver: (result) => {
             this.gameUI?.onGameOver(result);
-            // 5秒後にゲーム終了処理とPromise解決（タイマー管理）
-            this.gameEndTimer = setTimeout(() => {
-              this.clearGameEndTimer();
-              this.endGame();
-              resolve(); // ここでPromiseを解決
-            }, 5000);
+            // タイマーは使用せず、ユーザー入力を待つ
           },
           onWaitingForPlayer: () => {
             this.gameUI?.onWaitingForPlayer();
@@ -269,17 +285,12 @@ class PongCLI {
           onError: (error) => {
             this.gameUI?.showError(error);
             this.clearGameEndTimer();
-            setTimeout(() => {
-              this.endGame();
-              reject(new Error(error)); // エラーの場合はreject
-            }, 2000);
+            // タイマーは使用せず、ユーザー入力を待つ
           },
           onDisconnected: () => {
             this.clearGameEndTimer();
-            setTimeout(() => {
-              this.endGame();
-              resolve(); // 切断時もPromiseを解決
-            }, 1000);
+            this.gameUI?.showDisconnected();
+            // タイマーは使用せず、ユーザー入力を待つ
           },
         });
 
@@ -292,6 +303,12 @@ class PongCLI {
           this.clearGameEndTimer();
           this.endGame();
           resolve(); // 手動終了時もPromiseを解決
+        };
+
+        this.gameUI.onReturnToMenu = () => {
+          this.clearGameEndTimer();
+          this.endGame();
+          resolve(); // メニューに戻る時もPromiseを解決
         };
 
         this.gameUI.onGameSettings = (ballSpeed, winningScore) => {
@@ -314,12 +331,9 @@ class PongCLI {
           (error as Error).message
         );
 
-        // エラーメッセージを表示して待機
+        // エラーメッセージを表示してユーザー入力を待つ
         this.clearGameEndTimer();
-        setTimeout(() => {
-          this.endGame();
-          reject(error);
-        }, 2000);
+        reject(error);
       }
     });
   }
@@ -369,6 +383,9 @@ class PongCLI {
     }
 
     console.log(colors.cyan("🏓 メインメニューに戻ります..."));
+    
+    // ライブラリ間の切り替えのため少し待機
+    setTimeout(() => {}, 100);
   }
 
   /**
@@ -382,6 +399,14 @@ class PongCLI {
       }
     } catch (error) {
       console.error("Failed to reset raw mode:", error);
+    }
+
+    try {
+      // 残留イベントリスナーをクリア
+      process.stdin.removeAllListeners('keypress');
+      process.stdin.removeAllListeners('data');
+    } catch (error) {
+      console.error("Failed to remove listeners:", error);
     }
 
     try {
@@ -399,10 +424,33 @@ class PongCLI {
     }
 
     try {
+      // カーソルキーモードを通常に戻す
+      process.stdout.write("\x1b[?1l");
+    } catch (error) {
+      console.error("Failed to reset cursor key mode:", error);
+    }
+
+    try {
+      // キーパッドモードを無効化
+      process.stdout.write("\x1b>");
+    } catch (error) {
+      console.error("Failed to reset keypad mode:", error);
+    }
+
+    try {
       // 画面をクリア
       console.clear();
     } catch (error) {
       console.error("Failed to clear screen:", error);
+    }
+
+    try {
+      // stdin を再開して通常のライン入力モードに戻す
+      if (process.stdin.isTTY) {
+        process.stdin.resume();
+      }
+    } catch (error) {
+      console.error("Failed to resume stdin:", error);
     }
   }
 
