@@ -27,11 +27,53 @@ class PongCLI {
    * CLI アプリケーションのメインエントリーポイント
    */
   public async run(): Promise<void> {
+    // イベントハンドラーを定義
+    const unhandledRejectionHandler = (reason: any, promise: Promise<any>) => {
+      // ExitPromptErrorは正常な終了なので無視
+      if (
+        reason &&
+        typeof reason === "object" &&
+        "name" in reason &&
+        reason.name === "ExitPromptError"
+      ) {
+        this.cleanupAndExit(0);
+        return;
+      }
+      console.error(
+        colors.red("🚨 Unhandled Rejection at:"),
+        promise,
+        colors.red("reason:"),
+        reason
+      );
+      this.cleanupAndExit(1);
+    };
+
+    const uncaughtExceptionHandler = (error: Error) => {
+      // ExitPromptErrorは正常な終了なので無視
+      if (error.name === "ExitPromptError") {
+        this.cleanupAndExit(0);
+        return;
+      }
+      console.error(colors.red("🚨 Uncaught Exception:"), error);
+      this.cleanupAndExit(1);
+    };
+
+    const sigintHandler = () => {
+      this.cleanupTerminal();
+      console.log("\n👋 CLIを終了します...");
+      this.cleanupAndExit(0);
+    };
+
+    // イベントハンドラーを登録
+    process.on("unhandledRejection", unhandledRejectionHandler);
+    process.on("uncaughtException", uncaughtExceptionHandler);
+    process.on("SIGINT", sigintHandler);
+
     this.userSession = null;
+
     try {
       // メインメニュー
       while (true) {
-        process.stdout.write("\x1b[2J\x1b[0f"); // ANSI escape sequences
         console.clear();
         console.log(colors.bold(colors.cyan("🏓 Pong CLI Game へようこそ！")));
         console.log(colors.gray(`サーバー: ${this.config.serverUrl}`));
@@ -61,10 +103,40 @@ class PongCLI {
       }
     } catch (error) {
       console.error(colors.red("🚨 エラーが発生しました:"), error);
+      await this.cleanup();
       process.exit(1);
+    } finally {
+      // イベントハンドラーを削除
+      process.removeListener("unhandledRejection", unhandledRejectionHandler);
+      process.removeListener("uncaughtException", uncaughtExceptionHandler);
+      process.removeListener("SIGINT", sigintHandler);
     }
   }
 
+  // ヘルパーメソッドを追加
+  private cleanupTerminal(): void {
+    try {
+      // ターミナル状態をリセット
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false);
+      }
+      process.stdout.write("\x1b[?25h"); // カーソル表示
+      process.stdout.write("\x1b[?1049l"); // 通常スクリーンバッファ
+    } catch (error) {
+      console.error("Error during terminal cleanup:", error);
+    }
+  }
+
+  private async cleanupAndExit(code: number): Promise<void> {
+    this.cleanupTerminal();
+    try {
+      await this.cleanup();
+    } catch (error) {
+      console.error("Error during cleanup:", error);
+    }
+    process.exit(code);
+  }
+  
   /**
    * ログイン処理
    */
@@ -292,7 +364,7 @@ class PongCLI {
     } catch (error) {
       console.error("Terminal reset error:", error);
     }
-    
+
     console.log(colors.cyan("🏓 メインメニューに戻ります..."));
   }
 
@@ -311,14 +383,14 @@ class PongCLI {
 
     try {
       // カーソルを表示
-      process.stdout.write('\x1b[?25h');
+      process.stdout.write("\x1b[?25h");
     } catch (error) {
       console.error("Failed to show cursor:", error);
     }
 
     try {
       // 通常のスクリーンバッファに戻る
-      process.stdout.write('\x1b[?1049l');
+      process.stdout.write("\x1b[?1049l");
     } catch (error) {
       console.error("Failed to restore screen buffer:", error);
     }
@@ -410,54 +482,8 @@ async function main() {
   await cli.run();
 }
 
-// エラーハンドリング
-process.on("unhandledRejection", (reason, promise) => {
-  // ExitPromptErrorは正常な終了なので無視
-  if (
-    reason &&
-    typeof reason === "object" &&
-    "name" in reason &&
-    reason.name === "ExitPromptError"
-  ) {
-    process.exit(0);
-  }
-  console.error(
-    colors.red("🚨 Unhandled Rejection at:"),
-    promise,
-    colors.red("reason:"),
-    reason
-  );
-  process.exit(1);
-});
-
-process.on("uncaughtException", (error) => {
-  // ExitPromptErrorは正常な終了なので無視
-  if (error.name === "ExitPromptError") {
-    process.exit(0);
-  }
-  console.error(colors.red("🚨 Uncaught Exception:"), error);
-  process.exit(1);
-});
-
-// Ctrl+C での正常終了
-process.on("SIGINT", () => {
-  try {
-    // ターミナル状態をリセット
-    if (process.stdin.isTTY) {
-      process.stdin.setRawMode(false);
-    }
-    process.stdout.write('\x1b[?25h'); // カーソル表示
-    process.stdout.write('\x1b[?1049l'); // 通常スクリーンバッファ
-  } catch (error) {
-    console.error("Error during SIGINT cleanup:", error);
-  }
-  console.log("\n👋 CLIを終了します...");
-  process.exit(0);
-});
-
 // メイン関数を実行
 if (require.main === module) {
-  process.stdout.write("\x1b[2J\x1b[0f"); // ANSI escape sequences
   console.clear();
   main().catch((error) => {
     console.error(colors.red("🚨 Fatal error:"), error);
