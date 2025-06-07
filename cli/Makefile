@@ -1,6 +1,6 @@
 .PHONY: all
 all: build
-	./dist/index.js --dev
+	./dist/index.js
 
 .PHONY: build
 build:

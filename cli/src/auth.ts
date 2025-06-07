@@ -12,6 +12,9 @@ export class AuthClient {
     this.config = config;
     this.cookieJar = new CookieJar();
 
+    // 自己証明書を許可
+    process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+
     // axiosにクッキーサポートを追加
     this.axios = axiosCookieJarSupport.wrapper(axios.create());
     (this.axios.defaults as any).jar = this.cookieJar;
@@ -35,7 +38,8 @@ export class AuthClient {
           },
         },
       );
-
+      console.log(`🔐 ログインリクエスト: ${this.config.authUrl}/login`);
+      console.log(`🔐 レスポンスステータス: ${response}`);
       if (
         response.status === 200 &&
         response.data.user &&
