@@ -17,9 +17,6 @@ export default function FriendsPage() {
   const router = useRouter();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [friendId, setFriendId] = useState("");
-  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -42,40 +39,9 @@ export default function FriendsPage() {
       const data = await response.json();
       setFriends(data.friends);
     } catch (error) {
-      setError("友達一覧の取得に失敗しました");
+      console.error("友達一覧の取得に失敗しました:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const addFriend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!friendId.trim()) return;
-
-    setAdding(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/friends", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ friendId: friendId.trim() }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "友達追加に失敗しました");
-      }
-
-      setFriendId("");
-      loadFriends();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "友達追加に失敗しました");
-    } finally {
-      setAdding(false);
     }
   };
 
@@ -91,33 +57,8 @@ export default function FriendsPage() {
     <div className="container mx-auto min-h-screen pt-20 pb-13 px-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-cyan-400 mb-8 text-center">
-          Friends
+          Friends List
         </h1>
-
-        {/* 友達追加フォーム */}
-        <div className="bg-gray-800 p-6 rounded-lg border border-cyan-400 mb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">友達を追加</h2>
-          <form onSubmit={addFriend} className="flex gap-3">
-            <input
-              type="text"
-              value={friendId}
-              onChange={(e) => setFriendId(e.target.value)}
-              placeholder="ユーザーIDを入力"
-              className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
-              disabled={adding}
-            />
-            <button
-              type="submit"
-              disabled={adding || !friendId.trim()}
-              className="px-6 py-2 bg-cyan-400 text-black font-semibold rounded hover:bg-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {adding ? "追加中..." : "追加"}
-            </button>
-          </form>
-          {error && (
-            <p className="mt-3 text-red-400 text-sm">{error}</p>
-          )}
-        </div>
 
         {/* 友達一覧 */}
         <div className="bg-gray-800 p-6 rounded-lg border border-cyan-400">
