@@ -235,7 +235,6 @@ class PongCLI {
     return new Promise<void>((resolve, reject) => {
       try {
         // 画面を完全にクリアしてメニューを消去
-        process.stdout.write("\x1b[2J\x1b[0f");
         console.clear();
 
         // UI を初期化
@@ -293,6 +292,10 @@ class PongCLI {
           this.clearGameEndTimer();
           this.endGame();
           resolve(); // 手動終了時もPromiseを解決
+        };
+
+        this.gameUI.onGameSettings = (ballSpeed, winningScore) => {
+          this.gameClient?.sendGameSettings(ballSpeed, winningScore);
         };
 
         // WebSocket 接続（非同期）

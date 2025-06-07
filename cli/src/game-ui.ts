@@ -6,10 +6,12 @@ export class GameUI {
   private gameBox: any;
   private scoreBox: any;
   private statusBox: any;
+  private settingsModal: any;
 
   private currentState: GameState | null = null;
   private playerSide: PlayerSide = null;
   private opponentName: string = "Opponent";
+  private isSettingsModalOpen: boolean = false;
 
   // ゲームフィールドの定数
   private readonly FIELD_WIDTH = 80;
@@ -25,6 +27,7 @@ export class GameUI {
   // イベントハンドラー
   public onPaddleMove?: (y: number) => void;
   public onQuit?: () => void;
+  public onGameSettings?: (ballSpeed: number, winningScore: number) => void;
 
   constructor() {
     this.screen = blessed.screen({
@@ -103,11 +106,22 @@ export class GameUI {
   private setupKeyHandlers(): void {
     // パドル移動
     this.screen.key(["w", "up"], () => {
-      this.movePaddle(-1);
+      if (!this.isSettingsModalOpen) {
+        this.movePaddle(-1);
+      }
     });
 
     this.screen.key(["s", "down"], () => {
-      this.movePaddle(1);
+      if (!this.isSettingsModalOpen) {
+        this.movePaddle(1);
+      }
+    });
+
+    // 設定モーダル表示（setup状態の時のみ）
+    this.screen.key(["space"], () => {
+      if (this.currentState?.status === "setup" && !this.isSettingsModalOpen) {
+        this.showSettingsModal();
+      }
     });
 
     // 終了
@@ -133,8 +147,8 @@ export class GameUI {
       0,
       Math.min(
         this.GAME_HEIGHT - this.GAME_PADDLE_HEIGHT,
-        paddle.y + moveAmount,
-      ),
+        paddle.y + moveAmount
+      )
     );
 
     if (this.onPaddleMove) {
@@ -171,7 +185,7 @@ export class GameUI {
    */
   public onCountdown(count: number): void {
     this.updateStatus(
-      `{center}{bold}{yellow-fg}${count}{/yellow-fg}{/bold}{/center}`,
+      `{center}{bold}{yellow-fg}${count}{/yellow-fg}{/bold}{/center}`
     );
     this.screen.render();
   }
@@ -186,7 +200,7 @@ export class GameUI {
       `{center}{bold}GAME OVER{/bold}{/center}\n\n` +
         `{center}${isWinner ? "{green-fg}{bold}YOU WIN!{/bold}{/green-fg}" : "{red-fg}{bold}YOU LOSE{/bold}{/red-fg}"}{/center}\n\n` +
         `{center}Final Score{/center}\n` +
-        `{center}${result.finalScore.left} - ${result.finalScore.right}{/center}`,
+        `{center}${result.finalScore.left} - ${result.finalScore.right}{/center}`
     );
 
     this.screen.render();
@@ -269,12 +283,12 @@ export class GameUI {
     field: string[][],
     paddle: any,
     x: number,
-    char: string,
+    char: string
   ): void {
     const paddleY =
       Math.round((paddle.y / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2)) + 1;
     const paddleHeight = Math.round(
-      (this.GAME_PADDLE_HEIGHT / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2),
+      (this.GAME_PADDLE_HEIGHT / this.GAME_HEIGHT) * (this.FIELD_HEIGHT - 2)
     );
 
     for (
@@ -296,7 +310,7 @@ export class GameUI {
       `{center}You{/center}\n` +
         `{center}{bold}{green-fg}${myScore}{/green-fg}{/bold}{/center}\n\n` +
         `{center}${this.opponentName}{/center}\n` +
-        `{center}{bold}{red-fg}${opponentScore}{/red-fg}{/bold}{/center}`,
+        `{center}{bold}{red-fg}${opponentScore}{/red-fg}{/bold}{/center}`
     );
   }
 
@@ -309,7 +323,7 @@ export class GameUI {
       case "connecting":
         return "{center}Connecting...{/center}";
       case "setup":
-        return "{center}Setting up...{/center}";
+        return "{center}Setting up...{/center}\n\n{center}{yellow-fg}SPACE: Game Settings{/yellow-fg}{/center}\n{center}Ctrl+C: Quit{/center}";
       case "waiting":
         return "{center}Preparing...{/center}";
       case "countdown":
@@ -338,6 +352,145 @@ export class GameUI {
    * 画面を再描画
    */
   public render(): void {
+    this.screen.render();
+  }
+
+  /**
+   * ゲーム設定モーダルを表示
+   */
+  private showSettingsModal(): void {
+    this.isSettingsModalOpen = true;
+
+    // フォーム用の変数
+    let ballSpeed = 5;
+    let winningScore = 5;
+    let currentField = 0; // 0: ballSpeed, 1: winningScore
+    let keyProcessing = false; // キー処理の重複を防ぐフラグ
+
+    // モーダルボックス
+    this.settingsModal = blessed.box({
+      parent: this.screen,
+      top: "center",
+      left: "center",
+      width: 50,
+      height: 15,
+      border: {
+        type: "line",
+      },
+      style: {
+        border: {
+          fg: "yellow",
+        },
+        bg: "white",
+      },
+      label: " Game Settings ",
+      tags: true,
+      keys: true, // キーイベントを有効化
+      vi: false, // viモードを無効化
+    });
+
+    // モーダルにフォーカスを設定
+    this.settingsModal.focus();
+
+    // 設定内容を更新する関数
+    const updateModalContent = () => {
+      const content = [
+        "{center}{bold}Game Settings{/bold}{/center}",
+        "",
+        `Ball Speed: ${currentField === 0 ? "{yellow-fg}{bold}" : ""}${ballSpeed}${currentField === 0 ? "{/bold}{/yellow-fg}" : ""} (1-30)`,
+        `Winning Score: ${currentField === 1 ? "{yellow-fg}{bold}" : ""}${winningScore}${currentField === 1 ? "{/bold}{/yellow-fg}" : ""} (1-30)`,
+        "",
+        "{center}↑/↓: Select field{/center}",
+        "{center}←/→: Change value{/center}",
+        "{center}ENTER: Apply{/center}",
+        "{center}ESC: Cancel{/center}",
+      ].join("\n");
+
+      this.settingsModal.setContent(content);
+      this.screen.render();
+    };
+
+    // 初期表示
+    updateModalContent();
+
+    // キーハンドラーを設定（モーダルボックス自体に設定）
+    const modalKeyHandler = (_ch: string, key: any) => {
+      if (!this.isSettingsModalOpen || keyProcessing) return;
+
+      keyProcessing = true;
+
+      // 短時間後にフラグをリセット
+      setTimeout(() => {
+        keyProcessing = false;
+      }, 50);
+
+      switch (key.name) {
+        case "up":
+          currentField = currentField === 0 ? 1 : 0;
+          updateModalContent();
+          break;
+
+        case "down":
+          currentField = currentField === 1 ? 0 : 1;
+          updateModalContent();
+          break;
+
+        case "left":
+          if (currentField === 0) {
+            ballSpeed = Math.max(1, ballSpeed - 1);
+          } else {
+            winningScore = Math.max(1, winningScore - 1);
+          }
+          updateModalContent();
+          break;
+
+        case "right":
+          if (currentField === 0) {
+            ballSpeed = Math.min(30, ballSpeed + 1);
+          } else {
+            winningScore = Math.min(30, winningScore + 1);
+          }
+          updateModalContent();
+          break;
+
+        case "enter":
+          this.closeSettingsModal();
+          if (this.onGameSettings) {
+            this.onGameSettings(ballSpeed, winningScore);
+          }
+          break;
+
+        case "escape":
+          this.closeSettingsModal();
+          break;
+      }
+    };
+
+    // モーダルボックス自体にキーハンドラーを設定
+    this.settingsModal.on("keypress", modalKeyHandler);
+
+    // モーダル用のクリーンアップ関数を保存
+    this.settingsModal._keyHandler = modalKeyHandler;
+
+    this.screen.render();
+  }
+
+  /**
+   * ゲーム設定モーダルを閉じる
+   */
+  private closeSettingsModal(): void {
+    if (this.settingsModal) {
+      // モーダル自体からキーハンドラーを削除
+      if (this.settingsModal._keyHandler) {
+        this.settingsModal.removeListener(
+          "keypress",
+          this.settingsModal._keyHandler
+        );
+      }
+      this.settingsModal.destroy();
+      this.settingsModal = null;
+    }
+    this.isSettingsModalOpen = false;
     this.screen.render();
   }
 }
