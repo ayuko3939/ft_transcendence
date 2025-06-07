@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { logUserAction } from "@/lib/clientLogger";
+import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import { logUserAction } from "@/lib/clientLogger";
 
 import PasswordChangeModal from "./PasswordChangeModal";
 
 export default function Header() {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -20,6 +22,11 @@ export default function Header() {
   };
   const handleClosePasswordModal = () => {
     setIsPasswordModalOpen(false);
+  };
+
+  const handleFriendsClick = () => {
+    setIsDropdownOpen(false);
+    router.push("/friends");
   };
 
   const toggleDropdown = () => {
@@ -110,6 +117,15 @@ export default function Header() {
                     Change Password
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={handleFriendsClick}
+                  className="block w-full px-4 py-2 text-left text-sm text-white hover:bg-cyan-900/50 focus:bg-cyan-900/70 focus:outline-none"
+                  role="menuitem"
+                  tabIndex={-1}
+                >
+                  Friends List
+                </button>
                 <button
                   type="button"
                   onClick={handleLogout}

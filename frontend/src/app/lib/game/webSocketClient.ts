@@ -15,7 +15,7 @@ export interface WebSocketHandlers {
   onChatMessages: (messages: ChatMessage[]) => void;
   onCountdown: (count: number) => void;
   onGameStart: (gameState: GameState) => void;
-  onGameOver: (result: GameResult) => void;
+  onGameOver: (result: GameResult, opponentUserId?: string) => void;
   onWaitingForPlayer: () => void;
 }
 
@@ -133,7 +133,7 @@ export class PongSocketClient {
         this.handlers.onGameStart(data.state);
         break;
       case "gameOver":
-        this.handlers.onGameOver(data.result);
+        this.handlers.onGameOver(data.result, data.opponentUserId);
         break;
       case "gameState":
         this.handlers.onGameState(data.state);

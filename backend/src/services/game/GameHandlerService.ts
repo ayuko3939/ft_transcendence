@@ -28,8 +28,10 @@ export class GameHandlerService {
     reason: string,
     message: string,
   ): void {
-    const victorPlayer = this.room.players[winner];
-    if (!victorPlayer) return;
+    const leftPlayer = this.room.players.left;
+    const rightPlayer = this.room.players.right;
+    
+    if (!leftPlayer || !rightPlayer) return;
 
     // 勝者のスコアを勝利点数にする
     if (winner === "left") {
@@ -38,20 +40,31 @@ export class GameHandlerService {
       this.room.state.score.right = this.room.state.winningScore;
     }
 
-    const victoryMessage = JSON.stringify({
-      type: "gameOver",
-      result: {
-        winner: winner,
-        finalScore: {
-          left: this.room.state.score.left,
-          right: this.room.state.score.right,
-        },
-        reason: reason,
-        message: message,
+    const gameResult = {
+      winner: winner,
+      finalScore: {
+        left: this.room.state.score.left,
+        right: this.room.state.score.right,
       },
-    });
+      reason: reason,
+      message: message,
+    };
 
-    victorPlayer.send(victoryMessage);
+    // 左プレイヤーにメッセージ送信（対戦相手は右プレイヤー）
+    const leftMessage = JSON.stringify({
+      type: "gameOver",
+      result: gameResult,
+      opponentUserId: this.room.userIds.right,
+    });
+    leftPlayer.send(leftMessage);
+
+    // 右プレイヤーにメッセージ送信（対戦相手は左プレイヤー）
+    const rightMessage = JSON.stringify({
+      type: "gameOver",
+      result: gameResult,
+      opponentUserId: this.room.userIds.left,
+    });
+    rightPlayer.send(rightMessage);
   }
 
   private stopGame(): void {
@@ -105,7 +118,7 @@ export class GameHandlerService {
     if (this.room.tournamentMatchId) {
       const isValidPlayer = await this.validateTournamentPlayer(
         data.sessionToken,
-        playerSide,
+        playerSide
       );
       if (!isValidPlayer) {
         const player = this.room.players[playerSide];
@@ -114,7 +127,7 @@ export class GameHandlerService {
             JSON.stringify({
               type: "error",
               message: "このトーナメントマッチに参加する権限がありません",
-            }),
+            })
           );
           player.close(1008, "Unauthorized for this tournament match");
         }
@@ -342,14 +355,14 @@ export class GameHandlerService {
    */
   private async validateTournamentPlayer(
     userId: string,
-    playerSide: "left" | "right",
+    playerSide: "left" | "right"
   ): Promise<boolean> {
     if (!this.room.tournamentMatchId) return false;
 
     try {
       const tournamentService = new TournamentService();
       const matchDetails = await tournamentService.getMatchDetails(
-        this.room.tournamentMatchId,
+        this.room.tournamentMatchId
       );
 
       if (!matchDetails) return false;
@@ -360,7 +373,7 @@ export class GameHandlerService {
 
       if (!isPlayer1 && !isPlayer2) {
         console.log(
-          `ユーザー ${userId} はマッチ ${this.room.tournamentMatchId} の参加者ではありません`,
+          `ユーザー ${userId} はマッチ ${this.room.tournamentMatchId} の参加者ではありません`
         );
         return false;
       }

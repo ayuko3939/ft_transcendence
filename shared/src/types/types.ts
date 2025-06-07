@@ -98,6 +98,6 @@ export type ServerMessage =
   | { type: "gameState"; state: GameState } // ゲーム状態更新
   | { type: "countdown"; count: number } // カウントダウン
   | { type: "gameStart"; state: GameState } // ゲーム開始
-  | { type: "gameOver"; result: GameResult } // ゲーム終了
+  | { type: "gameOver"; result: GameResult; opponentUserId?: string } // ゲーム終了
   | { type: "chatUpdate"; messages: ChatMessage[] } // チャット更新
   | { type: "waitingForPlayer" }; // プレイヤー待機中

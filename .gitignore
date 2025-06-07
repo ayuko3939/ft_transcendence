@@ -8,3 +8,4 @@ mise.local.toml
 database/drizzle/
 *.db
 !*dummy.db
+CLAUDE.md
