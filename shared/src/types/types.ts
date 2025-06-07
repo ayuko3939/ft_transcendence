@@ -100,4 +100,5 @@ export type ServerMessage =
   | { type: "gameStart"; state: GameState } // ゲーム開始
   | { type: "gameOver"; result: GameResult } // ゲーム終了
   | { type: "chatUpdate"; messages: ChatMessage[] } // チャット更新
-  | { type: "waitingForPlayer" }; // プレイヤー待機中
+  | { type: "waitingForPlayer" } // プレイヤー待機中
+  | { type: "error"; message: string }; // エラーメッセージ

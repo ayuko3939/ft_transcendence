@@ -96,16 +96,35 @@ export class GameHandlerService {
     data: Extract<ClientMessage, { type: "auth" }>,
     playerSide: "left" | "right"
   ): Promise<void> {
-    // ユーザーIDをGameRoomに保存
-    this.room.userIds[playerSide] = data.sessionToken;
+    const userId = data.sessionToken; // sessionTokenと言いながら実際はuserIdを使う
+    
+    // 同じユーザーIDが既に接続しているかチェック
+    const otherSide = playerSide === "left" ? "right" : "left";
+    const otherUserId = this.room.userIds[otherSide];
+    
+    if (otherUserId && otherUserId === userId) {
+      console.log(`同じユーザー ${userId} が既に接続済み - 接続を拒否`);
+      const player = this.room.players[playerSide];
+      if (player) {
+        player.send(JSON.stringify({
+          type: "error",
+          message: "同じユーザーが既に参加しています"
+        }));
+        player.close(1008, "Same user already connected");
+      }
+      return;
+    }
 
-    console.log(`プレイヤー ${playerSide} 接続:`, data.sessionToken);
+    // ユーザーIDをGameRoomに保存
+    this.room.userIds[playerSide] = userId;
+
+    console.log(`プレイヤー ${playerSide} 接続:`, userId);
 
     // トーナメントマッチの場合、プレイヤーが正しいか検証
     if (this.room.tournamentMatchId) {
       const isValidPlayer = await this.validateTournamentPlayer(
-        data.sessionToken,
-        playerSide
+        userId,
+        playerSide,
       );
       if (!isValidPlayer) {
         const player = this.room.players[playerSide];

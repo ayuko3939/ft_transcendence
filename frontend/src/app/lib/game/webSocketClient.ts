@@ -17,6 +17,7 @@ export interface WebSocketHandlers {
   onGameStart: (gameState: GameState) => void;
   onGameOver: (result: GameResult) => void;
   onWaitingForPlayer: () => void;
+  onError: (message: string) => void;
 }
 
 export class PongSocketClient {
@@ -143,6 +144,9 @@ export class PongSocketClient {
         break;
       case "waitingForPlayer":
         this.handlers.onWaitingForPlayer();
+        break;
+      case "error":
+        this.handlers.onError(data.message);
         break;
     }
   }

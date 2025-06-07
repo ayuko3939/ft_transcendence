@@ -110,8 +110,6 @@ function assignPlayerToRoom(
   let isAuthenticated = room.state.gameType !== "tournament";
 
   connection.on("message", (message: Buffer) => {
-    gameHandlerService.handlePlayerMessage(message, playerSide);
-
     // トーナメントの場合、authメッセージ後に認証フラグを立てる
     if (!isAuthenticated) {
       try {
@@ -123,6 +121,8 @@ function assignPlayerToRoom(
         // パースエラーは無視
       }
     }
+
+    gameHandlerService.handlePlayerMessage(message, playerSide);
   });
 
   connection.on("close", () => {
