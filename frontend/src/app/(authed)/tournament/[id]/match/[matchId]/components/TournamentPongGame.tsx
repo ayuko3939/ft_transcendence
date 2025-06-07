@@ -125,6 +125,11 @@ const TournamentPongGame = ({
         console.log("[Tournament] onWaitingForPlayer");
         setGameState((prev) => ({ ...prev, status: "waiting" }));
       },
+      onError: (message) => {
+        console.error("[Tournament] WebSocket error:", message);
+        // For tournament games, we might want to handle errors differently
+        // For now, just log the error
+      },
     });
 
     socketClientRef.current = socketClient;
