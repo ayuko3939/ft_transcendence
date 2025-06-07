@@ -6,3 +6,4 @@ all: build
 build:
 	@echo "Building CLI application..."
 	pnpm run build
+	chmod +x dist/index.js
