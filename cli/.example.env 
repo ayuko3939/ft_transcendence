@@ -1,0 +1,4 @@
+# Replace `localhost` with your actual server domain if needed.
+SERVER_URL="https://localhost"
+WS_URL="wss://localhost/ws/game"
+AUTH_URL="https://localhost/api/auth"

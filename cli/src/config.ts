@@ -1,11 +1,15 @@
+import { config } from "dotenv";
 import type { CLIConfig } from "./types";
+
+// .envファイルを読み込み
+config();
 
 // デフォルト設定（本番環境用）
 export const DEFAULT_CONFIG: CLIConfig = {
   // Nginx経由でアクセス
-  serverUrl: "http://localhost",
-  wsUrl: "ws://localhost/api/game",
-  authUrl: "http://localhost/api/auth",
+  serverUrl: process.env.SERVER_URL || "https://localhost",
+  wsUrl: process.env.WS_URL || "wss://localhost/ws/game",
+  authUrl: process.env.AUTH_URL || "https://localhost/api/auth",
 };
 
 // 開発環境用設定

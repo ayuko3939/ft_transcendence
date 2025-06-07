@@ -1,4 +1,5 @@
 import WebSocket from "ws";
+import type { CookieJar } from "tough-cookie";
 import type {
   ClientMessage,
   ServerMessage,
@@ -29,15 +30,18 @@ export class GameClient {
   private handlers: GameEventHandlers;
   private isConnected = false;
   private roomId?: string;
+  private cookieJar?: CookieJar;
 
   constructor(
     config: CLIConfig,
     session: UserSession,
     handlers: GameEventHandlers,
+    cookieJar?: CookieJar,
   ) {
     this.config = config;
     this.session = session;
     this.handlers = handlers;
+    this.cookieJar = cookieJar;
   }
 
   /**
@@ -54,7 +58,20 @@ export class GameClient {
 
         console.log(`🔄 WebSocket接続開始: ${wsUrl}`);
 
-        this.ws = new WebSocket(wsUrl);
+        // クッキーを取得してヘッダーに設定
+        const headers: { [key: string]: string } = {};
+        if (this.cookieJar) {
+          const cookies = this.cookieJar.getCookiesSync(this.config.authUrl);
+          if (cookies.length > 0) {
+            headers.Cookie = cookies.map(cookie => cookie.toString()).join('; ');
+            console.log(`🍪 WebSocket接続にクッキーを設定: ${cookies.length}個`);
+          }
+        }
+
+        // 自己証明書を許可
+        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+
+        this.ws = new WebSocket(wsUrl, { headers });
         this.roomId = roomId;
 
         this.ws.on("open", () => {
@@ -87,7 +104,15 @@ export class GameClient {
         });
 
         this.ws.on("error", (error) => {
-          console.error("🚨 接続エラー:", error.message);
+          console.error("🚨 WebSocket接続エラー:", error);
+          console.error("🚨 エラー詳細:", {
+            message: error.message,
+            code: (error as any).code,
+            errno: (error as any).errno,
+            syscall: (error as any).syscall,
+            address: (error as any).address,
+            port: (error as any).port
+          });
 
           if (this.handlers.onError) {
             this.handlers.onError(error.message);
