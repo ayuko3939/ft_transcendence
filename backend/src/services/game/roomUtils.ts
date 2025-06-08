@@ -221,7 +221,10 @@ function handleGameOver(room: GameRoom) {
   }
 }
 
-export function findAvailableRoom(gameRooms: Map<string, GameRoom>): {
+export function findAvailableRoom(
+  gameRooms: Map<string, GameRoom>,
+  userId?: string
+): {
   roomId: string;
   room: GameRoom;
 } {
@@ -230,7 +233,17 @@ export function findAvailableRoom(gameRooms: Map<string, GameRoom>): {
     if (room.state.status === "finished") {
       continue;
     }
+    
+    // 部屋に空きがあるかチェック
     if (!room.players.left || !room.players.right) {
+      // 同じユーザーIDが既に接続していないかチェック
+      if (userId) {
+        const existingUserIds = Object.values(room.userIds).filter(Boolean);
+        if (existingUserIds.includes(userId)) {
+          console.log(`ユーザー ${userId} は既にルーム ${id} に接続済み - スキップ`);
+          continue;
+        }
+      }
       return { roomId: id, room };
     }
   }

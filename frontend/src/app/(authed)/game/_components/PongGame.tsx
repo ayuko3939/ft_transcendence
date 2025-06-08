@@ -20,6 +20,7 @@ import { BALL, CANVAS, GAME, PADDLE } from "@ft-transcendence/shared";
 import { useSession } from "next-auth/react";
 
 import ConfirmDialog from "./ConfirmDialog";
+import ErrorModal from "./ErrorModal";
 import styles from "./game.module.css";
 import GameCanvas from "./GameCanvas";
 import GameChat from "./GameChat";
@@ -73,6 +74,7 @@ const PongGame = () => {
 
   // UI状態
   const [showSurrenderConfirm, setShowSurrenderConfirm] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -127,6 +129,10 @@ const PongGame = () => {
       onWaitingForPlayer: () => {
         setGameState((prev) => ({ ...prev, status: "waiting" }));
         clientLogInfo("対戦相手待機中", { userId });
+      },
+      onError: (message) => {
+        setErrorMessage(message);
+        clientLogInfo("WebSocketエラー", { userId, error: message });
       },
     });
 
@@ -189,7 +195,7 @@ const PongGame = () => {
 
   // 背景制御ロジック
   const shouldDarkenBackground =
-    gameState.status !== "playing" || showSurrenderConfirm;
+    gameState.status !== "playing" || showSurrenderConfirm || errorMessage !== null;
 
   return (
     <div className={styles.container}>
@@ -236,6 +242,17 @@ const PongGame = () => {
         message="中断するとあなたは不戦敗となります。ゲームを中断しますか？"
         onConfirm={handleSurrender}
         onCancel={() => setShowSurrenderConfirm(false)}
+      />
+
+      <ErrorModal
+        show={errorMessage !== null}
+        title="接続エラー"
+        message={errorMessage || ""}
+        onClose={() => {
+          setErrorMessage(null);
+          if (socketClientRef.current) socketClientRef.current.disconnect();
+          router.push("/");
+        }}
       />
     </div>
   );

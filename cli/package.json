@@ -1,0 +1,45 @@
+{
+  "name": "cli",
+  "version": "1.0.0",
+  "description": "CLI client for ft_transcendence Pong game",
+  "main": "dist/index.js",
+  "bin": {
+    "pong-cli": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "fmt": "prettier --write \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@types/tough-cookie": "^4.0.5",
+    "axios": "^1.7.7",
+    "axios-cookiejar-support": "^6.0.2",
+    "blessed": "^0.1.81",
+    "colors": "^1.4.0",
+    "dotenv": "^16.5.0",
+    "inquirer": "^12.1.0",
+    "tough-cookie": "^5.1.2",
+    "ws": "^8.18.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/blessed": "^0.1.25",
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.10.1",
+    "@types/ws": "^8.5.13",
+    "@types/yargs": "^17.0.33",
+    "prettier": "^3.4.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "pong",
+    "game",
+    "cli",
+    "websocket"
+  ],
+  "author": "ft_transcendence",
+  "license": "MIT"
+}

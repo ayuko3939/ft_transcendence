@@ -120,6 +120,14 @@
   max-width: 500px;
 }
 
+.dialogTitle {
+  color: var(--cyber-primary, #00ffff);
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
 .dialogText {
   color: white;
   font-size: 1.2rem;
