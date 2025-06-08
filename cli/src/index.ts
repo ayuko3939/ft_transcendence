@@ -98,7 +98,7 @@ class PongCLI {
         switch (action) {
           case "random":
             await this.joinRandomGame();
-            break;
+            return;
           case "exit":
             await this.cleanup();
             return;
@@ -238,6 +238,7 @@ class PongCLI {
   private async joinRandomGame(): Promise<void> {
     console.log(colors.yellow("🔍 ランダムマッチを検索中..."));
     await this.startGame();
+    exit(0); // ゲーム終了後にCLIを終了
   }
 
   /**
@@ -382,7 +383,7 @@ class PongCLI {
       console.error("Terminal reset error:", error);
     }
 
-    console.log(colors.cyan("🏓 メインメニューに戻ります..."));
+    console.log(colors.cyan("🏓 ご利用ありがとうございました"));
 
     // ライブラリ間の切り替えのため少し待機
     setTimeout(() => {}, 100);
