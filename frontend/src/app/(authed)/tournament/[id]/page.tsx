@@ -154,15 +154,20 @@ export default function TournamentDetailPage() {
       setJoining(true);
       setShowJoinModal(false); // モーダルを閉じる
 
-      // WebSocket経由で参加通知を送信
-      if (wsRef.current) {
-        const joinData = {
-          type: "join",
-          userId: session.user.id,
-        };
-        wsRef.current.send(JSON.stringify(joinData));
-      }
+      // 先にセッション更新を実行
       await update();
+      
+      // 少し待機してからWebSocket送信
+      setTimeout(() => {
+        if (wsRef.current) {
+          const joinData = {
+            type: "join",
+            userId: session.user.id,
+          };
+          wsRef.current.send(JSON.stringify(joinData));
+        }
+      }, 100);
+
     } catch (error) {
       console.error("トーナメント参加エラー:", error);
       alert(
