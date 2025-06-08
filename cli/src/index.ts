@@ -9,6 +9,7 @@ import { GameClient } from "./game-client";
 import { GameUI } from "./game-ui";
 import { getConfig, createConfig } from "./config";
 import type { UserSession, CLIConfig, AuthCredentials } from "./types";
+import { exit } from "process";
 
 class PongCLI {
   private config: CLIConfig;
@@ -469,6 +470,7 @@ class PongCLI {
     }
 
     console.log(colors.cyan("👋 ご利用ありがとうございました！"));
+    exit(0);
   }
 }
 
