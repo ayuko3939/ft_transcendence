@@ -38,6 +38,7 @@ export async function createUser(
         email,
         emailVerified: null,
         image,
+        displayName: name
       })
       .returning({ id: user.id });
     if (!newUser) {
