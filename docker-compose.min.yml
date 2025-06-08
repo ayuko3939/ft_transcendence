@@ -29,6 +29,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_ENDPOINT=${AWS_ENDPOINT}
+      - AWS_INTERNAL_ENDPOINT=http://minio:9000
       - AWS_REGION=ap-northeast-1
       - UPLOAD_BUCKET_NAME=${UPLOAD_BUCKET_NAME}
       - LOG_FILE_PATH=/logs/frontend.log
@@ -95,7 +96,7 @@ services:
       - app-network
     command: ["server", "/data", "--console-address", ":9001"]
 
-  minio-init:
+  minio-mc:
     image: minio/mc:RELEASE.2025-04-16T18-13-26Z
     depends_on:
       - minio

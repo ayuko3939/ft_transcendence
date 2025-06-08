@@ -53,4 +53,4 @@ EOF
 
 echo '===== MinIO initialization completed successfully ====='
 
-exit 0
+mc admin trace -a -v ft-transcendence
