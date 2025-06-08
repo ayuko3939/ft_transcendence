@@ -28,8 +28,10 @@ export class GameHandlerService {
     reason: string,
     message: string
   ): void {
-    const victorPlayer = this.room.players[winner];
-    if (!victorPlayer) return;
+    const leftPlayer = this.room.players.left;
+    const rightPlayer = this.room.players.right;
+    
+    if (!leftPlayer || !rightPlayer) return;
 
     // 勝者のスコアを勝利点数にする
     if (winner === "left") {
@@ -38,20 +40,31 @@ export class GameHandlerService {
       this.room.state.score.right = this.room.state.winningScore;
     }
 
-    const victoryMessage = JSON.stringify({
-      type: "gameOver",
-      result: {
-        winner: winner,
-        finalScore: {
-          left: this.room.state.score.left,
-          right: this.room.state.score.right,
-        },
-        reason: reason,
-        message: message,
+    const gameResult = {
+      winner: winner,
+      finalScore: {
+        left: this.room.state.score.left,
+        right: this.room.state.score.right,
       },
-    });
+      reason: reason,
+      message: message,
+    };
 
-    victorPlayer.send(victoryMessage);
+    // 左プレイヤーにメッセージ送信（対戦相手は右プレイヤー）
+    const leftMessage = JSON.stringify({
+      type: "gameOver",
+      result: gameResult,
+      opponentUserId: this.room.userIds.right,
+    });
+    leftPlayer.send(leftMessage);
+
+    // 右プレイヤーにメッセージ送信（対戦相手は左プレイヤー）
+    const rightMessage = JSON.stringify({
+      type: "gameOver",
+      result: gameResult,
+      opponentUserId: this.room.userIds.left,
+    });
+    rightPlayer.send(rightMessage);
   }
 
   private stopGame(): void {

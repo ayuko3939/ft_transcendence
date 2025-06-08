@@ -64,6 +64,7 @@ const PongGame = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [opponentUserId, setOpponentUserId] = useState<string | undefined>(undefined);
 
   // ゲーム設定
   const [gameSettings, setGameSettings] = useState<GameSettings>({
@@ -109,8 +110,9 @@ const PongGame = () => {
         setGameState(state);
         logUserAction("ゲーム開始", userId);
       },
-      onGameOver: (result) => {
+      onGameOver: (result, receivedOpponentUserId) => {
         setGameResult(result);
+        setOpponentUserId(receivedOpponentUserId);
         setGameState((prev) => ({
           ...prev,
           status: "finished",
@@ -222,6 +224,8 @@ const PongGame = () => {
         show={gameState.status === "finished" && gameResult !== null}
         result={gameResult}
         playerSide={playerSide}
+        opponentUserId={opponentUserId}
+        gameType="online"
         onBackToHome={handleBackToHome}
       />
 

@@ -214,3 +214,23 @@ export const tournamentMatches = sqliteTable(
     uniqueIndex("tournament_round_match_unique").on(table.tournamentId, table.round, table.matchNumber),
   ]
 );
+
+
+// ===== 友達関連テーブル =====
+
+export const friends = sqliteTable("friends", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  friendId: text("friend_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  uniqueIndex("friends_user_friend_unique").on(table.userId, table.friendId),
+]);

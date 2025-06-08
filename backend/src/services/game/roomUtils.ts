@@ -175,23 +175,38 @@ export function checkAndStartTournamentGame(room: GameRoom): void {
 }
 
 function handleGameOver(room: GameRoom) {
-  const gameOverMessage = JSON.stringify({
-    type: "gameOver",
-    result: {
-      winner: room.state.winner,
-      finalScore: {
-        left: room.state.score.left,
-        right: room.state.score.right,
-      },
-      message:
-        room.state.gameType === "tournament"
-          ? "トーナメント戦が終了しました"
-          : undefined,
-    },
-  });
+  const leftPlayer = room.players.left;
+  const rightPlayer = room.players.right;
+  
+  if (!leftPlayer || !rightPlayer) return;
 
-  room.players.left?.send(gameOverMessage);
-  room.players.right?.send(gameOverMessage);
+  const gameResult = {
+    winner: room.state.winner,
+    finalScore: {
+      left: room.state.score.left,
+      right: room.state.score.right,
+    },
+    message:
+      room.state.gameType === "tournament"
+        ? "トーナメント戦が終了しました"
+        : undefined,
+  };
+
+  // 左プレイヤーにメッセージ送信（対戦相手は右プレイヤー）
+  const leftMessage = JSON.stringify({
+    type: "gameOver",
+    result: gameResult,
+    opponentUserId: room.userIds.right,
+  });
+  leftPlayer.send(leftMessage);
+
+  // 右プレイヤーにメッセージ送信（対戦相手は左プレイヤー）
+  const rightMessage = JSON.stringify({
+    type: "gameOver",
+    result: gameResult,
+    opponentUserId: room.userIds.left,
+  });
+  rightPlayer.send(rightMessage);
 
   if (room.timers.game) {
     clearInterval(room.timers.game);
