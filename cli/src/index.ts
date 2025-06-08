@@ -291,7 +291,7 @@ class PongCLI {
             this.gameUI?.showDisconnected();
             // タイマーは使用せず、ユーザー入力を待つ
           },
-        });
+        }, this.authClient.getCookieJar());
 
         // UI イベントハンドラーを設定
         this.gameUI.onPaddleMove = (y) => {
@@ -315,7 +315,7 @@ class PongCLI {
         };
 
         // WebSocket 接続（非同期）
-        this.gameClient
+        this.gameClient!
           .connect(roomId)
           .then(() => {
             // UIレンダリング開始
