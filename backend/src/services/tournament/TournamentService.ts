@@ -303,13 +303,13 @@ export class TournamentService {
   }
 
   /**
-   * すべてのトーナメントを取得（waiting状態のもの）
+   * すべてのトーナメントを取得（waiting状態とin_progress状態のもの）
    */
   async getAvailableTournaments(): Promise<TournamentWithDetails[]> {
     const tournamentListFromDB = await db
       .select()
       .from(tournaments)
-      .where(eq(tournaments.status, "waiting"))
+      .where(inArray(tournaments.status, ["waiting", "in_progress"]))
       .orderBy(desc(tournaments.createdAt));
 
     if (tournamentListFromDB.length === 0) {
@@ -335,7 +335,7 @@ export class TournamentService {
     );
 
     // 全トーナメントの参加者を一度に取得
-    const allParticipantsFromDB = await db
+    const allParticipantsFromDB = tournamentList.length > 0 ? await db
       .select({
         id: tournamentParticipants.id,
         tournamentId: tournamentParticipants.tournamentId,
@@ -352,7 +352,7 @@ export class TournamentService {
           tournamentParticipants.tournamentId,
           tournamentList.map((t) => t.id),
         ),
-      );
+      ) : [];
 
     // allParticipantsFromDB を適切な型に変換
     const allParticipants = allParticipantsFromDB.map((item) => ({
