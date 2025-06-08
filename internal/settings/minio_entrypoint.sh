@@ -29,4 +29,4 @@ EOF
 
 echo '===== MinIO initialization completed successfully ====='
 
-exit 0
+exec "$@"

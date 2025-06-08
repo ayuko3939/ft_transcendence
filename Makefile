@@ -24,3 +24,7 @@ clean:
 .PHONY: fclean
 fclean:
 	$(DOCKER_COMPOSE) down -v --rmi all
+
+.PHONY: cli
+cli:
+	make -C cli

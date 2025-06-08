@@ -74,19 +74,21 @@ services:
     volumes:
       - nginx_ssl:/etc/nginx/ssl
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./nginx/conf.d/pong-game.conf.template:/etc/nginx/conf.d/pong-game.conf.template
       - logdir:/logstash/
     depends_on:
       - frontend
       - backend
     networks:
       - app-network
+    environment:
+      - SERVER_NAME=${SERVER_NAME:-localhost}
+      - IP_ADDRESS=${IP_ADDRESS:-127.0.0.1}
 
   minio:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
     container_name: ft_transcendence_minio
     ports:
-      - "9000:9000"
       - "9001:9001"
     volumes:
       - miniodir:/data
@@ -97,7 +99,7 @@ services:
       - app-network
     command: ["server", "/data", "--console-address", ":9001"]
 
-  minio-init:
+  minio-mc:
     image: minio/mc:RELEASE.2025-04-16T18-13-26Z
     depends_on:
       - minio
@@ -108,6 +110,7 @@ services:
     volumes:
       - ./internal/settings/minio_entrypoint.sh:/minio_entrypoint.sh
     entrypoint: ["/bin/sh", "/minio_entrypoint.sh"]
+    command: ["mc", "admin", "trace", "-a", "-v", "ft-transcendence"]
     networks:
       - app-network
 

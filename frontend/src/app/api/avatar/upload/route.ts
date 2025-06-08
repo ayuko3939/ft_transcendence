@@ -65,8 +65,14 @@ export async function POST(request: NextRequest) {
 
     const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 900 });
 
+    // Convert internal MinIO URL to external Nginx proxy URL
+    const externalSignedUrl = signedUrl.replace(
+      "http://minio:9000",
+      `${process.env.AWS_ENDPOINT || "https://localhost/storage"}`
+    );
+
     const minioPublicEndpoint =
-      process.env.AWS_ENDPOINT || "http://localhost:9000";
+      process.env.AWS_ENDPOINT || "https://localhost/storage";
     const publicUrl = `${minioPublicEndpoint}/${BUCKET_NAME}/${objectKey}`;
 
     logApiRequest(
@@ -77,7 +83,7 @@ export async function POST(request: NextRequest) {
     );
     return NextResponse.json({
       success: true,
-      signedUrl: signedUrl,
+      signedUrl: externalSignedUrl,
       objectKey: objectKey,
       publicUrl: publicUrl,
     });

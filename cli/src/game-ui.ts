@@ -48,7 +48,7 @@ export class GameUI {
       top: 0,
       left: 0,
       width: "80%",
-      height: "40%",
+      height: "60%",
       border: {
         type: "line",
       },
@@ -87,7 +87,7 @@ export class GameUI {
       top: "20%",
       left: "80%",
       width: "20%",
-      height: "20%",
+      height: "40%",
       border: {
         type: "line",
       },
