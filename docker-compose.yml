@@ -110,6 +110,7 @@ services:
     volumes:
       - ./internal/settings/minio_entrypoint.sh:/minio_entrypoint.sh
     entrypoint: ["/bin/sh", "/minio_entrypoint.sh"]
+    command: ["mc", "admin", "trace", "-a", "-v", "ft-transcendence"]
     networks:
       - app-network
 
