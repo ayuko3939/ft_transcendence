@@ -72,12 +72,15 @@ services:
     volumes:
       - nginx_ssl:/etc/nginx/ssl
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./nginx/conf.d/pong-game.conf.template:/etc/nginx/conf.d/pong-game.conf.template
     depends_on:
       - frontend
       - backend
     networks:
       - app-network
+    environment:
+      - SERVER_NAME=${SERVER_NAME:-localhost}
+      - IP_ADDRESS=${IP_ADDRESS:-127.0.0.1}
 
   minio:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z

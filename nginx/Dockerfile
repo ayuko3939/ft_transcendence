@@ -2,7 +2,7 @@
 FROM nginx:alpine
 
 # 必要なパッケージをインストール
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl gettext
 
 # 起動スクリプトを作成
 COPY ./nginx/docker-entrypoint.sh /
