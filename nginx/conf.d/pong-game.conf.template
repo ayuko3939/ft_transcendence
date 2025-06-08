@@ -88,6 +88,31 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 86400;
     }
+
+    # Minio (S3) storage proxy
+    location /storage/ {
+        # Remove /storage prefix and proxy to minio
+        rewrite ^/storage/(.*)$ /$1 break;
+        proxy_pass http://minio:9000;
+        
+        # Pass through all headers for S3 signature verification
+        proxy_pass_request_headers on;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Handle CORS for S3 requests
+        add_header Access-Control-Allow-Origin $http_origin always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-amz-*" always;
+        add_header Access-Control-Allow-Credentials true always;
+        
+        if ($request_method = 'OPTIONS') {
+            return 204;
+        }
+    }
+
     location / {
         proxy_pass http://frontend:3000;
         proxy_set_header Host $host;
